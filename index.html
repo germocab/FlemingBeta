@@ -6672,6 +6672,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
         <div style="display:flex;gap:10px;margin-bottom:1.1rem;align-items:center">
           <span style="flex:1;font-size:0.95rem;font-weight:700">Territorios</span>
           <button class="btn-secondary" onclick="openTerritoryModal()">+ Nuevo</button>
+          <button class="dev-csv-btn dev-only-el" style="display:none" onclick="openDevMapBulkModal()" title="Subir mapas en masa (solo DEV)"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>Mapas</button>
           <button class="dev-csv-btn dev-only-el" style="display:none" onclick="openDevCsvModal('territorios')" title="Subir CSV (solo DEV)"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>CSV</button>
         </div>
 
@@ -8877,6 +8878,64 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
   </div>
 </div>
 
+<!-- ── Subida masiva de mapas de Territorios (Usuario DEV) — v1.38.3-beta ────
+     Permite subir de una sola vez todos los PNG (modo Claro), todos los PNG
+     (modo Oscuro) y todos los SVG. La plataforma empareja cada archivo con
+     su Territorio buscando el número de territorio dentro del nombre del
+     archivo (ej: "12.png", "T-12 oscuro.png", "Territorio 12.svg" → T12).
+     Solo ACTUALIZA territorios que ya existen; no crea territorios nuevos. -->
+<div class="modal-overlay" id="dev-map-bulk-modal">
+  <div class="modal" style="max-width:640px">
+    <div class="modal-header">
+      <div class="modal-title">Subir mapas en masa</div>
+      <button class="modal-close" onclick="closeDevMapBulkModal()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <p class="auth-sub" style="margin-bottom:0.9rem">
+        Cada archivo se asigna al Territorio cuyo número aparezca en su nombre. Ej: <code>12.png</code>, <code>T-12 oscuro.png</code> o <code>Territorio 12.svg</code> se asignan al Territorio 12. Reemplaza el mapa de los territorios que ya existen; no crea territorios nuevos.
+      </p>
+      <div style="display:grid;gap:0.9rem">
+        <div>
+          <div class="form-label2" style="margin-bottom:6px">PNG — Modo Claro</div>
+          <div class="dev-csv-dropzone" id="dev-map-drop-light" onclick="document.getElementById('dev-map-input-light').click()">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+            <div>Toca para elegir varios PNG, o arrástralos aquí</div>
+            <div class="dev-csv-filename" id="dev-map-count-light"></div>
+          </div>
+          <input type="file" id="dev-map-input-light" accept="image/png,image/jpeg,image/webp" multiple style="display:none" onchange="handleDevMapFilesChosen(event,'light')">
+        </div>
+        <div>
+          <div class="form-label2" style="margin-bottom:6px">PNG — Modo Oscuro</div>
+          <div class="dev-csv-dropzone" id="dev-map-drop-dark" onclick="document.getElementById('dev-map-input-dark').click()">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+            <div>Toca para elegir varios PNG, o arrástralos aquí</div>
+            <div class="dev-csv-filename" id="dev-map-count-dark"></div>
+          </div>
+          <input type="file" id="dev-map-input-dark" accept="image/png,image/jpeg,image/webp" multiple style="display:none" onchange="handleDevMapFilesChosen(event,'dark')">
+        </div>
+        <div>
+          <div class="form-label2" style="margin-bottom:6px">SVG</div>
+          <div class="dev-csv-dropzone" id="dev-map-drop-svg" onclick="document.getElementById('dev-map-input-svg').click()">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+            <div>Toca para elegir varios SVG, o arrástralos aquí</div>
+            <div class="dev-csv-filename" id="dev-map-count-svg"></div>
+          </div>
+          <input type="file" id="dev-map-input-svg" accept=".svg,image/svg+xml" multiple style="display:none" onchange="handleDevMapFilesChosen(event,'svg')">
+        </div>
+      </div>
+      <div id="dev-map-preview-wrap" style="display:none">
+        <div class="dev-csv-summary" id="dev-map-summary"></div>
+        <div class="dev-csv-table-wrap"><table class="dev-csv-table" id="dev-map-table"></table></div>
+      </div>
+      <div class="auth-error" id="dev-map-error"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeDevMapBulkModal()">Cancelar</button>
+      <button class="btn-primary" style="width:auto;padding:0.65rem 1.4rem" id="dev-map-confirm-btn" onclick="confirmDevMapBulkImport()" disabled>Asignar mapas</button>
+    </div>
+  </div>
+</div>
+
 <!-- Zoom de un reporte de territorio recibido: mapa grande con el detalle de manzanas -->
 <div class="trep-report-zoom-overlay" id="trep-report-zoom-overlay" onclick="trepReportZoomOverlayClick(event)">
   <div class="trep-report-zoom-panel">
@@ -9091,7 +9150,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 // v1.33.5.2-beta) — el botón "Administrar" vuelve a mostrarse siempre como
 // lápiz en la esquina superior derecha y a llevar a la pantalla de Admin,
 // como antes. El código del Modo Edición queda sin usar por ahora.
-const APP_VERSION = '1.38.0-beta';
+const APP_VERSION = '1.38.3-beta';
 // v1.36.0-beta: (1) Links de referencia ahora tienen 2 tipos — Único uso
 // (sin límite de tiempo, se desactiva tras el primer uso) y Con límite de
 // tiempo (reutilizable hasta que vence, o hasta que el Admin lo termina
@@ -12412,9 +12471,7 @@ const DEV_CSV_SECTIONS = {
     existingKey: (t) => (t.number || '').toString().toLowerCase(),
     toPayload: (row) => ({
       number: row.number || '', color: row.color || '#007AFF',
-      no_pasar: JSON.stringify(
-        row.no_pasar ? row.no_pasar.split(';').map(s => s.trim()).filter(Boolean).map(addr => ({ addr, date: '' })) : []
-      ),
+      no_pasar: row.no_pasar ? row.no_pasar.split(';').map(s => s.trim()).filter(Boolean).map(addr => ({ addr, date: '', desc: '' })) : [],
       map_data: null, map_data_dark: null, svg_data: null, manzanas: [],
     }),
     isValid: (row) => !!row.number,
@@ -12620,6 +12677,189 @@ async function confirmDevCsvImport() {
       const reader = new FileReader();
       reader.onload = () => processDevCsvText(String(reader.result || ''));
       reader.readAsText(file, 'UTF-8');
+    });
+  });
+})();
+
+// ══════════════════════════════════════════════════════════════════════════
+// ── Subida masiva de mapas de Territorios (Usuario DEV) — v1.38.3-beta ─────
+// Sube muchos archivos de una sola vez (PNG Claro, PNG Oscuro, SVG) y los
+// empareja automáticamente con el Territorio correspondiente según el
+// número que aparezca en el nombre del archivo. Solo ACTUALIZA territorios
+// que ya existen (map_data / map_data_dark / svg_data); nunca crea
+// territorios nuevos.
+// ══════════════════════════════════════════════════════════════════════════
+
+let _devMapFiles = { light: [], dark: [], svg: [] }; // { file, number, matchedTerritory }[]
+
+// Extrae el número de territorio del nombre del archivo: toma la primera
+// secuencia de dígitos que aparece (ignorando la extensión). Soporta
+// "12.png", "T12.png", "T-12 oscuro.png", "Territorio 012.svg", etc.
+function extractTerritoryNumberFromFilename(filename) {
+  const base = filename.replace(/\.[^.]+$/, '');
+  const m = base.match(/(\d+)/);
+  return m ? parseInt(m[1], 10) : null;
+}
+
+function compressMapImageFile(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('No se pudo leer ' + file.name));
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onerror = () => reject(new Error(file.name + ' no es una imagen válida'));
+      img.onload = () => {
+        let { width, height } = img; const maxW = 1200;
+        if (width > maxW) { height = Math.round(height * maxW / width); width = maxW; }
+        const canvas = document.createElement('canvas'); canvas.width = width; canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', 0.82));
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function readSvgFileAsText(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('No se pudo leer ' + file.name));
+    reader.onload = (e) => resolve(String(e.target.result || ''));
+    reader.readAsText(file);
+  });
+}
+
+function openDevMapBulkModal() {
+  if (currentRole !== 'dev') { showToast('Solo el Usuario DEV puede subir mapas en masa.', 'error'); return; }
+  _devMapFiles = { light: [], dark: [], svg: [] };
+  ['light', 'dark', 'svg'].forEach(kind => {
+    document.getElementById('dev-map-input-' + kind).value = '';
+    document.getElementById('dev-map-count-' + kind).textContent = '';
+  });
+  document.getElementById('dev-map-preview-wrap').style.display = 'none';
+  document.getElementById('dev-map-error').style.display = 'none';
+  document.getElementById('dev-map-confirm-btn').disabled = true;
+  document.getElementById('dev-map-bulk-modal').classList.add('open');
+}
+
+function closeDevMapBulkModal() {
+  document.getElementById('dev-map-bulk-modal').classList.remove('open');
+  _devMapFiles = { light: [], dark: [], svg: [] };
+}
+
+function handleDevMapFilesChosen(event, kind) {
+  const files = Array.from(event.target.files || []);
+  if (!files.length) return;
+  addDevMapFiles(files, kind);
+}
+
+function addDevMapFiles(files, kind) {
+  _devMapFiles[kind] = files;
+  document.getElementById('dev-map-count-' + kind).textContent = files.length + ' archivo(s) seleccionado(s)';
+  renderDevMapBulkPreview();
+}
+
+function renderDevMapBulkPreview() {
+  const errEl = document.getElementById('dev-map-error');
+  errEl.style.display = 'none';
+  const kindLabel = { light: 'PNG Claro', dark: 'PNG Oscuro', svg: 'SVG' };
+  const allEntries = [];
+  ['light', 'dark', 'svg'].forEach(kind => {
+    _devMapFiles[kind].forEach(file => {
+      const number = extractTerritoryNumberFromFilename(file.name);
+      const territory = number !== null ? territories.find(t => parseInt(t.number, 10) === number) : null;
+      allEntries.push({
+        kind, file, number,
+        status: number === null ? 'Sin número en el nombre' : !territory ? `No existe Territorio ${number}` : 'OK',
+        territory,
+      });
+    });
+  });
+  if (!allEntries.length) {
+    document.getElementById('dev-map-preview-wrap').style.display = 'none';
+    document.getElementById('dev-map-confirm-btn').disabled = true;
+    return;
+  }
+  const matched = allEntries.filter(e => e.territory).length;
+  const unmatched = allEntries.length - matched;
+  document.getElementById('dev-map-summary').innerHTML =
+    `<b>${allEntries.length}</b> archivo(s) seleccionados · <b>${matched}</b> se asignarán a su Territorio · <b>${unmatched}</b> no se pudieron emparejar.`;
+  const table = document.getElementById('dev-map-table');
+  table.innerHTML = '<thead><tr><th>Archivo</th><th>Tipo</th><th>Territorio</th><th>Estado</th></tr></thead><tbody>' +
+    allEntries.map(e => `<tr class="${e.territory ? '' : 'dev-csv-row-dup'}">
+      <td>${e.file.name.replace(/</g, '&lt;')}</td>
+      <td>${kindLabel[e.kind]}</td>
+      <td>${e.territory ? 'T' + e.territory.number : (e.number ?? '—')}</td>
+      <td>${e.territory ? '✓ Se actualizará' : e.status}</td>
+    </tr>`).join('') + '</tbody>';
+  document.getElementById('dev-map-preview-wrap').style.display = '';
+  document.getElementById('dev-map-confirm-btn').disabled = matched === 0;
+}
+
+async function confirmDevMapBulkImport() {
+  const btn = document.getElementById('dev-map-confirm-btn');
+  const errEl = document.getElementById('dev-map-error');
+  errEl.style.display = 'none';
+  // Agrupa por territorio: un mismo territorio puede recibir claro+oscuro+svg a la vez.
+  const byTerritory = new Map(); // territoryId -> { light, dark, svg, number }
+  const tasks = [];
+  ['light', 'dark', 'svg'].forEach(kind => {
+    _devMapFiles[kind].forEach(file => {
+      const number = extractTerritoryNumberFromFilename(file.name);
+      const territory = number !== null ? territories.find(t => parseInt(t.number, 10) === number) : null;
+      if (territory) tasks.push({ kind, file, territory });
+    });
+  });
+  if (!tasks.length) return;
+  btn.disabled = true;
+  btn.textContent = 'Procesando...';
+  try {
+    for (const task of tasks) {
+      const entry = byTerritory.get(task.territory.id) || { territory: task.territory };
+      if (task.kind === 'light') entry.light = await compressMapImageFile(task.file);
+      else if (task.kind === 'dark') entry.dark = await compressMapImageFile(task.file);
+      else if (task.kind === 'svg') entry.svg = await readSvgFileAsText(task.file);
+      byTerritory.set(task.territory.id, entry);
+    }
+    let okCount = 0, failCount = 0;
+    for (const [terId, entry] of byTerritory.entries()) {
+      const payload = {};
+      if (entry.light !== undefined) payload.map_data = entry.light;
+      if (entry.dark !== undefined) payload.map_data_dark = entry.dark;
+      if (entry.svg !== undefined) payload.svg_data = entry.svg;
+      const { error } = await sb.from('territories').update(payload).eq('id', terId);
+      if (error) { failCount++; console.error('confirmDevMapBulkImport:', terId, error); continue; }
+      okCount++;
+      const idx = territories.findIndex(t => t.id === terId);
+      if (idx >= 0) territories[idx] = { ...territories[idx], ...payload };
+    }
+    showToast(`${okCount} territorio(s) actualizados` + (failCount ? `, ${failCount} con error` : '') + '.', failCount ? 'error' : 'success');
+    closeDevMapBulkModal();
+    if (typeof renderAdminTerritories === 'function') renderAdminTerritories();
+  } catch (e) {
+    console.error('confirmDevMapBulkImport:', e);
+    errEl.style.display = 'block';
+    errEl.textContent = 'Error al procesar: ' + (e.message || 'intenta de nuevo.');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Asignar mapas';
+  }
+}
+
+// Drag & drop en las 3 zonas de subida masiva de mapas.
+(function initDevMapBulkDropzones() {
+  document.addEventListener('DOMContentLoaded', () => {
+    [['dev-map-drop-light', 'light'], ['dev-map-drop-dark', 'dark'], ['dev-map-drop-svg', 'svg']].forEach(([zoneId, kind]) => {
+      const zone = document.getElementById(zoneId);
+      if (!zone) return;
+      ['dragover', 'dragenter'].forEach(evt => zone.addEventListener(evt, e => { e.preventDefault(); zone.classList.add('dragover'); }));
+      ['dragleave', 'drop'].forEach(evt => zone.addEventListener(evt, e => { e.preventDefault(); zone.classList.remove('dragover'); }));
+      zone.addEventListener('drop', e => {
+        const files = Array.from(e.dataTransfer.files || []);
+        if (!files.length) return;
+        addDevMapFiles(files, kind);
+      });
     });
   });
 })();
