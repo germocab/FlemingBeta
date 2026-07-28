@@ -12404,7 +12404,7 @@ const DEV_CSV_SECTIONS = {
   },
   territorios: {
     label: 'Territorios',
-    help: 'Cada fila crea un Territorio nuevo (solo datos básicos: número, color y si es "No pasar". El mapa/manzanas se agregan luego desde la plataforma).',
+    help: 'Cada fila crea un Territorio nuevo (número, color y direcciones "No Pasar", separadas por punto y coma). El mapa se agrega luego desde la plataforma, ya que un CSV no puede contener el PDF.',
     table: 'territories',
     columns: ['number', 'color', 'no_pasar'],
     getExisting: () => territories,
@@ -12412,7 +12412,9 @@ const DEV_CSV_SECTIONS = {
     existingKey: (t) => (t.number || '').toString().toLowerCase(),
     toPayload: (row) => ({
       number: row.number || '', color: row.color || '#007AFF',
-      no_pasar: /^(true|1|si|sí|yes)$/i.test((row.no_pasar || '').trim()),
+      no_pasar: JSON.stringify(
+        row.no_pasar ? row.no_pasar.split(';').map(s => s.trim()).filter(Boolean).map(addr => ({ addr, date: '' })) : []
+      ),
       map_data: null, map_data_dark: null, svg_data: null, manzanas: [],
     }),
     isValid: (row) => !!row.number,
