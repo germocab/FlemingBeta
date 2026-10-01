@@ -3460,6 +3460,11 @@
   .vmc-part-assigned-display.mine-label {
     color: var(--accent); font-weight: 700;
   }
+  .vmc-room-label {
+    font-size: 0.68rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+    color: var(--text3); margin: 2px 0 -2px 2px;
+  }
+  .vmc-room-label-b { color: var(--accent); margin-top: 6px; }
   .vmc-song-row {
     display: flex; align-items: center; gap: 8px;
     padding: 0.6rem 0.85rem;
@@ -9459,7 +9464,11 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 // las fechas y asigna a las personas.
 // v1.47.0.1-beta: se restaura la "Canción de apertura" (también se importa
 // desde JW.ORG) y se elimina el rol "Oración de apertura" de Vida y Ministerio.
-const APP_VERSION = '1.47.0.1-beta';
+// v1.47.5-beta: nueva "Sala B" en Seamos Mejores Maestros. Cada parte de esa
+// sección puede tener, además de su asignado/ayudante de la sala principal,
+// un asignado/ayudante de la Sala B (campos assigned_b / assigned2_b dentro
+// del JSON `parts`; no requiere cambios en la base de datos).
+const APP_VERSION = '1.47.5-beta';
 // v1.36.0-beta: (1) Links de referencia ahora tienen 2 tipos — Único uso
 // (sin límite de tiempo, se desactiva tras el primer uso) y Con límite de
 // tiempo (reutilizable hasta que vence, o hasta que el Admin lo termina
@@ -11889,6 +11898,9 @@ async function renderInicio() {
         const a1 = (p.assigned || '').trim().toLowerCase();
         const a2 = (p.assigned2 || '').trim().toLowerCase();
         if (a1 === myName || a2 === myName) items.push({ label: p.name || 'Parte', sub: rango, sortKey: _inicioSortKey(w.date_start, null), onClick: () => inicioGoTo('reuniones', 'vida-ministerio') });
+        const b1 = (p.assigned_b || '').trim().toLowerCase();
+        const b2 = (p.assigned2_b || '').trim().toLowerCase();
+        if (b1 === myName || b2 === myName) items.push({ label: (p.name || 'Parte') + ' (Sala B)', sub: rango, sortKey: _inicioSortKey(w.date_start, null), onClick: () => inicioGoTo('reuniones', 'vida-ministerio') });
       }
       const roles = [
         { field: 'presidente',   label: 'Presidente' },
@@ -25752,6 +25764,7 @@ function vmcAppendPartRow(section, p = {}) {
         <input type="text" id="vmc-name-${id}" class="vmc-part-name-input" placeholder="Nombre de la parte…" value="${p.name||''}" autocomplete="off" oninput="vmcUpdateAyudanteLabel(${id})">
         <input type="number" class="vmc-part-mins-input" min="1" max="60" placeholder="min" value="${p.mins||''}">
       </div>
+      ${section === 'maestros' ? '<div class="vmc-room-label">Sala principal</div>' : ''}
       <div style="display:flex;gap:6px">
         <div class="vmc-assign-wrap" style="flex:1">
           ${vmcPersonField(`vmc-hidden-${id}-1`, p.assigned||'', 'Asignado a…')}
@@ -25760,6 +25773,16 @@ function vmcAppendPartRow(section, p = {}) {
           ${vmcPersonField(`vmc-hidden-${id}-2`, p.assigned2||'', ayudanteLabel)}
         </div>
       </div>
+      ${section === 'maestros' ? `
+      <div class="vmc-room-label vmc-room-label-b">Sala B</div>
+      <div style="display:flex;gap:6px">
+        <div class="vmc-assign-wrap" style="flex:1">
+          ${vmcPersonField(`vmc-hidden-${id}-3`, p.assigned_b||'', 'Asignado a…')}
+        </div>
+        <div class="vmc-assign-wrap" style="flex:1">
+          ${vmcPersonField(`vmc-hidden-${id}-4`, p.assigned2_b||'', 'Ayudante (opc.)')}
+        </div>
+      </div>` : ''}
       <button type="button" class="vmc-part-detail-toggle" id="vmc-detail-toggle-${id}" onclick="vmcToggleDetail(${id})" style="${hasDetail?'display:none':''}">
         <svg viewBox="0 0 24 24" style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;vertical-align:-1px;margin-right:3px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Descripción / enlace
@@ -26073,7 +26096,7 @@ function vmcParseWolWeek(html) {
         // Evita duplicados (la página a veces repite el encabezado de una parte)
         const dup = parts.find(x => x._n === pm[1]);
         if (dup) { cur = dup; continue; }
-        cur = { section, name: pm[2].replace(/^[«"“]|[»"”]$/g, '').trim(), mins: 0, assigned: '', assigned2: '', note: '', link: '', link_text: '', _n: pm[1], _gotMins: false };
+        cur = { section, name: pm[2].replace(/^[«"“]|[»"”]$/g, '').trim(), mins: 0, assigned: '', assigned2: '', assigned_b: '', assigned2_b: '', note: '', link: '', link_text: '', _n: pm[1], _gotMins: false };
         parts.push(cur);
       }
       continue;
@@ -26130,7 +26153,7 @@ function vmcSnapshotAssignments() {
   const snap = { tesoros: [], maestros: [], vida: [] };
   document.querySelectorAll('.vmc-part-row').forEach(row => {
     const hid = row.querySelectorAll('input[type="hidden"]');
-    snap[row.dataset.section]?.push({ assigned: hid[0]?.value || '', assigned2: hid[1]?.value || '' });
+    snap[row.dataset.section]?.push({ assigned: hid[0]?.value || '', assigned2: hid[1]?.value || '', assigned_b: hid[2]?.value || '', assigned2_b: hid[3]?.value || '' });
   });
   return snap;
 }
@@ -26151,7 +26174,7 @@ async function vmcImportFromJw(manual) {
     const counters = { tesoros: 0, maestros: 0, vida: 0 };
     const merged = data.parts.map(p => {
       const old = snap[p.section]?.[counters[p.section]++] || {};
-      return { ...p, assigned: old.assigned || '', assigned2: old.assigned2 || '' };
+      return { ...p, assigned: old.assigned || '', assigned2: old.assigned2 || '', assigned_b: old.assigned_b || '', assigned2_b: old.assigned2_b || '' };
     });
 
     if (data.reading) document.getElementById('vmc-reading').value = data.reading;
@@ -26188,7 +26211,7 @@ function vmcOnStartDateChange() {
   document.getElementById('vmc-date-end').value =
     d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
   if (vmcEditingId) return;                       // editando: solo con el botón
-  const anyAssigned = Object.values(vmcSnapshotAssignments()).flat().some(a => a.assigned || a.assigned2);
+  const anyAssigned = Object.values(vmcSnapshotAssignments()).flat().some(a => a.assigned || a.assigned2 || a.assigned_b || a.assigned2_b);
   if (anyAssigned) return;                        // ya hay trabajo hecho: no pisar
   vmcImportFromJw(false);
 }
@@ -26210,11 +26233,13 @@ function vmcCollectParts() {
     const mins      = parseInt(minsInput?.value) || 0;
     const assigned  = hiddenInputs[0]?.value.trim() || '';
     const assigned2 = hiddenInputs[1]?.value.trim() || '';
+    const assigned_b  = section === 'maestros' ? (hiddenInputs[2]?.value.trim() || '') : '';
+    const assigned2_b = section === 'maestros' ? (hiddenInputs[3]?.value.trim() || '') : '';
     const note      = noteInput?.value.trim() || '';
     const link_text = linkTextInput?.value.trim() || '';
     let link        = linkInput?.value.trim() || '';
     if (link && !/^https?:\/\//i.test(link)) link = 'https://' + link;
-    if (name) parts.push({ section, name, mins, assigned, assigned2, note, link, link_text });
+    if (name) parts.push({ section, name, mins, assigned, assigned2, assigned_b, assigned2_b, note, link, link_text });
   });
   return parts;
 }
@@ -26325,6 +26350,10 @@ function vmcBuildAssignmentMap(week) {
   parts.forEach(p => {
     add(p.assigned,  p.name);
     add(p.assigned2, p.name);
+    if (p.section === 'maestros') {
+      add(p.assigned_b,  p.name + ' (Sala B)');
+      add(p.assigned2_b, p.name + ' (Sala B)');
+    }
   });
   return map;
 }
@@ -26461,7 +26490,7 @@ function vmcRenderWeekProgram(week, isGuest = false) {
   const myName = (!isGuest && currentUser) ? getIdentityName() : null;
 
   // My assignments
-  const myParts = myName ? parts.filter(p => p.assigned === myName || p.assigned2 === myName) : [];
+  const myParts = myName ? parts.filter(p => p.assigned === myName || p.assigned2 === myName || p.assigned_b === myName || p.assigned2_b === myName) : [];
   const myMeta  = [];
   if (myName && week.presidente === myName)   myMeta.push('Presidente');
   if (myName && week.prayer_close === myName) myMeta.push('Oración de cierre');
@@ -26485,8 +26514,12 @@ function vmcRenderWeekProgram(week, isGuest = false) {
     return `${songRow}<div class="vmc-user-section">
       <div class="vmc-user-section-header vmc-user-section-header-${sectionId}">${label}</div>
       ${sectionParts.map(p => {
-        const isMine = p.assigned === myName || p.assigned2 === myName;
-        const assignText = [p.assigned, p.assigned2].filter(Boolean).join(' & ') || '—';
+        const isMine = !!myName && (p.assigned === myName || p.assigned2 === myName || p.assigned_b === myName || p.assigned2_b === myName);
+        const textA = [p.assigned, p.assigned2].filter(Boolean).join(' & ');
+        const textB = p.section === 'maestros' ? [p.assigned_b, p.assigned2_b].filter(Boolean).join(' & ') : '';
+        const assignText = textB
+          ? `<span style="color:var(--text3);font-size:0.72rem">Sala principal:</span> ${textA || '—'}<br><span style="color:var(--text3);font-size:0.72rem">Sala B:</span> ${textB}`
+          : (textA || '—');
         const safeLink = p.link ? p.link.replace(/"/g,'&quot;') : '';
         const clickAttr = safeLink ? ` onclick="window.open('${safeLink}','_blank')" style="cursor:pointer"` : '';
         return `<div class="vmc-user-part-card${isMine ? ' is-mine' : ''}"${clickAttr}>
