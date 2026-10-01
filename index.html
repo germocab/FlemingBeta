@@ -9468,7 +9468,9 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 // sección puede tener, además de su asignado/ayudante de la sala principal,
 // un asignado/ayudante de la Sala B (campos assigned_b / assigned2_b dentro
 // del JSON `parts`; no requiere cambios en la base de datos).
-const APP_VERSION = '1.47.5-beta';
+// v1.47.5.1-beta: la parte "Lectura de la Biblia" (Tesoros de la Biblia)
+// también tiene Sala B (un solo asignado, sin ayudante).
+const APP_VERSION = '1.47.5.1-beta';
 // v1.36.0-beta: (1) Links de referencia ahora tienen 2 tipos — Único uso
 // (sin límite de tiempo, se desactiva tras el primer uso) y Con límite de
 // tiempo (reutilizable hasta que vence, o hasta que el Admin lo termina
@@ -25735,11 +25737,30 @@ function vmcRenderAllSections(parts) {
   });
 }
 
+// ¿Esta parte tiene Sala B? Todas las de Seamos Mejores Maestros y la
+// Lectura de la Biblia (Tesoros). La lectura no lleva ayudante.
+function vmcHasSalaB(section, name) {
+  if (section === 'maestros') return true;
+  return section === 'tesoros' && /lectura\s+de\s+la\s+biblia/i.test(name || '');
+}
+
+function vmcUpdateSalaBVisibility(id) {
+  const row = document.getElementById(`vmc-row-${id}`);
+  const name = document.getElementById(`vmc-name-${id}`)?.value || '';
+  if (!row) return;
+  const on = vmcHasSalaB(row.dataset.section, name);
+  ['vmc-salaa-', 'vmc-salab-'].forEach(pref => {
+    const el = document.getElementById(pref + id);
+    if (el) el.style.display = on ? '' : 'none';
+  });
+}
+
 function vmcAyudanteLabel(partName) {
   return /estudio\s+b[ií]blico/i.test(partName || '') ? 'Lector (opc.)' : 'Ayudante (opc.)';
 }
 
 function vmcUpdateAyudanteLabel(id) {
+  vmcUpdateSalaBVisibility(id);
   const nameInput = document.getElementById(`vmc-name-${id}`);
   const label = vmcAyudanteLabel(nameInput?.value || '');
   const btn = document.getElementById(`vmc-hidden-${id}-2`)?.nextElementSibling;
@@ -25764,7 +25785,7 @@ function vmcAppendPartRow(section, p = {}) {
         <input type="text" id="vmc-name-${id}" class="vmc-part-name-input" placeholder="Nombre de la parte…" value="${p.name||''}" autocomplete="off" oninput="vmcUpdateAyudanteLabel(${id})">
         <input type="number" class="vmc-part-mins-input" min="1" max="60" placeholder="min" value="${p.mins||''}">
       </div>
-      ${section === 'maestros' ? '<div class="vmc-room-label">Sala principal</div>' : ''}
+      ${section === 'maestros' || section === 'tesoros' ? `<div class="vmc-room-label" id="vmc-salaa-${id}" style="${vmcHasSalaB(section, p.name) ? '' : 'display:none'}">Sala principal</div>` : ''}
       <div style="display:flex;gap:6px">
         <div class="vmc-assign-wrap" style="flex:1">
           ${vmcPersonField(`vmc-hidden-${id}-1`, p.assigned||'', 'Asignado a…')}
@@ -25773,14 +25794,16 @@ function vmcAppendPartRow(section, p = {}) {
           ${vmcPersonField(`vmc-hidden-${id}-2`, p.assigned2||'', ayudanteLabel)}
         </div>
       </div>
-      ${section === 'maestros' ? `
-      <div class="vmc-room-label vmc-room-label-b">Sala B</div>
-      <div style="display:flex;gap:6px">
-        <div class="vmc-assign-wrap" style="flex:1">
-          ${vmcPersonField(`vmc-hidden-${id}-3`, p.assigned_b||'', 'Asignado a…')}
-        </div>
-        <div class="vmc-assign-wrap" style="flex:1">
-          ${vmcPersonField(`vmc-hidden-${id}-4`, p.assigned2_b||'', 'Ayudante (opc.)')}
+      ${section === 'maestros' || section === 'tesoros' ? `
+      <div id="vmc-salab-${id}" style="${vmcHasSalaB(section, p.name) ? '' : 'display:none'}">
+        <div class="vmc-room-label vmc-room-label-b" style="margin-bottom:4px">Sala B</div>
+        <div style="display:flex;gap:6px">
+          <div class="vmc-assign-wrap" style="flex:1">
+            ${vmcPersonField(`vmc-hidden-${id}-3`, p.assigned_b||'', 'Asignado a…')}
+          </div>
+          <div class="vmc-assign-wrap" style="flex:1">
+            ${section === 'maestros' ? vmcPersonField(`vmc-hidden-${id}-4`, p.assigned2_b||'', 'Ayudante (opc.)') : ''}
+          </div>
         </div>
       </div>` : ''}
       <button type="button" class="vmc-part-detail-toggle" id="vmc-detail-toggle-${id}" onclick="vmcToggleDetail(${id})" style="${hasDetail?'display:none':''}">
@@ -26233,8 +26256,9 @@ function vmcCollectParts() {
     const mins      = parseInt(minsInput?.value) || 0;
     const assigned  = hiddenInputs[0]?.value.trim() || '';
     const assigned2 = hiddenInputs[1]?.value.trim() || '';
-    const assigned_b  = section === 'maestros' ? (hiddenInputs[2]?.value.trim() || '') : '';
-    const assigned2_b = section === 'maestros' ? (hiddenInputs[3]?.value.trim() || '') : '';
+    const hasB = vmcHasSalaB(section, name);
+    const assigned_b  = hasB ? (hiddenInputs[2]?.value.trim() || '') : '';
+    const assigned2_b = hasB && section === 'maestros' ? (hiddenInputs[3]?.value.trim() || '') : '';
     const note      = noteInput?.value.trim() || '';
     const link_text = linkTextInput?.value.trim() || '';
     let link        = linkInput?.value.trim() || '';
@@ -26350,7 +26374,7 @@ function vmcBuildAssignmentMap(week) {
   parts.forEach(p => {
     add(p.assigned,  p.name);
     add(p.assigned2, p.name);
-    if (p.section === 'maestros') {
+    if (vmcHasSalaB(p.section, p.name)) {
       add(p.assigned_b,  p.name + ' (Sala B)');
       add(p.assigned2_b, p.name + ' (Sala B)');
     }
@@ -26516,7 +26540,7 @@ function vmcRenderWeekProgram(week, isGuest = false) {
       ${sectionParts.map(p => {
         const isMine = !!myName && (p.assigned === myName || p.assigned2 === myName || p.assigned_b === myName || p.assigned2_b === myName);
         const textA = [p.assigned, p.assigned2].filter(Boolean).join(' & ');
-        const textB = p.section === 'maestros' ? [p.assigned_b, p.assigned2_b].filter(Boolean).join(' & ') : '';
+        const textB = vmcHasSalaB(p.section, p.name) ? [p.assigned_b, p.assigned2_b].filter(Boolean).join(' & ') : '';
         const assignText = textB
           ? `<span style="color:var(--text3);font-size:0.72rem">Sala principal:</span> ${textA || '—'}<br><span style="color:var(--text3);font-size:0.72rem">Sala B:</span> ${textB}`
           : (textA || '—');
