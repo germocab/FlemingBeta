@@ -9471,7 +9471,12 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 // Biblia). Se guarda dentro del JSON `parts` con section:'maestros_b' (el
 // encargado es una entrada con header:true), sin cambios en la base de datos.
 // Los datos de 1.47.5 (assigned_b / assigned2_b) se migran solos al abrirse.
-const APP_VERSION = '1.47.6-beta';
+// v1.47.6.1-beta: arreglo de la importación desde JW.ORG ("signal is aborted
+// without reason"): las vías de conexión ahora se prueban EN PARALELO (gana
+// la primera que responde) en vez de una por una, hay más servicios de relevo
+// (incluido uno que entrega Markdown, también soportado), tiempo de espera
+// más generoso y caché por sesión.
+const APP_VERSION = '1.47.6.1-beta';
 // v1.36.0-beta: (1) Links de referencia ahora tienen 2 tipos — Único uso
 // (sin límite de tiempo, se desactiva tras el primer uso) y Con límite de
 // tiempo (reutilizable hasta que vence, o hasta que el Admin lo termina
@@ -26031,42 +26036,115 @@ function vmcIsoWeek(dateStr) {
   return { year, week };
 }
 
-// Descarga una página de WOL. Orden: directo → Edge Function opcional
-// "wol_proxy" → proxies CORS públicos (WOL no siempre permite CORS).
-async function vmcFetchWolHtml(url) {
-  const attempts = [
-    sig => fetch(url, { signal: sig }),
-    sig => fetch(`${SUPABASE_URL}/functions/v1/wol_proxy?url=${encodeURIComponent(url)}`, {
-            signal: sig, headers: { 'Authorization': `Bearer ${SUPABASE_KEY}`, 'apikey': SUPABASE_KEY } }),
-    sig => fetch(`https://corsproxy.io/?url=${encodeURIComponent(url)}`, { signal: sig }),
-    sig => fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`, { signal: sig }),
-    sig => fetch(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`, { signal: sig }),
-  ];
-  let lastErr = null;
-  for (const run of attempts) {
-    try {
-      const ctrl = new AbortController();
-      const t = setTimeout(() => ctrl.abort(), 12000);
-      const resp = await run(ctrl.signal);
-      clearTimeout(t);
-      if (!resp.ok) { lastErr = new Error('HTTP ' + resp.status); continue; }
-      const html = await resp.text();
-      if (html && /<h[123]/i.test(html)) return html;
-      lastErr = new Error('Respuesta sin contenido');
-    } catch (e) { lastErr = e; }
-  }
-  throw lastErr || new Error('No se pudo conectar con JW.ORG');
+// ── Descarga de páginas de WOL ──────────────────────────────────────────────
+// WOL no siempre permite que un navegador lo lea directamente (CORS), así que
+// se prueban varias vías en dos etapas, cada una en PARALELO (gana la primera
+// que responda con contenido válido):
+//   Etapa 1: directo + Edge Function propia "wol_proxy" (si está desplegada).
+//   Etapa 2: varios servicios públicos de relevo (si uno cae, otro responde).
+const _vmcWolCache = new Map();
+
+function vmcLooksLikeWol(text) {
+  return !!text && text.length > 200 &&
+    /vida y ministerio|tesoros de la biblia|biblioteca en l[ií]nea|nuestra vida cristiana/i.test(text);
 }
 
+async function vmcRaceSources(list, timeoutMs, errors) {
+  const ctrls = [];
+  const tasks = list.map(async src => {
+    const ctrl = new AbortController();
+    ctrls.push(ctrl);
+    const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+    try {
+      const resp = await src.run(ctrl.signal);
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      const text = await resp.text();
+      if (!vmcLooksLikeWol(text)) throw new Error('respuesta no válida');
+      return text;
+    } catch (e) {
+      errors.push(`${src.name}: ${e.name === 'AbortError' ? 'sin respuesta a tiempo' : (e.message || 'error')}`);
+      throw e;
+    } finally { clearTimeout(timer); }
+  });
+  try {
+    const text = await Promise.any(tasks);
+    ctrls.forEach(c => { try { c.abort(); } catch {} });   // cancela las demás
+    return text;
+  } catch { return null; }
+}
+
+async function vmcFetchWolHtml(url) {
+  if (_vmcWolCache.has(url)) return _vmcWolCache.get(url);
+  const enc = encodeURIComponent(url);
+  const errors = [];
+
+  const stage1 = [
+    { name: 'directo', run: sig => fetch(url, { signal: sig }) },
+    { name: 'servidor propio', run: sig => fetch(`${SUPABASE_URL}/functions/v1/wol_proxy?url=${enc}`,
+        { signal: sig, headers: { 'Authorization': `Bearer ${SUPABASE_KEY}`, 'apikey': SUPABASE_KEY } }) },
+  ];
+  const stage2 = [
+    { name: 'corsproxy.io',  run: sig => fetch(`https://corsproxy.io/?url=${enc}`, { signal: sig }) },
+    { name: 'allorigins',    run: sig => fetch(`https://api.allorigins.win/raw?url=${enc}`, { signal: sig }) },
+    { name: 'allorigins-json', run: async sig => {
+        const r = await fetch(`https://api.allorigins.win/get?url=${enc}`, { signal: sig });
+        if (!r.ok) return r;
+        const j = await r.json();
+        return new Response(j.contents || '', { status: 200 });
+      } },
+    { name: 'codetabs',      run: sig => fetch(`https://api.codetabs.com/v1/proxy?quest=${enc}`, { signal: sig }) },
+    { name: 'jina',          run: sig => fetch(`https://r.jina.ai/${url}`, { signal: sig }) },
+    { name: 'thingproxy',    run: sig => fetch(`https://thingproxy.freeboard.io/fetch/${url}`, { signal: sig }) },
+  ];
+
+  let text = await vmcRaceSources(stage1, 8000, errors);
+  if (!text) text = await vmcRaceSources(stage2, 25000, errors);
+  if (!text) {
+    console.warn('Importación VMC — fallaron todas las vías:', errors);
+    throw new Error('ninguna vía de conexión respondió');
+  }
+  _vmcWolCache.set(url, text);
+  return text;
+}
+
+// ── Lectura del contenido (HTML o Markdown) ─────────────────────────────────
 function vmcCleanText(el) {
   return (el.textContent || '').replace(/\u00a0/g, ' ').replace(/\s+/g, ' ').trim();
 }
 
-// Convierte el HTML de la página de la semana en { reading, song_mid, song_close, parts }
-function vmcParseWolWeek(html) {
+// Lista ordenada de {tag, text} (H1/H2/H3/P) a partir de HTML…
+function vmcElementsFromHtml(html) {
   const doc = new DOMParser().parseFromString(html, 'text/html');
   const root = doc.querySelector('#article') || doc.querySelector('article') || doc.body;
-  const els = [...root.querySelectorAll('h1,h2,h3,p')];
+  return [...root.querySelectorAll('h1,h2,h3,p')]
+    .map(el => ({ tag: el.tagName, text: vmcCleanText(el) }))
+    .filter(e => e.text);
+}
+
+// …o a partir de Markdown (respuesta de algunos servicios de relevo)
+function vmcElementsFromMarkdown(md) {
+  const out = [];
+  md.split('\n').forEach(raw => {
+    let l = raw.trim();
+    if (!l) return;
+    const hm = l.match(/^(#{1,6})\s*(.*)$/);
+    let tag = 'P';
+    if (hm) { tag = hm[1].length <= 3 ? 'H' + hm[1].length : 'P'; l = hm[2]; }
+    l = l.replace(/!\[[^\]]*\]\([^)]*\)/g, '')
+         .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
+         .replace(/\\([|*_#\[\]()])/g, '$1')
+         .replace(/^[-*]\s+/, '')
+         .replace(/\*+/g, '')
+         .replace(/\s+/g, ' ').trim();
+    if (l) out.push({ tag, text: l });
+  });
+  return out;
+}
+
+function vmcIsHtml(text) { return /<(!doctype|html|head|body|h[1-6]|p|div|ul|li|a)[\s>]/i.test(text.slice(0, 3000)); }
+
+function vmcParseWolWeek(text) {
+  const els = vmcIsHtml(text) ? vmcElementsFromHtml(text) : vmcElementsFromMarkdown(text);
 
   let section = null, reading = '', song_open = '', song_mid = '', song_close = '';
   const parts = [];
@@ -26081,11 +26159,7 @@ function vmcParseWolWeek(html) {
     return null;
   };
 
-  for (const el of els) {
-    const tag = el.tagName;
-    const t = vmcCleanText(el);
-    if (!t) continue;
-
+  for (const { tag, text: t } of els) {
     if (tag === 'H1') { seenH1 = true; continue; }
     if (tag === 'H2') {
       const sec = secOf(t);
@@ -26103,7 +26177,7 @@ function vmcParseWolWeek(html) {
         if (m) song_close = m[1];
         cur = null; continue;
       }
-      // Canción suelta dentro de Nuestra Vida Cristiana → canción intermedia
+      // Canción suelta: antes de las secciones = apertura; en Vida Cristiana = intermedia
       const songOnly = t.match(/^Canci[oó]n\s+(\d+)/i);
       if (songOnly) {
         if (!section && !song_open) song_open = songOnly[1];
@@ -26113,7 +26187,6 @@ function vmcParseWolWeek(html) {
       // Parte numerada: "3. Lectura de la Biblia"
       const pm = t.match(/^(\d+)\.\s*(.+)$/);
       if (pm && section) {
-        // Evita duplicados (la página a veces repite el encabezado de una parte)
         const dup = parts.find(x => x._n === pm[1]);
         if (dup) { cur = dup; continue; }
         cur = { section, name: pm[2].replace(/^[«"“]|[»"”]$/g, '').trim(), mins: 0, assigned: '', assigned2: '', note: '', link: '', link_text: '', _n: pm[1], _gotMins: false };
@@ -26136,27 +26209,38 @@ function vmcParseWolWeek(html) {
   return { reading, song_open, song_mid, song_close, parts };
 }
 
+// Enlace a la Guía de actividades dentro de la página "Reuniones" de la semana
+function vmcFindWeekDocUrl(text) {
+  const abs = h => h.startsWith('http') ? h : VMC_WOL_BASE + h;
+  if (vmcIsHtml(text)) {
+    const doc = new DOMParser().parseFromString(text, 'text/html');
+    const links = [...doc.querySelectorAll('a[href*="/wol/d/"]')];
+    const a = links.find(x => !/atalaya/i.test(x.textContent) && !/atalaya/i.test(x.closest('li,div')?.textContent || '')) || links[0];
+    return a ? abs(a.getAttribute('href')) : null;
+  }
+  const re = /\]\((https?:\/\/wol\.jw\.org)?(\/[a-z]{2}\/wol\/d\/[^)\s]+)\)/;
+  const lines = text.split('\n');
+  for (const l of lines) { const m = l.match(re); if (m && !/atalaya/i.test(l)) return VMC_WOL_BASE + m[2]; }
+  for (const l of lines) { const m = l.match(re); if (m) return VMC_WOL_BASE + m[2]; }
+  return null;
+}
+
 // Busca la página de la semana en WOL y devuelve los datos ya parseados.
 async function vmcLoadWolWeek(dateStart) {
   const { year, week } = vmcIsoWeek(dateStart);
   const meetingsUrl = `${VMC_WOL_BASE}/${VMC_WOL_LANG}/meetings/${VMC_WOL_RES}/${year}/${week}`;
-  const html1 = await vmcFetchWolHtml(meetingsUrl);
+  const page1 = await vmcFetchWolHtml(meetingsUrl);
 
   // ¿La propia página ya trae el programa?
-  let data = vmcParseWolWeek(html1);
+  let data = vmcParseWolWeek(page1);
   if (data.parts.length >= 4) return data;
 
   // Si no, seguir el enlace de "Vida y Ministerio" hacia la Guía de actividades
-  const doc = new DOMParser().parseFromString(html1, 'text/html');
-  const link = [...doc.querySelectorAll('a[href*="/wol/d/"]')]
-    .find(a => !/atalaya/i.test(a.textContent) && !/atalaya/i.test(a.closest('li,div')?.textContent || ''))
-    || doc.querySelector('a[href*="/wol/d/"]');
-  if (!link) throw new Error('No hay programa publicado para esa semana');
-  const href = link.getAttribute('href');
-  const url2 = href.startsWith('http') ? href : VMC_WOL_BASE + href;
-  const html2 = await vmcFetchWolHtml(url2);
-  data = vmcParseWolWeek(html2);
-  if (data.parts.length < 4) throw new Error('No se pudo leer el programa de esa semana');
+  const url2 = vmcFindWeekDocUrl(page1);
+  if (!url2) throw new Error('no hay programa publicado para esa semana');
+  const page2 = await vmcFetchWolHtml(url2);
+  data = vmcParseWolWeek(page2);
+  if (data.parts.length < 4) throw new Error('no se pudo leer el programa de esa semana');
   return data;
 }
 
@@ -26225,7 +26309,7 @@ async function vmcImportFromJw(manual) {
     if (manual) showToast('Programa importado de JW.ORG ✓', 'success');
   } catch (err) {
     console.warn('Importación VMC falló:', err);
-    vmcSetImportStatus('No se pudo importar automáticamente (' + (err.message || 'error') + '). Puedes llenar la semana a mano.', 'error');
+    vmcSetImportStatus('No se pudo importar automáticamente (' + (err.message || 'error') + '). Intenta de nuevo en un momento, o llena la semana a mano. Si sigue fallando, despliega la función wol_proxy en Supabase.', 'error');
     if (manual) showToast('No se pudo importar desde JW.ORG', 'error');
   } finally {
     vmcImportBusy = false;
