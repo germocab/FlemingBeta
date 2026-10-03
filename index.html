@@ -6159,6 +6159,22 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 .home-ico-btn.add { background: var(--accent); color: #fff; }
 .home-ico-btn.del { color: var(--red); }
 .home-custom-reset { margin-top: 1.2rem; width: 100%; padding: 0.7rem; border-radius: 12px; border: 1px solid var(--border); background: none; color: var(--text2); font-family: var(--font); font-weight: 600; font-size: 0.85rem; cursor: pointer; }
+.avatar-char-img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: inherit; }
+#profile-photo-sheet { max-height: 90vh; overflow-y: auto; }
+.avatar-char-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 0.5rem 1.25rem 1.25rem; max-height: 250px; overflow-y: auto; }
+.avatar-char-item { display: flex; flex-direction: column; align-items: center; gap: 5px; background: none; border: none; cursor: pointer; padding: 0; font-family: var(--font); color: var(--text2); font-size: 0.68rem; font-weight: 600; text-align: center; line-height: 1.15; }
+.avatar-char-thumb { width: 56px; height: 56px; border-radius: 50%; overflow: hidden; border: 2.5px solid transparent; background: var(--surface3); transition: transform 0.15s, border-color 0.15s; }
+.avatar-char-item:hover .avatar-char-thumb { transform: scale(1.07); }
+.avatar-char-item.active .avatar-char-thumb { border-color: var(--accent); }
+.avatar-char-item.active { color: var(--accent); }
+.avatar-admin-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; }
+.avatar-admin-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 10px; display: flex; flex-direction: column; gap: 8px; align-items: center; }
+.avatar-admin-sq { width: 100%; aspect-ratio: 1 / 1; border-radius: 10px; overflow: hidden; background: var(--surface3); }
+.avatar-admin-sq img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.avatar-admin-name { font-size: 0.82rem; font-weight: 700; color: var(--text); text-align: center; word-break: break-word; }
+.avatar-admin-actions { display: flex; gap: 6px; }
+.avatar-admin-actions button { padding: 0.3rem 0.65rem; border-radius: 8px; border: 1px solid var(--border); background: var(--surface2); color: var(--text2); font-family: var(--font); font-size: 0.72rem; font-weight: 600; cursor: pointer; }
+.avatar-admin-actions button.del { color: var(--red); }
 </style>
 <script id="home-js">
 // ══════════════════════════════════════════════════════════════════════════
@@ -6170,6 +6186,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 //  dispositivo (localStorage).
 // ══════════════════════════════════════════════════════════════════════════
 const _HI = {
+  ban: '<circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>',
   sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>',
   cart: '<circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>',
   book: '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>',
@@ -6191,12 +6208,13 @@ function _homeIcoBox(icon, col, extra, img) {
 }
 const HOME_SECTIONS = {
   hoy:      { title: 'Predicación Hoy', icon: 'sun', col: 'blue' },
-  carritos: { title: 'Mis Carritos', icon: 'cart', col: 'teal' },
+  carritos: { title: 'Mis Turnos', icon: 'cart', col: 'teal' },
   vmc:      { title: 'Mis asignaciones en reunión Vida y Ministerio', icon: 'book', col: 'blue' },
   fs:       { title: 'Mis asignaciones en reunión pública', icon: 'cal', col: 'green' },
   aseo:     { title: 'Aseo del Salón para mi grupo', icon: 'house', col: 'orange' },
   resp:     { title: 'Mis Responsabilidades', icon: 'users', col: 'purple' },
   tips:     { title: 'Tips', icon: 'bulb', col: 'yellow' },
+  texto:    { title: 'Texto Diario', icon: 'book', col: 'orange' },
 };
 const HOME_DEFAULT_LAYOUT = ['hoy', 'vmc', 'fs', 'resp'];
 
@@ -6325,8 +6343,8 @@ async function renderHome() {
   const layout = getHomeLayout();
   if (!wrap.dataset.ready) wrap.innerHTML = '<div class="loader-wrap"><div class="loader"></div></div>';
 
-  const need = ['recordatorios', 'vmc', 'fs'];
-  ['carritos', 'aseo', 'resp'].forEach(k => { if (layout.includes(k)) need.push(k); });
+  // v1.51.0-beta: "Para tí" también muestra próximas asignaciones de Casa en Casa, Turnos, Aseo y Responsabilidades.
+  const need = ['recordatorios', 'vmc', 'fs', 'casa', 'carritos', 'aseo', 'resp'];
   let sections = [], tips = [];
   try { sections = await collectInicioSections({ only: need }); } catch (e) { console.warn('Inicio:', e); }
   try { tips = await loadTips(); } catch {}
@@ -6348,7 +6366,43 @@ async function renderHome() {
       if (n >= 0 && n <= 7) meet.push({ date: md, icon: ic, col: cl, title: ttl, sub: it.label, meta: _homeRelDay(md), onClick: it.onClick });
     });
   });
-  meet.sort((a, b) => a.date.localeCompare(b.date)).forEach(m => para.push(m));
+  // v1.51.0-beta: Próximas asignaciones (7 días) de todas las categorías, en orden cronológico.
+  meet.forEach(m => { m.ts = new Date(m.date + 'T00:00:00').getTime(); });
+  const _nowMs = Date.now();
+  [['casa', 'sun', 'blue', ''], ['carritos', 'cart', 'teal', 'Turno: '], ['aseo', 'house', 'orange', ''], ['resp', 'users', 'purple', '']].forEach(([k, ic, cl, pre]) => {
+    (sec(k)?.items || []).forEach(it => {
+      const sk = it.sortKey;
+      if (sk == null || !isFinite(sk) || sk < _nowMs - 3600000 || sk > _nowMs + 7 * 86400000) return;
+      meet.push({ ts: sk, icon: ic, col: cl, title: pre + it.label, sub: it.sub,
+        meta: [_homeRelDay(_homeYmd(new Date(sk))), it.partner].filter(Boolean).join(' • '), onClick: it.onClick });
+    });
+  });
+  meet.sort((a, b) => a.ts - b.ts).slice(0, 6).forEach(m => para.push(m));
+  // v1.51.0-beta: Nuevos No Pasar (últimos 7 días) y Evento próximo (14 días).
+  try {
+    const { data: terRows } = await sb.from('territories').select('id, number, no_pasar');
+    const since = Date.now() - 7 * 86400000;
+    const freshTers = [];
+    (terRows || []).forEach(tr => {
+      let entries = []; try { entries = parseNoPasar(tr.no_pasar); } catch (e) {}
+      const fresh = entries.filter(e => e.date && /^\d{4}-\d{2}-\d{2}/.test(e.date) && new Date(e.date.slice(0, 10) + 'T00:00:00').getTime() >= since);
+      if (fresh.length) freshTers.push({ tr, fresh, last: fresh.map(e => e.date.slice(0, 10)).sort().pop() });
+    });
+    freshTers.sort((a, b) => b.last.localeCompare(a.last)).slice(0, 2).forEach(({ tr, fresh, last }) => para.push({
+      icon: 'ban', col: 'red', title: 'Nuevo No Pasar',
+      sub: (typeof terLabel === 'function' ? terLabel(tr.number) : 'Territorio ' + tr.number) + ': ' + fresh[0].addr + (fresh.length > 1 ? ' (+' + (fresh.length - 1) + ' más)' : ''),
+      meta: _homeShortDate(last), onClick: () => inicioGoTo('predicacion', 'territorios') }));
+  } catch (e) { console.warn('Inicio (nuevos No Pasar):', e); }
+  try {
+    const { data: evs } = await sb.from('assignments').select('id,date,time,type,especial_titulo')
+      .in('type', ['especial', 'visita']).gte('date', _homeYmd(new Date())).order('date').order('time').limit(3);
+    (evs || []).filter(ev => _homeDiffDays(ev.date) <= 14).slice(0, 1).forEach(ev => para.push({
+      icon: 'cal', col: 'purple', title: ev.type === 'visita' ? 'Visita próxima' : 'Evento próximo',
+      sub: ev.especial_titulo || (ev.type === 'visita' ? 'Visita' : 'Evento'),
+      meta: _homeRelDay(ev.date) + (ev.time ? ' • ' + ev.time.substring(0, 5) + ' hrs' : ''),
+      onClick: () => inicioGoTo('predicacion', 'casa', () => { try { viewAssignment(ev.id); } catch (e) {} }) }));
+  } catch (e) { console.warn('Inicio (evento próximo):', e); }
+  if (seq !== _homeSeq) return;
   const recentTips = (tips || []).filter(tp => tp.created_at && (Date.now() - new Date(tp.created_at).getTime()) < 14 * 86400000).slice(0, 2);
   recentTips.forEach(tp => para.push({ icon: 'bulb', col: 'yellow', img: tp.image_url || '', title: 'Novedad: nuevo Tip', sub: tp.title || '', meta: 'Toca para leerlo', onClick: () => openTipDetailModal(tp.id) }));
 
@@ -6359,8 +6413,9 @@ async function renderHome() {
   // ── Apartados elegidos, en el orden elegido ──
   layout.forEach(k => {
     if (k === 'hoy') { html += '<div class="home-section" id="home-hoy"></div>'; return; }
+    if (k === 'texto') { html += '<div class="home-section" id="home-texto"></div>'; return; }
     let cards = [];
-    if (k === 'carritos') cards = (sec('carritos')?.items || []).map(it => ({ title: it.label, sub: it.sub, onClick: it.onClick }));
+    if (k === 'carritos') cards = (sec('carritos')?.items || []).map(it => ({ title: it.label, sub: it.sub, meta: it.partner, onClick: it.onClick }));
     else if (k === 'vmc' || k === 'fs') {
       const dow = k === 'vmc' ? (typeof MEETING_DAY_VMC !== 'undefined' ? MEETING_DAY_VMC : 4) : (typeof MEETING_DAY_FS !== 'undefined' ? MEETING_DAY_FS : 6);
       cards = (sec(k)?.items || []).map(it => { const md = _homeMeetingDate(it.weekStart, dow); return { title: it.label, sub: 'Semana ' + (it.sub || ''), meta: md ? _homeLongDate(md) : '', onClick: it.onClick }; });
@@ -6374,6 +6429,7 @@ async function renderHome() {
   wrap.innerHTML = html;
   wrap.dataset.ready = '1';
   if (layout.includes('hoy')) renderHomeHoy();
+  if (layout.includes('texto')) renderHomeTexto();
 }
 
 async function renderHomeHoy() {
@@ -6385,6 +6441,74 @@ async function renderHomeHoy() {
   renderSchedule({ container: el2, onlyToday: true });
   if (!el2.innerHTML.trim()) {
     el2.innerHTML = '<div class="home-section-title">Predicación Hoy</div><div class="home-empty">No hay asignaciones de predicación para hoy.</div>';
+  }
+}
+// ── Texto Diario (v1.51.0-beta) ─────────────────────────────────────────────
+// Lee el texto del día de "Examinemos las Escrituras todos los días" desde la Biblioteca
+// en línea de jw.org (misma vía que ya usa la importación de Vida y Ministerio, con sus
+// servidores de relevo). Se guarda en el dispositivo por día. Al presionar la tarjeta se
+// abre el texto en JW Library (o en jw.org si la app no está instalada).
+function _homeTextoClean(s) { return (s || '').replace(/\u00a0/g, ' ').replace(/\s+/g, ' ').trim(); }
+function _homeTextoMd(s) { return (s || '').replace(/\[([^\]]+)\]\([^)]*\)/g, '$1').replace(/[*_]/g, '').trim(); }
+function _homeTextoClip(s, max) {
+  s = s || '';
+  if (s.length <= max) return s;
+  const cut = s.slice(0, max);
+  return cut.slice(0, Math.max(cut.lastIndexOf(' '), 40)).replace(/[\s,;:.\-]+$/, '') + '…';
+}
+function _homeParseTexto(raw) {
+  if (!raw) return null;
+  let scripture = '', body = '';
+  if (/<\/?(div|p|h2|article|html|body)\b/i.test(raw)) {
+    const doc = new DOMParser().parseFromString(raw, 'text/html');
+    const item = doc.querySelector('.todayItem') || doc.querySelector('#article') || doc.body;
+    const th = item.querySelector('.themeScrp');
+    scripture = _homeTextoClean(th ? th.textContent : (item.querySelector('h2 ~ p') || {}).textContent);
+    let ps = [...item.querySelectorAll('.bodyTxt p')];
+    if (!ps.length) ps = [...item.querySelectorAll('p')];
+    body = ps.map(p => _homeTextoClean(p.textContent)).find(t => t.length > 60 && t !== scripture) || '';
+  } else {
+    const lines = raw.split('\n').map(l => l.trim());
+    const hi = lines.findIndex(l => /^#{1,3}\s*(lunes|martes|mi[eé]rcoles|jueves|viernes|s[aá]bado|domingo)\b/i.test(l));
+    if (hi >= 0) {
+      const rest = lines.slice(hi + 1).filter(Boolean);
+      scripture = _homeTextoMd(rest[0]);
+      body = _homeTextoMd(rest.find((l, i) => i > 0 && l.length > 60 && !l.startsWith('#')) || '');
+    }
+  }
+  return scripture ? { scripture, body } : null;
+}
+async function _homeLoadTextoDiario(ymd) {
+  const key = 'fleming_texto_diario:' + ymd;
+  try { const c = JSON.parse(localStorage.getItem(key)); if (c && c.scripture) return c; } catch (e) {}
+  const [y, m, d] = ymd.split('-').map(Number);
+  const html = await vmcFetchWolHtml('https://wol.jw.org/es/wol/dt/r4/lp-s/' + y + '/' + m + '/' + d);
+  const r = _homeParseTexto(html);
+  if (!r) throw new Error('no se encontró el texto del día');
+  try {
+    Object.keys(localStorage).filter(k => k.startsWith('fleming_texto_diario:') && k !== key).forEach(k => localStorage.removeItem(k));
+    localStorage.setItem(key, JSON.stringify(r));
+  } catch (e) {}
+  return r;
+}
+async function renderHomeTexto() {
+  if (!document.getElementById('home-texto')) return;
+  const ymd = _homeYmd(new Date());
+  const link = 'https://www.jw.org/finder?srcid=jwlshare&alias=daily-text&date=' + ymd.replace(/-/g, '') + '&wtlocale=S';
+  const open = () => { window.open(link, '_blank', 'noopener'); };
+  const draw = (card) => {
+    const el = document.getElementById('home-texto');
+    if (el) el.innerHTML = _homeSection('Texto Diario', '<div class="home-card-list">' + _homeCard(card) + '</div>');
+  };
+  draw({ icon: 'book', col: 'orange', title: 'Cargando el Texto Diario…', onClick: open });
+  try {
+    const r = await _homeLoadTextoDiario(ymd);
+    draw({ icon: 'book', col: 'orange', title: r.scripture, sub: _homeTextoClip(r.body, 170),
+      meta: _homeLongDate(ymd) + ' · Abrir en JW Library', onClick: open });
+  } catch (e) {
+    console.warn('Texto Diario:', e);
+    draw({ icon: 'book', col: 'orange', title: 'Texto Diario', sub: 'No se pudo cargar el texto de hoy. Toca para abrirlo en JW Library.',
+      meta: _homeLongDate(ymd), onClick: open });
   }
 }
 function homeRefreshHoyIfVisible() {
@@ -7175,6 +7299,7 @@ function homeResetLayout() { saveHomeLayout(HOME_DEFAULT_LAYOUT.slice()); render
         <button class="admin-tab" id="admin-tab-tips" data-tab="tips" onclick="switchAdminTab('tips')" style="display:none">Tips</button>
         <button class="admin-tab" id="admin-tab-monitor" data-tab="monitor" onclick="switchAdminTab('monitor')" style="display:none">Monitor</button>
         <button class="admin-tab" id="admin-tab-legal" data-tab="legal" onclick="switchAdminTab('legal')" style="display:none">Legal</button>
+        <button class="admin-tab" id="admin-tab-avatares" data-tab="avatares" onclick="switchAdminTab('avatares')" style="display:none">Avatares</button>
       </div>
       <div class="admin-section active" id="admin-assignments">
         <div style="display:flex;gap:10px;margin-bottom:1.1rem;align-items:center">
@@ -7672,6 +7797,35 @@ function homeResetLayout() { saveHomeLayout(HOME_DEFAULT_LAYOUT.slice()); render
         </div>
         <div style="font-size:0.8rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.04em;margin:0.5rem 0 0.6rem">Tips publicados</div>
         <div id="admin-tips-list"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Tips</div></div></div>
+      </div>
+
+      <!-- ── Avatares de Personajes Bíblicos (v1.51.0-beta) — exclusivo del Usuario DEV ── -->
+      <div class="admin-section" id="admin-avatares">
+        <div style="display:flex;gap:10px;margin-bottom:1.1rem;align-items:center">
+          <span style="flex:1;font-size:0.95rem;font-weight:700">Avatar de Personajes Bíblicos</span>
+        </div>
+        <div class="notif-gestor-card" style="margin-bottom:1.1rem">
+          <div class="form-group2">
+            <label class="form-label2">Nombre del personaje</label>
+            <input type="text" class="form-input" id="avatar-char-name" placeholder="Ej: Moisés" maxlength="40">
+          </div>
+          <div class="form-group2">
+            <label class="form-label2">Imagen (se recorta al centro en formato cuadrado)</label>
+            <input type="file" id="avatar-char-file" accept="image/png,image/jpeg,image/webp" style="display:none" onchange="handleAvatarCharImage(event)">
+            <div id="avatar-char-placeholder" style="display:flex;align-items:center;gap:8px;padding:0.65rem 0.9rem;border:1.5px dashed var(--border);border-radius:10px;cursor:pointer;color:var(--text3);font-size:0.85rem" onclick="document.getElementById('avatar-char-file').click()">
+              <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              Adjuntar imagen
+            </div>
+            <div id="avatar-char-preview-wrap" style="display:none;margin-top:0.5rem;align-items:center;gap:12px">
+              <div class="avatar-admin-sq" style="width:96px;flex-shrink:0"><img id="avatar-char-preview" alt=""></div>
+              <button type="button" class="btn-secondary" style="width:auto;padding:0.45rem 0.9rem" onclick="clearAvatarCharImage()">Quitar</button>
+            </div>
+          </div>
+          <div id="avatar-char-error" class="form-error" style="display:none"></div>
+          <button class="btn-primary" style="width:auto;padding:0.65rem 1.4rem" id="save-avatar-char-btn" onclick="saveAvatarCharacter()">Agregar personaje</button>
+        </div>
+        <div style="font-size:0.8rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.04em;margin:0.5rem 0 0.6rem">Personajes disponibles</div>
+        <div id="admin-avatares-list"></div>
       </div>
 
       <!-- ── Monitor (v1.33.7-beta): Sugerencias de No Pasar, Sugerencias de la
@@ -8978,19 +9132,6 @@ function homeResetLayout() { saveHomeLayout(HOME_DEFAULT_LAYOUT.slice()); render
           <div id="pref-live-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
         </div>
       </div>
-      <div class="profile-row" style="cursor:pointer" onclick="toggleLiveAlwaysOnPref()">
-        <div class="profile-row-icon" style="background:var(--ter-8-bg,rgba(52,199,89,0.12));color:var(--green)">
-          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
-        </div>
-        <div class="profile-row-content">
-          <div class="profile-row-label" data-i18n="exp.liveaa.title">Live Siempre Activo</div>
-          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="exp.liveaa.desc">Live sigue activo en segundo plano al salir de una asignación.</div>
-        </div>
-        <div id="live-always-on-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
-          <div id="live-always-on-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
-        </div>
-      </div>
-      <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="exp.liveaa.help">Para detener la sesión: entra a la asignación y presiona Pausa en la tarjeta Live, o detenla desde Notificaciones.</div>
     </div>
     <!-- Clima en asignaciones: movida desde Preferencias (v1.29.10-beta) -->
     <div class="profile-section">
@@ -9855,7 +9996,15 @@ function homeResetLayout() { saveHomeLayout(HOME_DEFAULT_LAYOUT.slice()); render
 // Escritorio/pantallas grandes la NavBar queda siempre en estado Grow. (3) Nuevo
 // experimento "Inicio" (solo móvil): pantalla de inicio personalizable con barra de
 // navegación inferior (Inicio / Predicación / Reuniones) y "Personalizar Inicio".
-const APP_VERSION = '1.50.1-beta';
+// v1.51.0-beta: (1) "Mis Carritos" pasa a llamarse "Mis Turnos" en Inicio; las tarjetas
+// muestran al compañero de turno y al presionarlas abren la Ficha del turno (ya no la
+// sub-sección Carritos). (2) "Para tí" suma próximas asignaciones, Nuevos No Pasar y Evento
+// próximo. (3) Sábados: Inicio solo muestra el Grupo de Servicio propio; "Otros Grupos" queda
+// solo en Predicación. (4) Nuevo apartado opcional "Texto Diario" (Examinemos las Escrituras
+// todos los días, desde la Biblioteca en línea de jw.org). (5) Se retira "Live Siempre Activo"
+// (Live sigue igual). (6) Administración → FlemingApp → Avatares: el DEV sube Personajes
+// Bíblicos (imagen cuadrada + nombre) que los usuarios pueden elegir como avatar.
+const APP_VERSION = '1.51.0-beta';
 // v1.36.0-beta: (1) Links de referencia ahora tienen 2 tipos — Único uso
 // (sin límite de tiempo, se desactiva tras el primer uso) y Con límite de
 // tiempo (reutilizable hasta que vence, o hasta que el Admin lo termina
@@ -10199,9 +10348,6 @@ const I18N = {
   'exp.navbarbtnsize.title':   { es: 'Botones NavBar más Grandes', en: 'Bigger NavBar Buttons', nl: 'Grotere NavBar-knoppen' },
   'exp.navbarbtnsize.desc':    { es: 'Agranda los botones de Sección, Sub-sección, Notificaciones y Más Opciones/Iniciales, sin cambiar el tamaño de la interfaz.', en: 'Enlarges the Section, Sub-section, Notifications and More Options/Initials buttons, without changing the interface size.', nl: 'Vergroot de knoppen voor Sectie, Subsectie, Meldingen en Meer opties/Initialen, zonder de interfacegrootte te wijzigen.' },
   'exp.liveaa.section': { es: 'Live', en: 'Live', nl: 'Live' },
-  'exp.liveaa.title':   { es: 'Live Siempre Activo', en: 'Live Always On', nl: 'Live Altijd Actief' },
-  'exp.liveaa.desc':    { es: 'Live sigue activo en segundo plano al salir de la asignación. La tarjeta con Live activo brilla en verde en Inicio', en: 'Live keeps running in the background when you leave the assignment. The card with active Live glows green on Home', nl: 'Live blijft actief op de achtergrond wanneer je de toewijzing verlaat. De kaart met actieve Live licht groen op bij Start' },
-  'exp.liveaa.help':    { es: 'Para detener la sesión: entra a la asignación y presiona Pausa en la tarjeta Live, o detenla desde el panel de Notificaciones.', en: 'To stop the session: open the assignment and press Pause on the Live card, or stop it from the Notifications panel.', nl: 'Om de sessie te stoppen: open de toewijzing en druk op Pauze op de Live-kaart, of stop deze via het Meldingenpaneel.' },
   'exp.modosencillo.section': { es: 'Modo Sencillo', en: 'Simple Mode', nl: 'Eenvoudige modus' },
   'exp.modosencillo.title':   { es: 'Activar Modo Sencillo', en: 'Enable Simple Mode', nl: 'Eenvoudige modus inschakelen' },
   'exp.modosencillo.desc':    { es: 'Simplifica la interfaz: reemplaza la navegación por un menú de pantalla completa con botones grandes.', en: 'Simplifies the interface: replaces navigation with a full-screen menu with large buttons.', nl: 'Vereenvoudigt de interface: vervangt navigatie door een volledig-scherm menu met grote knoppen.' },
@@ -11675,6 +11821,10 @@ const AVATAR_ICONS = {
   corona: '<path d="M3 8.5l4 3.2L12 5l5 6.7 4-3.2-1.6 9.8H4.6L3 8.5z"/><rect x="4.6" y="17.5" width="14.8" height="2.3" rx="0.8"/>',
 };
 function avatarGlyphHtml(name, iconKey) {
+  // v1.51.0-beta: si el usuario eligió un Personaje Bíblico, se muestra su imagen (cuadrada,
+  // recortada al círculo por el contenedor) en lugar de ícono o iniciales.
+  const charUrl = _avatarCharCache[name];
+  if (charUrl) return `<img class="avatar-char-img" src="${escapeHtml(charUrl)}" alt="" draggable="false">`;
   if (iconKey && AVATAR_ICONS[iconKey]) {
     return `<svg viewBox="0 0 24 24" class="avatar-glyph-icon" fill="#fff">${AVATAR_ICONS[iconKey]}</svg>`;
   }
@@ -11699,6 +11849,32 @@ function buildAvatarHtml(name, size = 28, fontSize = '0.62rem', radius = '50%') 
 // Cache de name→ícono de avatar personalizado (v1.45.2-sb), mismo patrón que
 // _avatarColorCache.
 let _avatarIconCache = {}; // { [name]: 'estrella'|'corazon'|'flor'|'futbol'|'corona'|null }
+// v1.51.0-beta — Personajes Bíblicos. Requiere en Supabase (ver supabase_avatares.sql):
+//   create table avatar_characters (id uuid primary key default gen_random_uuid(), name text not null, image_url text not null, created_at timestamptz default now());
+//   alter table platform_users add column if not exists avatar_character uuid references avatar_characters(id) on delete set null;
+let _avatarCharList = [];       // [{ id, name, image_url }]
+let _avatarCharById = {};       // id -> personaje
+let _avatarCharIdCache = {};    // nombre de usuario -> id del personaje elegido
+let _avatarCharCache = {};      // nombre de usuario -> imagen del personaje elegido
+let _avatarCharLoaded = false;
+let _pendingAvatarCharImg = null;
+function _avatarRebuildCharCache() {
+  _avatarCharCache = {};
+  Object.keys(_avatarCharIdCache).forEach(n => { const c = _avatarCharById[_avatarCharIdCache[n]]; if (c) _avatarCharCache[n] = c.image_url; });
+}
+async function loadAvatarCharacters(force) {
+  if (_avatarCharLoaded && !force) return _avatarCharList;
+  try {
+    const { data, error } = await sb.from('avatar_characters').select('id, name, image_url').order('name');
+    if (error) throw error;
+    _avatarCharList = data || [];
+    _avatarCharById = {};
+    _avatarCharList.forEach(c => { _avatarCharById[c.id] = c; });
+    _avatarCharLoaded = true;
+    _avatarRebuildCharCache();
+  } catch (e) { console.warn('Avatares de personajes:', e.message || e); }
+  return _avatarCharList;
+}
 
 // Cache de name→color de avatar personalizado, para lookup rápido al
 // renderizar grupos, tarjetas de usuario, etc.
@@ -11708,14 +11884,23 @@ let _avatarCacheLoaded = false;
 async function loadAvatarCache() {
   if (_avatarCacheLoaded) return; // already fetched this session — los colores rara vez cambian mid-session
   try {
-    const { data } = await sb.from('platform_users').select('name, avatar_color, avatar_icon');
+    // v1.51.0-beta: también carga el personaje elegido (avatar_character). Si la columna aún no
+    // existe en Supabase, se cae a la consulta anterior para no perder colores ni íconos.
+    let res = await sb.from('platform_users').select('name, avatar_color, avatar_icon, avatar_character');
+    if (res.error) res = await sb.from('platform_users').select('name, avatar_color, avatar_icon');
+    const data = res.data;
     _avatarColorCache = {};
     _avatarIconCache = {};
+    _avatarCharIdCache = {};
     (data || []).forEach(u => {
       if (u.avatar_color) _avatarColorCache[u.name] = u.avatar_color;
       if (u.avatar_icon) _avatarIconCache[u.name] = u.avatar_icon;
+      if (u.avatar_character) _avatarCharIdCache[u.name] = u.avatar_character;
     });
+    if (Object.keys(_avatarCharIdCache).length) await loadAvatarCharacters(true);
+    _avatarRebuildCharCache();
     _avatarCacheLoaded = true;
+    try { if (currentUser && typeof applyOwnAvatarToDropdowns === 'function') applyOwnAvatarToDropdowns(); } catch (e) {}
   } catch(e) { /* silently ignore */ }
 }
 
@@ -11756,7 +11941,7 @@ async function openMemberPerfil(nombre, esPrecursorGrupo, rolGrupo) {
   const col = getAvatarColorForName(nombre, memberColor(nombre));
   const inits = memberInitials(nombre);
   avatarEl.style.background = col;
-  avatarEl.textContent = inits;
+  avatarEl.innerHTML = avatarGlyphHtml(nombre, _avatarIconCache[nombre] || null);
   avatarEl.classList.remove('avatar-frame-admin', 'avatar-frame-admintag');
   avatarEl.style.removeProperty('--atag-frame-color');
   cargosEl.innerHTML = '';
@@ -12105,6 +12290,20 @@ function applyPwaShortcut() {
   } catch {}
 }
 
+// v1.51.0-beta: abre directamente la Ficha de un turno de Carritos (en vez de la
+// sub-sección). Al cerrar la ficha se vuelve a Inicio si el usuario venía de ahí.
+async function inicioOpenCartTurno(turnoId) {
+  window._cartDetailFromInicio = true;
+  inicioGoTo('predicacion', 'carritos');
+  try { if (!cartDataLoaded) await cartLoadAllData(); } catch (e) { console.warn('Carritos:', e); }
+  for (let i = 0; i < 50 && cartLoading; i++) await new Promise(r => setTimeout(r, 100));
+  if (!cartTURNOS.find(x => String(x.id) === String(turnoId))) {
+    window._cartDetailFromInicio = false;
+    showToast('No se encontró el turno.', 'error');
+    return;
+  }
+  cartOpenTurnDetail(turnoId);
+}
 function inicioGoTo(mainTab, subTab, after) {
   if (typeof closeProfilePage === 'function') closeProfilePage();
   const btn = document.querySelector(`.main-seg-btn[data-tab="${mainTab}"]`);
@@ -12246,11 +12445,18 @@ async function collectInicioSections(opts) {
         icon: '<circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>',
         items: mine.slice(0, 5).map(t => {
           const punto = (puntos || []).find(p => p.id === t.punto_id);
+          // v1.51.0-beta: compañero(s) de turno (los demás nombres del turno).
+          const others = (t.nombres || '').split(/[,\/&+\n]/).map(n => n.trim()).filter(Boolean).filter(n => {
+            const low = n.toLowerCase();
+            return !(low === myName || low.includes(myName) || myName.includes(low) || (typeof _namesMatch === 'function' && _namesMatch(n, getIdentityName())));
+          });
           return {
             label: punto ? punto.nombre : 'Punto de carrito',
             sub: `${t.dia || ''}${t.hora ? ' • ' + t.hora : ''}`,
+            partner: others.length ? 'Con ' + others.join(' y ') : 'Sin compañero por ahora',
+            turnoId: t.id,
             sortKey: _inicioNextWeekdaySortKey(t.dia, t.hora),
-            onClick: () => inicioGoTo('predicacion', 'carritos'),
+            onClick: () => inicioOpenCartTurno(t.id),
           };
         }),
       });
@@ -12407,7 +12613,7 @@ function renderInicioSections(sections) {
         </div>
         <div class="pia-row-content">
           <div class="pia-row-label">${f.item.label}${f.item.badge ? `<span class="inicio-badge-reminder">${f.item.badge}</span>` : ''}</div>
-          ${f.item.sub ? `<div class="pia-row-sub">${f.item.sub}</div>` : ''}
+          ${(f.item.sub || f.item.partner) ? `<div class="pia-row-sub">${[f.item.sub, f.item.partner].filter(Boolean).join(' • ')}</div>` : ''}
         </div>
         <svg class="pia-row-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
       </div>`).join('')}
@@ -12427,6 +12633,7 @@ const AVATAR_BG_COLORS = ['#22c55e','#3b82f6','#a855f7','#f59e0b','#ef4444','#06
 
 function openAvatarColorSheet() {
   document.getElementById('profile-photo-overlay').classList.add('open');
+  renderAvatarCharPicker();
   updateAvatarIconPickerUI(_ownAvatarIcon || null);
 }
 function closeAvatarColorSheet() {
@@ -12467,12 +12674,13 @@ async function setOwnAvatarIcon(iconKey) {
   if (!currentUser) return;
   const value = iconKey || null;
   const { error } = await sb.from('platform_users')
-    .update({ avatar_icon: value })
+    .update(_ownIconPayload(value))
     .ilike('name', currentUser.name);
   if (error) { showToast('Error al guardar el ícono', 'error'); return; }
 
   _avatarIconCache[currentUser.name] = value;
   _ownAvatarIcon = value;
+  if (_avatarCharIdCache[currentUser.name]) { delete _avatarCharIdCache[currentUser.name]; _avatarRebuildCharCache(); }
   updateAvatarIconPickerUI(value);
   const glyph = avatarGlyphHtml(currentUser.name, value);
   const bigAvatar = document.getElementById('profile-avatar-big');
@@ -12484,9 +12692,134 @@ async function setOwnAvatarIcon(iconKey) {
 }
 
 function updateAvatarIconPickerUI(activeIcon) {
+  const hasChar = !!(currentUser && _avatarCharIdCache[currentUser.name]);
   document.querySelectorAll('.avatar-icon-swatch').forEach(el => {
-    el.classList.toggle('active', (el.dataset.icon || '') === (activeIcon || ''));
+    el.classList.toggle('active', !hasChar && (el.dataset.icon || '') === (activeIcon || ''));
   });
+  document.querySelectorAll('.avatar-char-item').forEach(el => {
+    el.classList.toggle('active', hasChar && el.dataset.char === _avatarCharIdCache[currentUser.name]);
+  });
+}
+function _ownIconPayload(value) {
+  const p = { avatar_icon: value };
+  if (currentUser && _avatarCharIdCache[currentUser.name]) p.avatar_character = null;
+  return p;
+}
+async function renderAvatarCharPicker() {
+  const grid = document.getElementById('avatar-char-grid');
+  const sec = document.getElementById('avatar-char-section');
+  if (!grid) return;
+  await loadAvatarCharacters();
+  if (!_avatarCharList.length) { if (sec) sec.style.display = 'none'; return; }
+  if (sec) sec.style.display = '';
+  const active = currentUser ? _avatarCharIdCache[currentUser.name] : null;
+  grid.innerHTML = _avatarCharList.map(c =>
+    `<button class="avatar-char-item${c.id === active ? ' active' : ''}" data-char="${c.id}" onclick="setOwnAvatarCharacter('${c.id}')" title="${escapeHtml(c.name)}">` +
+    `<span class="avatar-char-thumb"><img class="avatar-char-img" src="${escapeHtml(c.image_url)}" alt="" loading="lazy" draggable="false"></span>` +
+    `<span>${escapeHtml(c.name)}</span></button>`).join('');
+}
+async function setOwnAvatarCharacter(charId) {
+  if (!currentUser || !charId) return;
+  const { error } = await sb.from('platform_users')
+    .update({ avatar_character: charId, avatar_icon: null })
+    .ilike('name', currentUser.name);
+  if (error) { showToast('Error al guardar el personaje', 'error'); return; }
+  _avatarCharIdCache[currentUser.name] = charId;
+  _avatarIconCache[currentUser.name] = null;
+  _ownAvatarIcon = null;
+  _avatarRebuildCharCache();
+  const bigAvatar = document.getElementById('profile-avatar-big');
+  if (bigAvatar) bigAvatar.innerHTML = avatarGlyphHtml(currentUser.name, null);
+  applyOwnAvatarToDropdowns();
+  updateAvatarIconPickerUI(null);
+  showToast('Personaje actualizado ✓', 'success');
+  renderGruposView();
+  closeAvatarColorSheet();
+}
+
+// ── Administración → FlemingApp → Avatares (solo DEV) ──
+function handleAvatarCharImage(event) {
+  const file = event.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = new Image();
+    img.onload = () => {
+      const side = Math.min(img.width, img.height);
+      if (side < 96) { showError('avatar-char-error', 'La imagen es muy pequeña (mínimo 96 × 96 px).'); return; }
+      document.getElementById('avatar-char-error').style.display = 'none';
+      const out = Math.min(side, 256);
+      const canvas = document.createElement('canvas'); canvas.width = out; canvas.height = out;
+      const sx = (img.width - side) / 2, sy = (img.height - side) / 2;
+      canvas.getContext('2d').drawImage(img, sx, sy, side, side, 0, 0, out, out);
+      let url = canvas.toDataURL('image/webp', 0.86);
+      if (!url.startsWith('data:image/webp')) url = canvas.toDataURL('image/jpeg', 0.86);
+      _pendingAvatarCharImg = url;
+      document.getElementById('avatar-char-preview').src = url;
+      document.getElementById('avatar-char-preview-wrap').style.display = 'flex';
+      document.getElementById('avatar-char-placeholder').style.display = 'none';
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+function clearAvatarCharImage() {
+  _pendingAvatarCharImg = null;
+  document.getElementById('avatar-char-file').value = '';
+  document.getElementById('avatar-char-preview-wrap').style.display = 'none';
+  document.getElementById('avatar-char-placeholder').style.display = 'flex';
+}
+async function saveAvatarCharacter() {
+  if (currentRole !== 'dev') return;
+  const name = document.getElementById('avatar-char-name').value.trim();
+  document.getElementById('avatar-char-error').style.display = 'none';
+  if (!name) { showError('avatar-char-error', 'El nombre es requerido'); return; }
+  if (!_pendingAvatarCharImg) { showError('avatar-char-error', 'Adjunta una imagen'); return; }
+  await loadAvatarCharacters(true);
+  if (_avatarCharList.some(c => c.name.trim().toLowerCase() === name.toLowerCase())) { showError('avatar-char-error', 'Ya existe un personaje con ese nombre'); return; }
+  const btn = document.getElementById('save-avatar-char-btn');
+  btn.disabled = true; btn.textContent = 'Guardando…';
+  const { error } = await sb.from('avatar_characters').insert({ name, image_url: _pendingAvatarCharImg });
+  btn.disabled = false; btn.textContent = 'Agregar personaje';
+  if (error) {
+    const missing = /avatar_characters|42P01/.test((error.message || '') + (error.code || ''));
+    showError('avatar-char-error', missing ? 'Falta crear la tabla "avatar_characters" en Supabase (ver supabase_avatares.sql).' : error.message);
+    return;
+  }
+  showToast('Personaje agregado ✓', 'success');
+  document.getElementById('avatar-char-name').value = '';
+  clearAvatarCharImage();
+  await renderAdminAvatares();
+}
+async function renderAdminAvatares() {
+  const list = document.getElementById('admin-avatares-list');
+  if (!list) return;
+  list.innerHTML = '<div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando personajes</div></div>';
+  await loadAvatarCharacters(true);
+  if (!_avatarCharList.length) { list.innerHTML = '<div class="monitor-empty">Aún no hay personajes. Agrega el primero arriba.</div>'; return; }
+  list.innerHTML = '<div class="avatar-admin-grid">' + _avatarCharList.map(c =>
+    `<div class="avatar-admin-card"><div class="avatar-admin-sq"><img src="${escapeHtml(c.image_url)}" alt="" loading="lazy"></div>` +
+    `<div class="avatar-admin-name">${escapeHtml(c.name)}</div>` +
+    `<div class="avatar-admin-actions"><button onclick="renameAvatarCharacter('${c.id}')">Renombrar</button><button class="del" onclick="deleteAvatarCharacter('${c.id}')">Eliminar</button></div></div>`).join('') + '</div>';
+}
+async function renameAvatarCharacter(id) {
+  const c = _avatarCharById[id]; if (!c || currentRole !== 'dev') return;
+  const name = (prompt('Nuevo nombre del personaje:', c.name) || '').trim();
+  if (!name || name === c.name) return;
+  const { error } = await sb.from('avatar_characters').update({ name }).eq('id', id);
+  if (error) { showToast('No se pudo renombrar', 'error'); return; }
+  showToast('Nombre actualizado ✓', 'success');
+  renderAdminAvatares();
+}
+async function deleteAvatarCharacter(id) {
+  const c = _avatarCharById[id]; if (!c || currentRole !== 'dev') return;
+  if (!confirm('¿Eliminar a "' + c.name + '"? Quienes lo tengan como avatar volverán a sus iniciales.')) return;
+  const { error } = await sb.from('avatar_characters').delete().eq('id', id);
+  if (error) { showToast('No se pudo eliminar', 'error'); return; }
+  Object.keys(_avatarCharIdCache).forEach(n => { if (_avatarCharIdCache[n] === id) delete _avatarCharIdCache[n]; });
+  await loadAvatarCharacters(true);
+  try { applyOwnAvatarToDropdowns(); } catch (e) {}
+  showToast('Personaje eliminado ✓', 'success');
+  renderAdminAvatares();
 }
 
 function toggleLabel(uid, labelKey) {
@@ -13078,6 +13411,8 @@ async function enterApp() {
   if (monitorAdminTab) monitorAdminTab.style.display = (currentRole === 'dev') ? '' : 'none';
   const legalAdminTab = document.getElementById('admin-tab-legal');
   if (legalAdminTab) legalAdminTab.style.display = (currentRole === 'dev') ? '' : 'none';
+  const avataresAdminTab = document.getElementById('admin-tab-avatares');
+  if (avataresAdminTab) avataresAdminTab.style.display = (currentRole === 'dev') ? '' : 'none';
   // v1.38.0-beta: botones "Subir CSV" — exclusivos del Usuario DEV.
   document.querySelectorAll('.dev-only-el').forEach(el => { el.style.display = (currentRole === 'dev') ? '' : 'none'; });
 
@@ -14752,7 +15087,7 @@ const ADMIN_TAB_SECTION = {
   assignments: 'predicacion', territories: 'predicacion', conductores: 'predicacion',
   casas: 'predicacion', grupos: 'predicacion', carritos: 'predicacion', reports: 'predicacion',
   vmc: 'reuniones', 'fin-semana': 'reuniones', audiovideo: 'reuniones', acomodacion: 'reuniones', 'aseo-salon': 'reuniones', hospitalidad: 'reuniones',
-  usuarios: 'fleming', notificaciones: 'fleming', tips: 'fleming', monitor: 'fleming', legal: 'fleming',
+  usuarios: 'fleming', notificaciones: 'fleming', tips: 'fleming', monitor: 'fleming', legal: 'fleming', avatares: 'fleming',
 };
 
 // Cambia la sección visible (Predicación/Reuniones) y activa la primera sub-pestaña disponible dentro de ella.
@@ -14787,6 +15122,11 @@ async function switchAdminTab(tab) {
     return;
   }
   // Legal (v1.41.0-stable_beta): edición exclusiva del Usuario DEV, no delegable a Admins.
+  // Avatares de Personajes (v1.51.0-beta): gestión exclusiva del Usuario DEV.
+  if (tab === 'avatares' && currentRole !== 'dev') {
+    showToast('No tienes permisos para acceder a este módulo.', 'error');
+    return;
+  }
   if (tab === 'legal' && currentRole !== 'dev') {
     showToast('No tienes permisos para acceder a este módulo.', 'error');
     return;
@@ -14847,6 +15187,7 @@ async function switchAdminTab(tab) {
   if (tab === 'tips') { renderAdminTipsList(); }
   if (tab === 'monitor') { switchMonitorTab(_monitorActiveTab || 'np'); loadMaintenanceModeUI(); }
   if (tab === 'legal') { renderAdminLegal(); }
+  if (tab === 'avatares') { renderAdminAvatares(); }
   if (tab === 'carritos') { cartOpenAdminSection(); }
   if (tab === 'reports') { trepOpenAdminSection(); }
 }
@@ -15268,7 +15609,9 @@ function renderSchedule(opts) {
       //    opcional) o botón hacia la pantalla independiente "Otros Grupos"
       //    (comportamiento por defecto desde v1.27.0-beta), según la
       //    preferencia de Configuración → Apariencia (v1.23.0-beta) ──
-      if (otherAssignments.length) {
+      // v1.51.0-beta: en Inicio (opts.onlyToday) solo se muestra el grupo propio; el botón
+      // "Otros Grupos" queda reservado para la sección Predicación.
+      if (otherAssignments.length && !(opts && opts.onlyToday)) {
         if (!isGroupMinicardsEnabled()) {
           // Guarda los datos de este Sábado para que la pantalla "Otros
           // Grupos" los pueda leer al abrirse.
@@ -16217,18 +16560,8 @@ function closeDetail() {
   const form = document.getElementById('suggest-np-form');
   if (form) { form.classList.remove('open'); }
   ['snp-calle','snp-numero','snp-motivo'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
-  // Live Mode: al cerrar el detalle, se detiene normalmente. Pero si la
-  // función experimental "Live Siempre Activo" está encendida, Live se deja
-  // corriendo en segundo plano (no se llama a stopLiveMode) y la tarjeta de
-  // esa asignación mostrará un borde que brilla en verde en la pantalla de
-  // inicio, hasta que se pause/detenga manualmente.
-  if (_liveActive) {
-    if (typeof isLiveAlwaysOnEnabled === 'function' && isLiveAlwaysOnEnabled()) {
-      if (typeof _liveApplyCardGlow === 'function') _liveApplyCardGlow();
-    } else {
-      stopLiveMode();
-    }
-  }
+  // Live Mode: al cerrar el detalle, Live se detiene (v1.51.0-beta: ya no existe "Live Siempre Activo").
+  if (_liveActive) stopLiveMode();
   if (typeof _liveHostOnCloseDetail === 'function') _liveHostOnCloseDetail();
 }
 
@@ -16623,38 +16956,11 @@ async function renderLiveAdminPanel() {
   }
 }
 
-// ── Live Siempre Activo (Experimentos, v1.24.0-beta) ─────────────────────────
-// Al encenderse, Live ya no se detiene automáticamente al cerrar el detalle
-// de una asignación de casa en casa (ver closeDetail): sigue corriendo en
-// segundo plano mientras se navega por la plataforma. La tarjeta de esa
-// asignación en la pantalla de inicio muestra un borde que brilla en verde
-// mientras la sesión siga activa y sin pausar.
-function isLiveAlwaysOnEnabled() {
-  return localStorage.getItem('fleming_live_always_on') === 'true';
-}
-function toggleLiveAlwaysOnPref() {
-  const next = !isLiveAlwaysOnEnabled();
-  localStorage.setItem('fleming_live_always_on', next ? 'true' : 'false');
-  updateLiveAlwaysOnToggleUI();
-  if (next) {
-    showToast('Live Siempre Activo activado', 'success');
-  } else {
-    showToast('Live Siempre Activo desactivado', '');
-    // Si se apaga estando el detalle cerrado con Live corriendo en segundo
-    // plano, se detiene la sesión de inmediato para respetar la preferencia.
-    if (_liveActive && !document.getElementById('detail-overlay')?.classList.contains('open')) {
-      stopLiveMode();
-    }
-  }
-}
-function updateLiveAlwaysOnToggleUI() {
-  const toggle = document.getElementById('live-always-on-toggle');
-  const thumb  = document.getElementById('live-always-on-thumb');
-  if (!toggle || !thumb) return;
-  const on = isLiveAlwaysOnEnabled();
-  toggle.style.background = on ? 'var(--accent)' : 'var(--surface3)';
-  thumb.style.left = on ? '21px' : '3px';
-}
+// ── "Live Siempre Activo" retirado en v1.51.0-beta ────────────────────────────
+// Live se detiene al cerrar el detalle de la asignación (comportamiento normal).
+// Se conserva este stub para no romper referencias antiguas.
+function isLiveAlwaysOnEnabled() { return false; }
+try { localStorage.removeItem('fleming_live_always_on'); } catch (e) {}
 
 // Marca (o desmarca) con el borde verde la tarjeta de la asignación dueña de
 // la sesión Live activa, en cualquier lista de tarjetas ya renderizada
@@ -21545,6 +21851,8 @@ async function syncRoleFromServer() {
       if (monitorAdminTab) monitorAdminTab.style.display = (currentRole === 'dev') ? '' : 'none';
       const legalAdminTab = document.getElementById('admin-tab-legal');
       if (legalAdminTab) legalAdminTab.style.display = (currentRole === 'dev') ? '' : 'none';
+      const avataresAdminTab = document.getElementById('admin-tab-avatares');
+      if (avataresAdminTab) avataresAdminTab.style.display = (currentRole === 'dev') ? '' : 'none';
       // If user was viewing the Fleming App / Usuarios section and lost access, send them back to predicación
       const usuariosSection = document.getElementById('admin-usuarios');
       if (usuariosSection && usuariosSection.classList.contains('active') && !['dev','admin'].includes(currentRole)) {
@@ -23665,6 +23973,8 @@ function syncAdminDropdown() {
   if (monitorAdminTab) monitorAdminTab.style.display = (currentRole === 'dev') ? '' : 'none';
   const legalAdminTab = document.getElementById('admin-tab-legal');
   if (legalAdminTab) legalAdminTab.style.display = (currentRole === 'dev') ? '' : 'none';
+  const avataresAdminTab = document.getElementById('admin-tab-avatares');
+  if (avataresAdminTab) avataresAdminTab.style.display = (currentRole === 'dev') ? '' : 'none';
   const themeLabel = document.getElementById('theme-btn-label-admin');
   if (themeLabel) _updateThemeActive(document.documentElement.getAttribute('data-theme') || 'auto');
 }
@@ -27715,6 +28025,15 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 8.5l4 3.2L12 5l5 6.7 4-3.2-1.6 9.8H4.6L3 8.5z"/><rect x="4.6" y="17.5" width="14.8" height="2.3" rx="0.8"/></svg>
       </button>
     </div>
+
+    <!-- v1.51.0-beta: Personajes bíblicos (imágenes subidas por el DEV) -->
+    <div id="avatar-char-section" style="display:none">
+      <div class="np-action-header" style="padding-top:0">
+        <div class="np-action-addr" style="font-size:0.9rem">Personajes bíblicos</div>
+        <div class="np-action-sub">Elige un personaje como foto de tu perfil</div>
+      </div>
+      <div class="avatar-char-grid" id="avatar-char-grid"></div>
+    </div>
     <button class="np-action-btn-cancel" onclick="closeAvatarColorSheet()" data-i18n="btn.cancelar">Cancelar</button>
   </div>
 </div>
@@ -28635,7 +28954,14 @@ function cartClearFilters() {
   cartHandleSearch();
 }
 function cartGoBack() { document.getElementById('detail-ct-screen').classList.remove('ct-active'); }
-function cartCloseTurnDetail() { document.getElementById('cartTurnDetailScreen').classList.remove('ct-turn-active'); }
+function cartCloseTurnDetail() {
+  document.getElementById('cartTurnDetailScreen').classList.remove('ct-turn-active');
+  // v1.51.0-beta: si la ficha se abrió desde Inicio, al cerrarla se vuelve a Inicio.
+  if (window._cartDetailFromInicio) {
+    window._cartDetailFromInicio = false;
+    if (typeof isInicioActive === 'function' && isInicioActive() && typeof homeNavGo === 'function') homeNavGo('inicio');
+  }
+}
 // En escritorio el detalle se muestra como Pop-Up con fondo atenuado; un
 // click fuera del panel (sobre el fondo) lo cierra, igual que el resto de
 // los modales de la plataforma. En móvil el panel ocupa toda la pantalla,
