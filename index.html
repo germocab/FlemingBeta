@@ -6175,6 +6175,52 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 .avatar-admin-actions { display: flex; gap: 6px; }
 .avatar-admin-actions button { padding: 0.3rem 0.65rem; border-radius: 8px; border: 1px solid var(--border); background: var(--surface2); color: var(--text2); font-family: var(--font); font-size: 0.72rem; font-weight: 600; cursor: pointer; }
 .avatar-admin-actions button.del { color: var(--red); }
+
+/* ── v1.52.0-beta: Para tí (mantener presionado), Texto Diario prominente, Editar perfil, categorías ── */
+.home-card[data-pk] { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+.home-card.lp-press { transform: scale(0.97); transition: transform 0.5s; }
+.home-card-texto { padding: 1.2rem 1.2rem; }
+.home-card-texto .home-card-title { font-size: 1.2rem; font-weight: 800; line-height: 1.4; letter-spacing: -0.015em; }
+.home-card-texto .home-card-meta { font-size: 0.72rem; margin-top: 10px; }
+.home-confirm-overlay { position: fixed; inset: 0; z-index: 3000; background: rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; padding: 1.5rem; animation: fadeIn 0.18s; }
+.home-confirm { width: 100%; max-width: 340px; background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 1.3rem 1.2rem 1.1rem; box-shadow: 0 20px 60px rgba(0,0,0,0.35); text-align: center; }
+.home-confirm-t { font-size: 1.05rem; font-weight: 800; color: var(--text); }
+.home-confirm-s { font-size: 0.88rem; font-weight: 600; color: var(--text); margin-top: 8px; line-height: 1.35; word-break: break-word; }
+.home-confirm-n { font-size: 0.76rem; color: var(--text3); margin-top: 8px; line-height: 1.4; }
+.home-confirm-b { display: flex; gap: 10px; margin-top: 1.1rem; }
+.home-confirm-b button { flex: 1; padding: 0.7rem; border-radius: 12px; border: 1px solid var(--border); background: var(--surface2); color: var(--text); font-family: var(--font); font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+.home-confirm-b button.danger { background: var(--red); border-color: var(--red); color: #fff; }
+#page-avatar-edit { display: none; position: fixed; inset: 0; z-index: 270; background: var(--bg); flex-direction: column; overflow-y: auto; animation: fadeIn 0.26s var(--ease-fluid-soft); }
+#page-avatar-edit.open { display: flex; }
+.ape-wrap { width: 100%; max-width: 760px; margin: 0 auto; padding-bottom: 3rem; }
+.ape-preview-wrap { display: flex; flex-direction: column; align-items: center; padding: 1.6rem 1.25rem 1.2rem; text-align: center; }
+.ape-preview { width: 132px; height: 132px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.8rem; font-weight: 800; color: #fff; overflow: hidden; border: 3px solid var(--surface); box-shadow: 0 6px 26px rgba(0,0,0,0.2); background: var(--accent); }
+.ape-name { font-size: 1.1rem; font-weight: 800; margin-top: 0.9rem; color: var(--text); }
+.ape-hint { font-size: 0.76rem; color: var(--text3); margin-top: 2px; }
+.ape-sec { margin-top: 1.2rem; }
+.ape-h { font-size: 1.02rem; font-weight: 800; color: var(--text); padding: 0 1.25rem; margin-bottom: 0.7rem; letter-spacing: -0.01em; }
+.ape-colors { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; padding: 0.2rem 1.25rem; justify-items: center; }
+.ape-icons { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; padding: 0.2rem 1.25rem; justify-items: center; }
+.ape-cat { margin-top: 1.5rem; }
+.ape-row-wrap { position: relative; }
+.ape-row { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x proximity; padding: 0.25rem 1.25rem 0.7rem; scrollbar-width: none; -webkit-overflow-scrolling: touch; scroll-padding-left: 1.25rem; }
+.ape-row::-webkit-scrollbar { display: none; }
+.ape-tile { flex: 0 0 auto; width: 92px; scroll-snap-align: start; align-items: stretch !important; gap: 6px !important; font-size: 0.74rem !important; }
+.ape-tile-img { width: 92px; height: 92px; border-radius: 14px; overflow: hidden; border: 3px solid transparent; background: var(--surface3); transition: transform 0.15s, border-color 0.15s; }
+.ape-tile:hover .ape-tile-img { transform: scale(1.05); }
+.ape-tile.active .ape-tile-img { border-color: var(--text); }
+.ape-tile span.ape-tile-name { display: block; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ape-arrow { display: none; position: absolute; top: 34px; width: 34px; height: 34px; border-radius: 50%; border: none; background: rgba(0,0,0,0.6); color: #fff; cursor: pointer; align-items: center; justify-content: center; z-index: 2; }
+.ape-arrow.l { left: 6px; } .ape-arrow.r { right: 6px; }
+.ape-arrow svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+@media (hover: hover) { .ape-arrow { display: flex; } }
+.avatar-cat-row { display: flex; align-items: center; gap: 8px; padding: 0.5rem 0; border-top: 1px solid var(--border); }
+.avatar-cat-row .avatar-cat-name { flex: 1; font-size: 0.88rem; font-weight: 700; color: var(--text); min-width: 0; word-break: break-word; }
+.avatar-cat-row .avatar-cat-count { font-size: 0.72rem; color: var(--text3); }
+.avatar-cat-row button { padding: 0.28rem 0.55rem; border-radius: 8px; border: 1px solid var(--border); background: var(--surface2); color: var(--text2); font-family: var(--font); font-size: 0.72rem; font-weight: 600; cursor: pointer; }
+.avatar-cat-row button.del { color: var(--red); }
+.avatar-admin-gh { font-size: 0.9rem; font-weight: 800; color: var(--text); margin: 1.1rem 0 0.6rem; }
+.avatar-admin-sel { width: 100%; padding: 0.3rem; border-radius: 8px; border: 1px solid var(--border); background: var(--surface2); color: var(--text2); font-family: var(--font); font-size: 0.72rem; }
 </style>
 <script id="home-js">
 // ══════════════════════════════════════════════════════════════════════════
@@ -6321,11 +6367,12 @@ function _homeRelDay(ymd) {
 }
 
 // ── Render ──
-let _homeActions = [], _homeSeq = 0;
+let _homeActions = [], _homeSeq = 0, _homeParaKeys = [];
 function homeAct(i) { const f = _homeActions[i]; if (typeof f === 'function') f(); }
 function _homeCard(c) {
   const idx = _homeActions.push(c.onClick || null) - 1;
-  return '<div class="home-card' + (c.reminder ? ' is-reminder' : '') + '"' + (c.onClick ? ' onclick="homeAct(' + idx + ')"' : '') + '>' +
+  const pk = c.pkey ? ' data-pk="' + (_homeParaKeys.push(c.pkey) - 1) + '"' : '';
+  return '<div class="home-card' + (c.reminder ? ' is-reminder' : '') + (c.cls ? ' ' + c.cls : '') + '"' + pk + (c.onClick ? ' onclick="homeAct(' + idx + ')"' : '') + '>' +
     (c.icon ? _homeIcoBox(c.icon, c.col, '', c.img) : '') +
     '<div class="home-card-body"><div class="home-card-title">' + escapeHtml(c.title || '') + '</div>' +
     (c.sub ? '<div class="home-card-sub">' + escapeHtml(c.sub) + '</div>' : '') +
@@ -6339,8 +6386,9 @@ async function renderHome() {
   const wrap = document.getElementById('home-content');
   if (!wrap || typeof currentUser === 'undefined' || !currentUser) return;
   const seq = ++_homeSeq;
-  _homeActions = [];
+  _homeActions = []; _homeParaKeys = [];
   const layout = getHomeLayout();
+  const textoTop = isHomeTextoTop();
   if (!wrap.dataset.ready) wrap.innerHTML = '<div class="loader-wrap"><div class="loader"></div></div>';
 
   // v1.51.0-beta: "Para tí" también muestra próximas asignaciones de Casa en Casa, Turnos, Aseo y Responsabilidades.
@@ -6406,14 +6454,18 @@ async function renderHome() {
   const recentTips = (tips || []).filter(tp => tp.created_at && (Date.now() - new Date(tp.created_at).getTime()) < 14 * 86400000).slice(0, 2);
   recentTips.forEach(tp => para.push({ icon: 'bulb', col: 'yellow', img: tp.image_url || '', title: 'Novedad: nuevo Tip', sub: tp.title || '', meta: 'Toca para leerlo', onClick: () => openTipDetailModal(tp.id) }));
 
-  let html = _homeSection('Para tí', para.length
-    ? '<div class="home-card-list">' + para.map(_homeCard).join('') + '</div>'
-    : '<div class="home-empty">Estás al día. Aquí verás tus recordatorios y novedades.</div>');
+  // v1.52.0-beta: tarjetas que el usuario quitó (mantener presionado) no se muestran.
+  para.forEach(c => { c.pkey = _homeParaKey(c); });
+  const _hid = _homeHiddenLoad();
+  const paraShown = para.filter(c => !_hid[c.pkey]);
+  let html = (textoTop ? '<div class="home-section" id="home-texto"></div>' : '') + _homeSection('Para tí', paraShown.length
+    ? '<div class="home-card-list" id="home-para-list">' + paraShown.map(_homeCard).join('') + '</div>'
+    : '<div class="home-empty" id="home-para-list">Estás al día. Aquí verás tus recordatorios y novedades.</div>');
 
   // ── Apartados elegidos, en el orden elegido ──
   layout.forEach(k => {
     if (k === 'hoy') { html += '<div class="home-section" id="home-hoy"></div>'; return; }
-    if (k === 'texto') { html += '<div class="home-section" id="home-texto"></div>'; return; }
+    if (k === 'texto') { if (!textoTop) html += '<div class="home-section" id="home-texto"></div>'; return; }
     let cards = [];
     if (k === 'carritos') cards = (sec('carritos')?.items || []).map(it => ({ title: it.label, sub: it.sub, meta: it.partner, onClick: it.onClick }));
     else if (k === 'vmc' || k === 'fs') {
@@ -6429,7 +6481,7 @@ async function renderHome() {
   wrap.innerHTML = html;
   wrap.dataset.ready = '1';
   if (layout.includes('hoy')) renderHomeHoy();
-  if (layout.includes('texto')) renderHomeTexto();
+  if (textoTop || layout.includes('texto')) renderHomeTexto();
 }
 
 async function renderHomeHoy() {
@@ -6500,14 +6552,15 @@ async function renderHomeTexto() {
     const el = document.getElementById('home-texto');
     if (el) el.innerHTML = _homeSection('Texto Diario', '<div class="home-card-list">' + _homeCard(card) + '</div>');
   };
-  draw({ icon: 'book', col: 'orange', title: 'Cargando el Texto Diario…', onClick: open });
+  draw({ cls: 'home-card-texto', title: 'Cargando el Texto Diario…', onClick: open });
   try {
     const r = await _homeLoadTextoDiario(ymd);
-    draw({ icon: 'book', col: 'orange', title: r.scripture, sub: _homeTextoClip(r.body, 170),
+    // v1.52.0-beta: sin ícono ni comentario; solo el texto (más grande) para invitar a abrir JW Library.
+    draw({ cls: 'home-card-texto', title: r.scripture,
       meta: _homeLongDate(ymd) + ' · Abrir en JW Library', onClick: open });
   } catch (e) {
     console.warn('Texto Diario:', e);
-    draw({ icon: 'book', col: 'orange', title: 'Texto Diario', sub: 'No se pudo cargar el texto de hoy. Toca para abrirlo en JW Library.',
+    draw({ cls: 'home-card-texto', title: 'Texto Diario', sub: 'No se pudo cargar el texto de hoy. Toca para abrirlo en JW Library.',
       meta: _homeLongDate(ymd), onClick: open });
   }
 }
@@ -6518,6 +6571,80 @@ function homeRefreshHoyIfVisible() {
     if (el && !el.innerHTML.trim()) el.innerHTML = '<div class="home-section-title">Predicación Hoy</div><div class="home-empty">No hay asignaciones de predicación para hoy.</div>';
   }
 }
+
+
+// ── v1.52.0-beta: quitar tarjetas de "Para tí" (mantener presionado) ─────────
+function _homeHiddenKey() { return 'fleming_home_hidden:' + ((typeof currentUser !== 'undefined' && currentUser && currentUser.name) || '').trim().toLowerCase(); }
+function _homeHiddenLoad() {
+  let o = {};
+  try { o = JSON.parse(localStorage.getItem(_homeHiddenKey())) || {}; } catch (e) {}
+  const lim = Date.now() - 45 * 86400000;
+  Object.keys(o).forEach(k => { if (!(o[k] > lim)) delete o[k]; });
+  return o;
+}
+function _homeHiddenSave(o) { try { localStorage.setItem(_homeHiddenKey(), JSON.stringify(o)); } catch (e) {} }
+function _homeParaKey(c) { return (c.title || '') + '|' + (c.sub || '') + '|' + (c.ts || ''); }
+function homeRestoreHidden() { _homeHiddenSave({}); showToast('Tarjetas restauradas ✓', 'success'); renderHomeCustomize(); }
+function homeParaAskHide(i) {
+  const key = _homeParaKeys[i];
+  const card = document.querySelector('#home-content .home-card[data-pk="' + i + '"]');
+  if (!key || !card) return;
+  const ttl = (card.querySelector('.home-card-title') || {}).textContent || 'esta tarjeta';
+  document.getElementById('home-confirm-overlay')?.remove();
+  const ov = document.createElement('div');
+  ov.id = 'home-confirm-overlay'; ov.className = 'home-confirm-overlay';
+  ov.innerHTML = '<div class="home-confirm" role="alertdialog"><div class="home-confirm-t">¿Quitar esta tarjeta?</div>' +
+    '<div class="home-confirm-s">' + escapeHtml(ttl) + '</div>' +
+    '<div class="home-confirm-n">Dejará de mostrarse en "Para tí". Puedes restaurarla desde Personalizar Inicio.</div>' +
+    '<div class="home-confirm-b"><button type="button" data-a="no">No, conservar</button><button type="button" class="danger" data-a="yes">Sí, quitar</button></div></div>';
+  ov.addEventListener('click', e => {
+    const a = e.target.closest('button')?.dataset.a;
+    if (e.target === ov || a === 'no') { ov.remove(); return; }
+    if (a === 'yes') {
+      const h = _homeHiddenLoad(); h[key] = Date.now(); _homeHiddenSave(h);
+      ov.remove();
+      const list = card.parentElement;
+      card.remove();
+      if (list && !list.querySelector('.home-card')) {
+        list.outerHTML = '<div class="home-empty" id="home-para-list">Estás al día. Aquí verás tus recordatorios y novedades.</div>';
+      }
+      showToast('Tarjeta quitada', '');
+    }
+  });
+  document.body.appendChild(ov);
+}
+(function homeLongPressInit() {
+  let timer = null, sx = 0, sy = 0, card = null, suppress = false;
+  const sel = '#home-content .home-card[data-pk]';
+  const clear = () => { if (timer) { clearTimeout(timer); timer = null; } if (card) { card.classList.remove('lp-press'); card = null; } };
+  document.addEventListener('touchstart', e => {
+    const c = e.target.closest && e.target.closest(sel);
+    if (!c || e.touches.length !== 1) return;
+    clear(); card = c; sx = e.touches[0].clientX; sy = e.touches[0].clientY;
+    c.classList.add('lp-press');
+    timer = setTimeout(() => {
+      timer = null; suppress = true;
+      try { navigator.vibrate && navigator.vibrate(18); } catch (er) {}
+      const idx = c.dataset.pk; c.classList.remove('lp-press'); card = null;
+      homeParaAskHide(+idx);
+    }, 550);
+  }, { passive: true });
+  document.addEventListener('touchmove', e => {
+    if (!timer) return;
+    const t = e.touches[0];
+    if (Math.abs(t.clientX - sx) > 10 || Math.abs(t.clientY - sy) > 10) clear();
+  }, { passive: true });
+  ['touchend', 'touchcancel'].forEach(ev => document.addEventListener(ev, () => { clear(); if (suppress) setTimeout(() => { suppress = false; }, 450); }, { passive: true }));
+  document.addEventListener('click', e => {
+    if (suppress && e.target.closest && e.target.closest(sel)) { e.stopPropagation(); e.preventDefault(); suppress = false; }
+  }, true);
+  document.addEventListener('contextmenu', e => { if (e.target.closest && e.target.closest(sel)) e.preventDefault(); });
+})();
+
+// ── v1.52.0-beta: "Texto Diario" es el único apartado que puede ir arriba de "Para tí" ──
+function _homeTextoTopKey() { return _homeLayoutKey() + ':textotop'; }
+function isHomeTextoTop() { try { return localStorage.getItem(_homeTextoTopKey()) === '1'; } catch (e) { return false; } }
+function setHomeTextoTop(v) { try { if (v) localStorage.setItem(_homeTextoTopKey(), '1'); else localStorage.removeItem(_homeTextoTopKey()); } catch (e) {} }
 
 // ── Personalizar Inicio ──
 const _HOME_ICON = {
@@ -6543,31 +6670,44 @@ function renderHomeCustomize() {
   const body = document.getElementById('home-custom-body');
   if (!body) return;
   const layout = getHomeLayout();
-  const avail = Object.keys(HOME_SECTIONS).filter(k => !layout.includes(k));
-  let h = '<div class="home-custom-h">Fijo</div>' +
-    '<div class="home-custom-row locked">' + _homeIcoBox('star', 'blue', 'home-custom-ico') + '<div class="home-custom-name">Para tí<div class="home-custom-note">Siempre se muestra arriba</div></div>' + _homeIco('lock', '', '', true) + '</div>';
+  const top = isHomeTextoTop();
+  const avail = Object.keys(HOME_SECTIONS).filter(k => !layout.includes(k) && !(k === 'texto' && top));
+  let h = '<div class="home-custom-h">Fijo</div>';
+  if (top) {
+    h += '<div class="home-custom-row">' + _homeIcoBox(HOME_SECTIONS.texto.icon, HOME_SECTIONS.texto.col, 'home-custom-ico') + '<div class="home-custom-name">Texto Diario<div class="home-custom-note">Arriba de "Para tí"</div></div>' +
+      _homeIco('up', '', '', true) + _homeIco('down', '', 'homeTextoDown()') + _homeIco('x', 'del', 'homeTextoRemove()') + '</div>';
+  }
+  h += '<div class="home-custom-row locked">' + _homeIcoBox('star', 'blue', 'home-custom-ico') + '<div class="home-custom-name">Para tí<div class="home-custom-note">Se puede quitar tarjeta por tarjeta (mantén presionada)</div></div>' + _homeIco('lock', '', '', true) + '</div>';
   h += '<div class="home-custom-h">Tus apartados</div>';
   if (!layout.length) h += '<div class="home-empty">No tienes apartados. Agrega alguno abajo.</div>';
   layout.forEach((k, i) => {
-    h += '<div class="home-custom-row">' + _homeIcoBox(HOME_SECTIONS[k].icon, HOME_SECTIONS[k].col, 'home-custom-ico') + '<div class="home-custom-name">' + escapeHtml(HOME_SECTIONS[k].title) + '</div>' +
-      _homeIco('up', '', "homeMove('" + k + "',-1)", i === 0) + _homeIco('down', '', "homeMove('" + k + "',1)", i === layout.length - 1) + _homeIco('x', 'del', "homeRemove('" + k + "')") + '</div>';
+    const upDisabled = i === 0 && k !== 'texto';
+    h += '<div class="home-custom-row">' + _homeIcoBox(HOME_SECTIONS[k].icon, HOME_SECTIONS[k].col, 'home-custom-ico') + '<div class="home-custom-name">' + escapeHtml(HOME_SECTIONS[k].title) +
+      (k === 'texto' && i === 0 ? '<div class="home-custom-note">Toca ↑ para ponerlo arriba de "Para tí"</div>' : '') + '</div>' +
+      _homeIco('up', '', "homeMove('" + k + "',-1)", upDisabled) + _homeIco('down', '', "homeMove('" + k + "',1)", i === layout.length - 1) + _homeIco('x', 'del', "homeRemove('" + k + "')") + '</div>';
   });
   if (avail.length) {
     h += '<div class="home-custom-h">Agregar</div>';
     avail.forEach(k => { h += '<div class="home-custom-row">' + _homeIcoBox(HOME_SECTIONS[k].icon, HOME_SECTIONS[k].col, 'home-custom-ico') + '<div class="home-custom-name">' + escapeHtml(HOME_SECTIONS[k].title) + '</div>' + _homeIco('plus', 'add', "homeAdd('" + k + "')") + '</div>'; });
   }
+  const nHid = Object.keys(_homeHiddenLoad()).length;
+  if (nHid) h += '<button class="home-custom-reset" onclick="homeRestoreHidden()">Restaurar tarjetas quitadas de "Para tí" (' + nHid + ')</button>';
   h += '<button class="home-custom-reset" onclick="homeResetLayout()">Restablecer por defecto</button>';
   body.innerHTML = h;
 }
 function homeMove(k, dir) {
   const l = getHomeLayout(), i = l.indexOf(k), j = i + dir;
-  if (i < 0 || j < 0 || j >= l.length) return;
+  if (i < 0) return;
+  if (k === 'texto' && i === 0 && dir < 0) { l.shift(); saveHomeLayout(l); setHomeTextoTop(true); renderHomeCustomize(); return; }
+  if (j < 0 || j >= l.length) return;
   [l[i], l[j]] = [l[j], l[i]];
   saveHomeLayout(l); renderHomeCustomize();
 }
+function homeTextoDown() { const l = getHomeLayout().filter(x => x !== 'texto'); l.unshift('texto'); saveHomeLayout(l); setHomeTextoTop(false); renderHomeCustomize(); }
+function homeTextoRemove() { setHomeTextoTop(false); renderHomeCustomize(); }
 function homeRemove(k) { saveHomeLayout(getHomeLayout().filter(x => x !== k)); renderHomeCustomize(); }
 function homeAdd(k) { const l = getHomeLayout(); if (!l.includes(k)) l.push(k); saveHomeLayout(l); renderHomeCustomize(); }
-function homeResetLayout() { saveHomeLayout(HOME_DEFAULT_LAYOUT.slice()); renderHomeCustomize(); }
+function homeResetLayout() { setHomeTextoTop(false); saveHomeLayout(HOME_DEFAULT_LAYOUT.slice()); renderHomeCustomize(); }
 </script>
 
 </head>
@@ -7804,10 +7944,26 @@ function homeResetLayout() { saveHomeLayout(HOME_DEFAULT_LAYOUT.slice()); render
         <div style="display:flex;gap:10px;margin-bottom:1.1rem;align-items:center">
           <span style="flex:1;font-size:0.95rem;font-weight:700">Avatar de Personajes Bíblicos</span>
         </div>
+        <!-- v1.52.0-beta: categorías (cada una se ve como una fila deslizable en Editar perfil) -->
+        <div class="notif-gestor-card" style="margin-bottom:1.1rem">
+          <div class="form-group2">
+            <label class="form-label2">Nueva categoría</label>
+            <div style="display:flex;gap:8px">
+              <input type="text" class="form-input" id="avatar-cat-name" placeholder="Ej: Hombres de fe" maxlength="40" style="flex:1">
+              <button class="btn-primary" style="width:auto;padding:0.65rem 1.1rem" onclick="saveAvatarCategory()">Agregar</button>
+            </div>
+          </div>
+          <div id="avatar-cat-error" class="form-error" style="display:none"></div>
+          <div id="admin-avatar-cats"></div>
+        </div>
         <div class="notif-gestor-card" style="margin-bottom:1.1rem">
           <div class="form-group2">
             <label class="form-label2">Nombre del personaje</label>
             <input type="text" class="form-input" id="avatar-char-name" placeholder="Ej: Moisés" maxlength="40">
+          </div>
+          <div class="form-group2">
+            <label class="form-label2">Categoría</label>
+            <select class="form-input" id="avatar-char-cat"><option value="">Sin categoría</option></select>
           </div>
           <div class="form-group2">
             <label class="form-label2">Imagen (se recorta al centro en formato cuadrado)</label>
@@ -10004,7 +10160,13 @@ function homeResetLayout() { saveHomeLayout(HOME_DEFAULT_LAYOUT.slice()); render
 // todos los días, desde la Biblioteca en línea de jw.org). (5) Se retira "Live Siempre Activo"
 // (Live sigue igual). (6) Administración → FlemingApp → Avatares: el DEV sube Personajes
 // Bíblicos (imagen cuadrada + nombre) que los usuarios pueden elegir como avatar.
-const APP_VERSION = '1.51.0-beta';
+// v1.52.0-beta: (1) "Para tí": mantén presionada una tarjeta para quitarla (con alerta de confirmación;
+// se pueden restaurar desde Personalizar Inicio). (2) "Texto Diario" puede ir arriba de "Para tí" (es el
+// único apartado que puede hacerlo). (3) Tarjeta de Texto Diario sin ícono, con el texto más prominente y sin
+// el comentario. (4) Cambiar la foto de perfil ahora abre una página completa "Editar perfil" (Back + título,
+// previsualización, Colores, Iniciales e íconos y Personajes). (5) Administración → Avatares: categorías de
+// personajes; en Editar perfil cada categoría es una fila deslizable estilo Netflix, una debajo de otra.
+const APP_VERSION = '1.52.0-beta';
 // v1.36.0-beta: (1) Links de referencia ahora tienen 2 tipos — Único uso
 // (sin límite de tiempo, se desactiva tras el primer uso) y Con límite de
 // tiempo (reutilizable hasta que vence, o hasta que el Admin lo termina
@@ -11852,7 +12014,8 @@ let _avatarIconCache = {}; // { [name]: 'estrella'|'corazon'|'flor'|'futbol'|'co
 // v1.51.0-beta — Personajes Bíblicos. Requiere en Supabase (ver supabase_avatares.sql):
 //   create table avatar_characters (id uuid primary key default gen_random_uuid(), name text not null, image_url text not null, created_at timestamptz default now());
 //   alter table platform_users add column if not exists avatar_character uuid references avatar_characters(id) on delete set null;
-let _avatarCharList = [];       // [{ id, name, image_url }]
+let _avatarCharList = [];       // [{ id, name, image_url, category_id }]
+let _avatarCatList = [];        // v1.52.0-beta: [{ id, name, sort_order }]
 let _avatarCharById = {};       // id -> personaje
 let _avatarCharIdCache = {};    // nombre de usuario -> id del personaje elegido
 let _avatarCharCache = {};      // nombre de usuario -> imagen del personaje elegido
@@ -11865,8 +12028,15 @@ function _avatarRebuildCharCache() {
 async function loadAvatarCharacters(force) {
   if (_avatarCharLoaded && !force) return _avatarCharList;
   try {
-    const { data, error } = await sb.from('avatar_characters').select('id, name, image_url').order('name');
-    if (error) throw error;
+    // v1.52.0-beta: cada personaje puede tener categoría (category_id). Si la columna/tabla aún no existen, se cae a lo anterior.
+    let res = await sb.from('avatar_characters').select('id, name, image_url, category_id').order('name');
+    if (res.error) res = await sb.from('avatar_characters').select('id, name, image_url').order('name');
+    if (res.error) throw res.error;
+    const data = res.data;
+    try {
+      const cr = await sb.from('avatar_categories').select('id, name, sort_order').order('sort_order').order('name');
+      _avatarCatList = cr.error ? [] : (cr.data || []);
+    } catch (e) { _avatarCatList = []; }
     _avatarCharList = data || [];
     _avatarCharById = {};
     _avatarCharList.forEach(c => { _avatarCharById[c.id] = c; });
@@ -12631,33 +12801,45 @@ function _inicioCardClick(key, idx) {
 // quien puede elegir desde su Perfil.
 const AVATAR_BG_COLORS = ['#22c55e','#3b82f6','#a855f7','#f59e0b','#ef4444','#06b6d4','#ec4899','#f97316','#64748b','#84cc16'];
 
+// v1.52.0-beta: ahora es una página completa ("Editar perfil") con previsualización en vivo.
 function openAvatarColorSheet() {
-  document.getElementById('profile-photo-overlay').classList.add('open');
+  document.getElementById('page-avatar-edit').classList.add('open');
+  refreshAvatarEditPreview();
   renderAvatarCharPicker();
-  updateAvatarIconPickerUI(_ownAvatarIcon || null);
 }
 function closeAvatarColorSheet() {
-  document.getElementById('profile-photo-overlay').classList.remove('open');
+  document.getElementById('page-avatar-edit')?.classList.remove('open');
 }
-function handleProfilePhotoOverlayClick(e) {
-  if (e.target === document.getElementById('profile-photo-overlay')) closeAvatarColorSheet();
+function refreshAvatarEditPreview() {
+  const el = document.getElementById('ape-preview');
+  if (!el || !currentUser) return;
+  const n = currentUser.name;
+  el.style.background = _ownAvatarColor || userColor(n);
+  el.innerHTML = avatarGlyphHtml(n, _avatarIconCache[n] || null);
+  const nm = document.getElementById('ape-name'); if (nm) nm.textContent = n;
+  updateAvatarColorPickerUI(_ownAvatarColor);
+  updateAvatarIconPickerUI(_ownAvatarIcon || null);
 }
 
 async function setOwnAvatarColor(color) {
   if (!currentUser) return;
+  // v1.52.0-beta: elegir un color vuelve a las iniciales/ícono (quita el personaje si había uno).
+  const hadChar = !!_avatarCharIdCache[currentUser.name];
+  const payload = hadChar ? { avatar_color: color, avatar_character: null } : { avatar_color: color };
   const { error } = await sb.from('platform_users')
-    .update({ avatar_color: color })
+    .update(payload)
     .ilike('name', currentUser.name);
   if (error) { showToast('Error al guardar el color', 'error'); return; }
 
   _avatarColorCache[currentUser.name] = color;
   _ownAvatarColor = color;
-  updateAvatarColorPickerUI(color);
+  if (hadChar) { delete _avatarCharIdCache[currentUser.name]; _avatarRebuildCharCache(); }
   document.getElementById('profile-avatar-big').style.background = color;
+  if (hadChar) document.getElementById('profile-avatar-big').innerHTML = avatarGlyphHtml(currentUser.name, _avatarIconCache[currentUser.name] || null);
   applyOwnAvatarToDropdowns();
   showToast('Color actualizado ✓', 'success');
   renderGruposView(); // refresca avatares en grupos
-  closeAvatarColorSheet();
+  refreshAvatarEditPreview();
 }
 
 function updateAvatarColorPickerUI(activeColor) {
@@ -12688,7 +12870,7 @@ async function setOwnAvatarIcon(iconKey) {
   applyOwnAvatarToDropdowns();
   showToast(value ? 'Ícono actualizado ✓' : 'Iniciales restauradas ✓', 'success');
   renderGruposView(); // refresca avatares en grupos
-  closeAvatarColorSheet();
+  refreshAvatarEditPreview();
 }
 
 function updateAvatarIconPickerUI(activeIcon) {
@@ -12706,17 +12888,34 @@ function _ownIconPayload(value) {
   return p;
 }
 async function renderAvatarCharPicker() {
-  const grid = document.getElementById('avatar-char-grid');
+  const rows = document.getElementById('avatar-char-rows');
   const sec = document.getElementById('avatar-char-section');
-  if (!grid) return;
+  if (!rows) return;
   await loadAvatarCharacters();
   if (!_avatarCharList.length) { if (sec) sec.style.display = 'none'; return; }
   if (sec) sec.style.display = '';
   const active = currentUser ? _avatarCharIdCache[currentUser.name] : null;
-  grid.innerHTML = _avatarCharList.map(c =>
-    `<button class="avatar-char-item${c.id === active ? ' active' : ''}" data-char="${c.id}" onclick="setOwnAvatarCharacter('${c.id}')" title="${escapeHtml(c.name)}">` +
-    `<span class="avatar-char-thumb"><img class="avatar-char-img" src="${escapeHtml(c.image_url)}" alt="" loading="lazy" draggable="false"></span>` +
-    `<span>${escapeHtml(c.name)}</span></button>`).join('');
+  const tile = c => `<button class="avatar-char-item ape-tile${c.id === active ? ' active' : ''}" data-char="${c.id}" onclick="setOwnAvatarCharacter('${c.id}')" title="${escapeHtml(c.name)}">` +
+    `<span class="ape-tile-img"><img class="avatar-char-img" src="${escapeHtml(c.image_url)}" alt="" loading="lazy" draggable="false"></span>` +
+    `<span class="ape-tile-name">${escapeHtml(c.name)}</span></button>`;
+  const chev = (d) => `<svg viewBox="0 0 24 24"><polyline points="${d < 0 ? '15 18 9 12 15 6' : '9 6 15 12 9 18'}"/></svg>`;
+  const block = (title, list) => `<div class="ape-cat"><div class="ape-h">${escapeHtml(title)}</div><div class="ape-row-wrap">` +
+    `<button class="ape-arrow l" onclick="apeScroll(this,-1)" aria-label="Anterior">${chev(-1)}</button>` +
+    `<div class="ape-row">${list.map(tile).join('')}</div>` +
+    `<button class="ape-arrow r" onclick="apeScroll(this,1)" aria-label="Siguiente">${chev(1)}</button></div></div>`;
+  const catIds = new Set(_avatarCatList.map(c => c.id));
+  let html = '';
+  _avatarCatList.forEach(cat => {
+    const list = _avatarCharList.filter(c => c.category_id === cat.id);
+    if (list.length) html += block(cat.name, list);
+  });
+  const rest = _avatarCharList.filter(c => !c.category_id || !catIds.has(c.category_id));
+  if (rest.length) html += block(_avatarCatList.length ? 'Otros' : 'Personajes bíblicos', rest);
+  rows.innerHTML = html;
+}
+function apeScroll(btn, dir) {
+  const row = btn.parentElement.querySelector('.ape-row');
+  if (row) row.scrollBy({ left: dir * row.clientWidth * 0.8, behavior: 'smooth' });
 }
 async function setOwnAvatarCharacter(charId) {
   if (!currentUser || !charId) return;
@@ -12734,7 +12933,7 @@ async function setOwnAvatarCharacter(charId) {
   updateAvatarIconPickerUI(null);
   showToast('Personaje actualizado ✓', 'success');
   renderGruposView();
-  closeAvatarColorSheet();
+  refreshAvatarEditPreview();
 }
 
 // ── Administración → FlemingApp → Avatares (solo DEV) ──
@@ -12778,11 +12977,15 @@ async function saveAvatarCharacter() {
   if (_avatarCharList.some(c => c.name.trim().toLowerCase() === name.toLowerCase())) { showError('avatar-char-error', 'Ya existe un personaje con ese nombre'); return; }
   const btn = document.getElementById('save-avatar-char-btn');
   btn.disabled = true; btn.textContent = 'Guardando…';
-  const { error } = await sb.from('avatar_characters').insert({ name, image_url: _pendingAvatarCharImg });
+  const catId = document.getElementById('avatar-char-cat')?.value || '';
+  const row = { name, image_url: _pendingAvatarCharImg };
+  if (catId) row.category_id = catId;
+  const { error } = await sb.from('avatar_characters').insert(row);
   btn.disabled = false; btn.textContent = 'Agregar personaje';
   if (error) {
     const missing = /avatar_characters|42P01/.test((error.message || '') + (error.code || ''));
-    showError('avatar-char-error', missing ? 'Falta crear la tabla "avatar_characters" en Supabase (ver supabase_avatares.sql).' : error.message);
+    const noCol = /category_id/.test(error.message || '');
+    showError('avatar-char-error', noCol ? 'Falta la columna "category_id" en Supabase (ver supabase_avatares_categorias.sql).' : missing ? 'Falta crear la tabla "avatar_characters" en Supabase (ver supabase_avatares.sql).' : error.message);
     return;
   }
   showToast('Personaje agregado ✓', 'success');
@@ -12795,11 +12998,87 @@ async function renderAdminAvatares() {
   if (!list) return;
   list.innerHTML = '<div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando personajes</div></div>';
   await loadAvatarCharacters(true);
+  const catOpts = (sel) => '<option value="">Sin categoría</option>' + _avatarCatList.map(c => `<option value="${c.id}"${c.id === sel ? ' selected' : ''}>${escapeHtml(c.name)}</option>`).join('');
+  const formSel = document.getElementById('avatar-char-cat');
+  if (formSel) { const prev = formSel.value; formSel.innerHTML = catOpts(prev); }
+  const catsEl = document.getElementById('admin-avatar-cats');
+  if (catsEl) {
+    catsEl.innerHTML = _avatarCatList.length ? _avatarCatList.map((c, i) => {
+      const n = _avatarCharList.filter(x => x.category_id === c.id).length;
+      return `<div class="avatar-cat-row"><span class="avatar-cat-name">${escapeHtml(c.name)}</span><span class="avatar-cat-count">${n}</span>` +
+        `<button ${i === 0 ? 'disabled style="opacity:.3"' : ''} onclick="moveAvatarCategory('${c.id}',-1)">↑</button>` +
+        `<button ${i === _avatarCatList.length - 1 ? 'disabled style="opacity:.3"' : ''} onclick="moveAvatarCategory('${c.id}',1)">↓</button>` +
+        `<button onclick="renameAvatarCategory('${c.id}')">Renombrar</button><button class="del" onclick="deleteAvatarCategory('${c.id}')">Eliminar</button></div>`;
+    }).join('') : '<div class="monitor-empty" style="padding:0.6rem 0">Aún no hay categorías. Los personajes se mostrarán juntos.</div>';
+  }
   if (!_avatarCharList.length) { list.innerHTML = '<div class="monitor-empty">Aún no hay personajes. Agrega el primero arriba.</div>'; return; }
-  list.innerHTML = '<div class="avatar-admin-grid">' + _avatarCharList.map(c =>
+  const card = c =>
     `<div class="avatar-admin-card"><div class="avatar-admin-sq"><img src="${escapeHtml(c.image_url)}" alt="" loading="lazy"></div>` +
     `<div class="avatar-admin-name">${escapeHtml(c.name)}</div>` +
-    `<div class="avatar-admin-actions"><button onclick="renameAvatarCharacter('${c.id}')">Renombrar</button><button class="del" onclick="deleteAvatarCharacter('${c.id}')">Eliminar</button></div></div>`).join('') + '</div>';
+    (_avatarCatList.length ? `<select class="avatar-admin-sel" onchange="setAvatarCharCategory('${c.id}',this.value)">${catOpts(c.category_id)}</select>` : '') +
+    `<div class="avatar-admin-actions"><button onclick="renameAvatarCharacter('${c.id}')">Renombrar</button><button class="del" onclick="deleteAvatarCharacter('${c.id}')">Eliminar</button></div></div>`;
+  const grid = arr => '<div class="avatar-admin-grid">' + arr.map(card).join('') + '</div>';
+  let html = '';
+  if (!_avatarCatList.length) html = grid(_avatarCharList);
+  else {
+    const ids = new Set(_avatarCatList.map(c => c.id));
+    _avatarCatList.forEach(cat => {
+      const arr = _avatarCharList.filter(c => c.category_id === cat.id);
+      html += `<div class="avatar-admin-gh">${escapeHtml(cat.name)}</div>` + (arr.length ? grid(arr) : '<div class="monitor-empty" style="padding:0.5rem 0">Sin personajes en esta categoría.</div>');
+    });
+    const rest = _avatarCharList.filter(c => !c.category_id || !ids.has(c.category_id));
+    if (rest.length) html += '<div class="avatar-admin-gh">Sin categoría</div>' + grid(rest);
+  }
+  list.innerHTML = html;
+}
+function _avatarCatMissing(error) { return /avatar_categories|category_id|42P01|42703/.test((error.message || '') + (error.code || '')); }
+async function saveAvatarCategory() {
+  if (currentRole !== 'dev') return;
+  const inp = document.getElementById('avatar-cat-name');
+  const name = (inp.value || '').trim();
+  document.getElementById('avatar-cat-error').style.display = 'none';
+  if (!name) { showError('avatar-cat-error', 'El nombre es requerido'); return; }
+  await loadAvatarCharacters(true);
+  if (_avatarCatList.some(c => c.name.trim().toLowerCase() === name.toLowerCase())) { showError('avatar-cat-error', 'Ya existe una categoría con ese nombre'); return; }
+  const order = _avatarCatList.reduce((m, c) => Math.max(m, c.sort_order || 0), 0) + 1;
+  const { error } = await sb.from('avatar_categories').insert({ name, sort_order: order });
+  if (error) { showError('avatar-cat-error', _avatarCatMissing(error) ? 'Falta crear la tabla "avatar_categories" en Supabase (ver supabase_avatares_categorias.sql).' : error.message); return; }
+  inp.value = '';
+  showToast('Categoría agregada ✓', 'success');
+  renderAdminAvatares();
+}
+async function renameAvatarCategory(id) {
+  const c = _avatarCatList.find(x => x.id === id); if (!c || currentRole !== 'dev') return;
+  const name = (prompt('Nuevo nombre de la categoría:', c.name) || '').trim();
+  if (!name || name === c.name) return;
+  const { error } = await sb.from('avatar_categories').update({ name }).eq('id', id);
+  if (error) { showToast('No se pudo renombrar', 'error'); return; }
+  showToast('Categoría actualizada ✓', 'success');
+  renderAdminAvatares();
+}
+async function deleteAvatarCategory(id) {
+  const c = _avatarCatList.find(x => x.id === id); if (!c || currentRole !== 'dev') return;
+  if (!confirm('¿Eliminar la categoría "' + c.name + '"? Sus personajes no se borran: pasarán a "Sin categoría".')) return;
+  const { error } = await sb.from('avatar_categories').delete().eq('id', id);
+  if (error) { showToast('No se pudo eliminar', 'error'); return; }
+  showToast('Categoría eliminada ✓', 'success');
+  renderAdminAvatares();
+}
+async function moveAvatarCategory(id, dir) {
+  if (currentRole !== 'dev') return;
+  const l = _avatarCatList.slice(), i = l.findIndex(c => c.id === id), j = i + dir;
+  if (i < 0 || j < 0 || j >= l.length) return;
+  [l[i], l[j]] = [l[j], l[i]];
+  const res = await Promise.all(l.map((c, k) => sb.from('avatar_categories').update({ sort_order: k + 1 }).eq('id', c.id)));
+  if (res.some(r => r.error)) { showToast('No se pudo reordenar', 'error'); return; }
+  renderAdminAvatares();
+}
+async function setAvatarCharCategory(id, catId) {
+  if (currentRole !== 'dev') return;
+  const { error } = await sb.from('avatar_characters').update({ category_id: catId || null }).eq('id', id);
+  if (error) { showToast(_avatarCatMissing(error) ? 'Falta la columna category_id (ver supabase_avatares_categorias.sql)' : 'No se pudo mover', 'error'); renderAdminAvatares(); return; }
+  showToast('Categoría actualizada ✓', 'success');
+  renderAdminAvatares();
 }
 async function renameAvatarCharacter(id) {
   const c = _avatarCharById[id]; if (!c || currentRole !== 'dev') return;
@@ -23876,9 +24155,9 @@ function _closeTopLayer() {
     return;
   }
   // Avatar color overlay
-  if (document.getElementById('profile-photo-overlay')?.classList.contains('open')) {
+  if (document.getElementById('page-avatar-edit')?.classList.contains('open')) {
     if (typeof closeAvatarColorSheet === 'function') closeAvatarColorSheet();
-    else document.getElementById('profile-photo-overlay').classList.remove('open');
+    else document.getElementById('page-avatar-edit').classList.remove('open');
     return;
   }
   // User profile page
@@ -27977,64 +28256,61 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
   </div>
 </div>
 
-<!-- ── Selector de color del avatar de iniciales (v1.42.0-stable_beta) ──
-     Reemplaza al antiguo selector de Foto de Perfil, retirado de la
-     plataforma: ahora solo se elige el color de fondo de las iniciales. ── -->
-<div class="np-action-overlay" id="profile-photo-overlay" onclick="handleProfilePhotoOverlayClick(event)">
-  <div class="np-action-sheet" id="profile-photo-sheet">
-    <div class="np-action-handle"></div>
-    <div class="np-action-header">
-      <div class="np-action-addr" data-i18n="profile.coloravatar">Color del avatar</div>
-      <div class="np-action-sub" data-i18n="profile.elegecolor">Elige un color de fondo</div>
+<!-- ── Editar perfil (v1.52.0-beta): página completa que reemplaza al antiguo menú pequeño de color/ícono/personajes ── -->
+<div id="page-avatar-edit">
+  <nav class="subpage-topbar">
+    <button class="pill-back-btn" onclick="closeAvatarColorSheet()" title="Volver">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <span class="pill-header-title">Editar perfil</span>
+  </nav>
+  <div class="ape-wrap">
+    <div class="ape-preview-wrap">
+      <div class="ape-preview" id="ape-preview">GC</div>
+      <div class="ape-name" id="ape-name"></div>
+      <div class="ape-hint">Así se ve tu foto de perfil</div>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px;padding:0.5rem 1.25rem 1.25rem;justify-items:center">
-      <button class="avatar-color-swatch" data-color="#22c55e" style="--sw:#22c55e" onclick="setOwnAvatarColor('#22c55e')" title="Verde"></button>
-      <button class="avatar-color-swatch" data-color="#3b82f6" style="--sw:#3b82f6" onclick="setOwnAvatarColor('#3b82f6')" title="Azul"></button>
-      <button class="avatar-color-swatch" data-color="#a855f7" style="--sw:#a855f7" onclick="setOwnAvatarColor('#a855f7')" title="Púrpura"></button>
-      <button class="avatar-color-swatch" data-color="#f59e0b" style="--sw:#f59e0b" onclick="setOwnAvatarColor('#f59e0b')" title="Ámbar"></button>
-      <button class="avatar-color-swatch" data-color="#ef4444" style="--sw:#ef4444" onclick="setOwnAvatarColor('#ef4444')" title="Rojo"></button>
-      <button class="avatar-color-swatch" data-color="#06b6d4" style="--sw:#06b6d4" onclick="setOwnAvatarColor('#06b6d4')" title="Cian"></button>
-      <button class="avatar-color-swatch" data-color="#ec4899" style="--sw:#ec4899" onclick="setOwnAvatarColor('#ec4899')" title="Rosa"></button>
-      <button class="avatar-color-swatch" data-color="#f97316" style="--sw:#f97316" onclick="setOwnAvatarColor('#f97316')" title="Naranja"></button>
-      <button class="avatar-color-swatch" data-color="#64748b" style="--sw:#64748b" onclick="setOwnAvatarColor('#64748b')" title="Gris"></button>
-      <button class="avatar-color-swatch" data-color="#84cc16" style="--sw:#84cc16" onclick="setOwnAvatarColor('#84cc16')" title="Lima"></button>
+    <div class="ape-sec">
+      <div class="ape-h">Colores</div>
+      <div class="ape-colors">
+        <button class="avatar-color-swatch" data-color="#22c55e" style="--sw:#22c55e" onclick="setOwnAvatarColor('#22c55e')" title="Verde"></button>
+        <button class="avatar-color-swatch" data-color="#3b82f6" style="--sw:#3b82f6" onclick="setOwnAvatarColor('#3b82f6')" title="Azul"></button>
+        <button class="avatar-color-swatch" data-color="#a855f7" style="--sw:#a855f7" onclick="setOwnAvatarColor('#a855f7')" title="Púrpura"></button>
+        <button class="avatar-color-swatch" data-color="#f59e0b" style="--sw:#f59e0b" onclick="setOwnAvatarColor('#f59e0b')" title="Ámbar"></button>
+        <button class="avatar-color-swatch" data-color="#ef4444" style="--sw:#ef4444" onclick="setOwnAvatarColor('#ef4444')" title="Rojo"></button>
+        <button class="avatar-color-swatch" data-color="#06b6d4" style="--sw:#06b6d4" onclick="setOwnAvatarColor('#06b6d4')" title="Cian"></button>
+        <button class="avatar-color-swatch" data-color="#ec4899" style="--sw:#ec4899" onclick="setOwnAvatarColor('#ec4899')" title="Rosa"></button>
+        <button class="avatar-color-swatch" data-color="#f97316" style="--sw:#f97316" onclick="setOwnAvatarColor('#f97316')" title="Naranja"></button>
+        <button class="avatar-color-swatch" data-color="#64748b" style="--sw:#64748b" onclick="setOwnAvatarColor('#64748b')" title="Gris"></button>
+        <button class="avatar-color-swatch" data-color="#84cc16" style="--sw:#84cc16" onclick="setOwnAvatarColor('#84cc16')" title="Lima"></button>
+      </div>
     </div>
-
-    <!-- v1.45.2-sb: ícono del avatar (opcional, reemplaza a las iniciales) -->
-    <div class="np-action-header" style="padding-top:0">
-      <div class="np-action-addr" style="font-size:0.9rem" data-i18n="profile.iconoavatar">Ícono del avatar</div>
-      <div class="np-action-sub" data-i18n="profile.elegeicono">Elige que mostrar en tu perfil</div>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:12px;padding:0.5rem 1.25rem 1.25rem;justify-items:center">
-      <button class="avatar-icon-swatch" data-icon="" onclick="setOwnAvatarIcon('')" title="Iniciales (predeterminado)">
+    <div class="ape-sec">
+      <div class="ape-h">Iniciales e íconos</div>
+      <div class="ape-icons">
+        <button class="avatar-icon-swatch" data-icon="" onclick="setOwnAvatarIcon('')" title="Iniciales (predeterminado)">
         <span class="avatar-icon-swatch-inits">Aa</span>
       </button>
-      <button class="avatar-icon-swatch" data-icon="estrella" onclick="setOwnAvatarIcon('estrella')" title="Estrella">
+        <button class="avatar-icon-swatch" data-icon="estrella" onclick="setOwnAvatarIcon('estrella')" title="Estrella">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l2.97 6.19 6.83.86-5.02 4.72 1.34 6.78L12 17.98l-6.12 3.07 1.34-6.78-5.02-4.72 6.83-.86L12 2.5z"/></svg>
       </button>
-      <button class="avatar-icon-swatch" data-icon="corazon" onclick="setOwnAvatarIcon('corazon')" title="Corazón">
+        <button class="avatar-icon-swatch" data-icon="corazon" onclick="setOwnAvatarIcon('corazon')" title="Corazón">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 20.5s-7.36-4.6-10-9.1C.6 8.6 1.4 5.1 4.4 3.7c2.3-1.1 4.9-.3 6.4 1.7l1.2 1.6 1.2-1.6c1.5-2 4.1-2.8 6.4-1.7 3 1.4 3.8 4.9 2.4 7.7-2.64 4.5-10 9.1-10 9.1z"/></svg>
       </button>
-      <button class="avatar-icon-swatch" data-icon="flor" onclick="setOwnAvatarIcon('flor')" title="Flor">
+        <button class="avatar-icon-swatch" data-icon="flor" onclick="setOwnAvatarIcon('flor')" title="Flor">
         <svg viewBox="0 0 24 24" fill="currentColor"><g><circle cx="12" cy="12" r="2.3"/><ellipse cx="12" cy="5.8" rx="2.6" ry="3.6"/><ellipse cx="12" cy="18.2" rx="2.6" ry="3.6"/><ellipse cx="5.8" cy="12" rx="3.6" ry="2.6"/><ellipse cx="18.2" cy="12" rx="3.6" ry="2.6"/></g></svg>
       </button>
-      <button class="avatar-icon-swatch" data-icon="futbol" onclick="setOwnAvatarIcon('futbol')" title="Fútbol">
+        <button class="avatar-icon-swatch" data-icon="futbol" onclick="setOwnAvatarIcon('futbol')" title="Fútbol">
         <svg viewBox="0 0 24 24" fill="currentColor"><g fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="12" r="9.5" fill="currentColor" stroke="none"/><g fill="var(--su-fut-dark,#111)" stroke="none"><polygon points="12,7.3 15,9.5 13.9,13 10.1,13 9,9.5"/></g><path d="M12 2.5v4.8M4.4 7l3.6 2.6M4.4 17l4.7-3.4M19.6 7l-3.6 2.6M19.6 17l-4.7-3.4M9.3 21.3l.8-4.3M14.7 21.3l-.8-4.3"/></g></svg>
       </button>
-      <button class="avatar-icon-swatch" data-icon="corona" onclick="setOwnAvatarIcon('corona')" title="Corona">
+        <button class="avatar-icon-swatch" data-icon="corona" onclick="setOwnAvatarIcon('corona')" title="Corona">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 8.5l4 3.2L12 5l5 6.7 4-3.2-1.6 9.8H4.6L3 8.5z"/><rect x="4.6" y="17.5" width="14.8" height="2.3" rx="0.8"/></svg>
       </button>
-    </div>
-
-    <!-- v1.51.0-beta: Personajes bíblicos (imágenes subidas por el DEV) -->
-    <div id="avatar-char-section" style="display:none">
-      <div class="np-action-header" style="padding-top:0">
-        <div class="np-action-addr" style="font-size:0.9rem">Personajes bíblicos</div>
-        <div class="np-action-sub">Elige un personaje como foto de tu perfil</div>
       </div>
-      <div class="avatar-char-grid" id="avatar-char-grid"></div>
     </div>
-    <button class="np-action-btn-cancel" onclick="closeAvatarColorSheet()" data-i18n="btn.cancelar">Cancelar</button>
+    <div id="avatar-char-section" style="display:none">
+      <div id="avatar-char-rows"></div>
+    </div>
   </div>
 </div>
 
