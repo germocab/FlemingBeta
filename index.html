@@ -6176,7 +6176,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 .avatar-admin-actions button { padding: 0.3rem 0.65rem; border-radius: 8px; border: 1px solid var(--border); background: var(--surface2); color: var(--text2); font-family: var(--font); font-size: 0.72rem; font-weight: 600; cursor: pointer; }
 .avatar-admin-actions button.del { color: var(--red); }
 
-/* ── v1.52.0-beta: Para tí (mantener presionado), Texto Diario prominente, Editar perfil, categorías ── */
+/* ── v1.52.1-beta: Para tí (mantener presionado), Texto Diario prominente, Editar perfil, categorías ── */
 .home-card[data-pk] { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
 .home-card.lp-press { transform: scale(0.97); transition: transform 0.5s; }
 .home-card-texto { padding: 1.2rem 1.2rem; }
@@ -6454,7 +6454,7 @@ async function renderHome() {
   const recentTips = (tips || []).filter(tp => tp.created_at && (Date.now() - new Date(tp.created_at).getTime()) < 14 * 86400000).slice(0, 2);
   recentTips.forEach(tp => para.push({ icon: 'bulb', col: 'yellow', img: tp.image_url || '', title: 'Novedad: nuevo Tip', sub: tp.title || '', meta: 'Toca para leerlo', onClick: () => openTipDetailModal(tp.id) }));
 
-  // v1.52.0-beta: tarjetas que el usuario quitó (mantener presionado) no se muestran.
+  // v1.52.1-beta: tarjetas que el usuario quitó (mantener presionado) no se muestran.
   para.forEach(c => { c.pkey = _homeParaKey(c); });
   const _hid = _homeHiddenLoad();
   const paraShown = para.filter(c => !_hid[c.pkey]);
@@ -6555,7 +6555,7 @@ async function renderHomeTexto() {
   draw({ cls: 'home-card-texto', title: 'Cargando el Texto Diario…', onClick: open });
   try {
     const r = await _homeLoadTextoDiario(ymd);
-    // v1.52.0-beta: sin ícono ni comentario; solo el texto (más grande) para invitar a abrir JW Library.
+    // v1.52.1-beta: sin ícono ni comentario; solo el texto (más grande) para invitar a abrir JW Library.
     draw({ cls: 'home-card-texto', title: r.scripture,
       meta: _homeLongDate(ymd) + ' · Abrir en JW Library', onClick: open });
   } catch (e) {
@@ -6573,7 +6573,7 @@ function homeRefreshHoyIfVisible() {
 }
 
 
-// ── v1.52.0-beta: quitar tarjetas de "Para tí" (mantener presionado) ─────────
+// ── v1.52.1-beta: quitar tarjetas de "Para tí" (mantener presionado) ─────────
 function _homeHiddenKey() { return 'fleming_home_hidden:' + ((typeof currentUser !== 'undefined' && currentUser && currentUser.name) || '').trim().toLowerCase(); }
 function _homeHiddenLoad() {
   let o = {};
@@ -6641,7 +6641,7 @@ function homeParaAskHide(i) {
   document.addEventListener('contextmenu', e => { if (e.target.closest && e.target.closest(sel)) e.preventDefault(); });
 })();
 
-// ── v1.52.0-beta: "Texto Diario" es el único apartado que puede ir arriba de "Para tí" ──
+// ── v1.52.1-beta: "Texto Diario" es el único apartado que puede ir arriba de "Para tí" ──
 function _homeTextoTopKey() { return _homeLayoutKey() + ':textotop'; }
 function isHomeTextoTop() { try { return localStorage.getItem(_homeTextoTopKey()) === '1'; } catch (e) { return false; } }
 function setHomeTextoTop(v) { try { if (v) localStorage.setItem(_homeTextoTopKey(), '1'); else localStorage.removeItem(_homeTextoTopKey()); } catch (e) {} }
@@ -7944,7 +7944,7 @@ function homeResetLayout() { setHomeTextoTop(false); saveHomeLayout(HOME_DEFAULT
         <div style="display:flex;gap:10px;margin-bottom:1.1rem;align-items:center">
           <span style="flex:1;font-size:0.95rem;font-weight:700">Avatar de Personajes Bíblicos</span>
         </div>
-        <!-- v1.52.0-beta: categorías (cada una se ve como una fila deslizable en Editar perfil) -->
+        <!-- v1.52.1-beta: categorías (cada una se ve como una fila deslizable en Editar perfil) -->
         <div class="notif-gestor-card" style="margin-bottom:1.1rem">
           <div class="form-group2">
             <label class="form-label2">Nueva categoría</label>
@@ -10160,13 +10160,13 @@ function homeResetLayout() { setHomeTextoTop(false); saveHomeLayout(HOME_DEFAULT
 // todos los días, desde la Biblioteca en línea de jw.org). (5) Se retira "Live Siempre Activo"
 // (Live sigue igual). (6) Administración → FlemingApp → Avatares: el DEV sube Personajes
 // Bíblicos (imagen cuadrada + nombre) que los usuarios pueden elegir como avatar.
-// v1.52.0-beta: (1) "Para tí": mantén presionada una tarjeta para quitarla (con alerta de confirmación;
+// v1.52.1-beta: (1) "Para tí": mantén presionada una tarjeta para quitarla (con alerta de confirmación;
 // se pueden restaurar desde Personalizar Inicio). (2) "Texto Diario" puede ir arriba de "Para tí" (es el
 // único apartado que puede hacerlo). (3) Tarjeta de Texto Diario sin ícono, con el texto más prominente y sin
 // el comentario. (4) Cambiar la foto de perfil ahora abre una página completa "Editar perfil" (Back + título,
 // previsualización, Colores, Iniciales e íconos y Personajes). (5) Administración → Avatares: categorías de
 // personajes; en Editar perfil cada categoría es una fila deslizable estilo Netflix, una debajo de otra.
-const APP_VERSION = '1.52.0-beta';
+const APP_VERSION = '1.52.1-beta';
 // v1.36.0-beta: (1) Links de referencia ahora tienen 2 tipos — Único uso
 // (sin límite de tiempo, se desactiva tras el primer uso) y Con límite de
 // tiempo (reutilizable hasta que vence, o hasta que el Admin lo termina
@@ -12015,7 +12015,7 @@ let _avatarIconCache = {}; // { [name]: 'estrella'|'corazon'|'flor'|'futbol'|'co
 //   create table avatar_characters (id uuid primary key default gen_random_uuid(), name text not null, image_url text not null, created_at timestamptz default now());
 //   alter table platform_users add column if not exists avatar_character uuid references avatar_characters(id) on delete set null;
 let _avatarCharList = [];       // [{ id, name, image_url, category_id }]
-let _avatarCatList = [];        // v1.52.0-beta: [{ id, name, sort_order }]
+let _avatarCatList = [];        // v1.52.1-beta: [{ id, name, sort_order }]
 let _avatarCharById = {};       // id -> personaje
 let _avatarCharIdCache = {};    // nombre de usuario -> id del personaje elegido
 let _avatarCharCache = {};      // nombre de usuario -> imagen del personaje elegido
@@ -12028,7 +12028,7 @@ function _avatarRebuildCharCache() {
 async function loadAvatarCharacters(force) {
   if (_avatarCharLoaded && !force) return _avatarCharList;
   try {
-    // v1.52.0-beta: cada personaje puede tener categoría (category_id). Si la columna/tabla aún no existen, se cae a lo anterior.
+    // v1.52.1-beta: cada personaje puede tener categoría (category_id). Si la columna/tabla aún no existen, se cae a lo anterior.
     let res = await sb.from('avatar_characters').select('id, name, image_url, category_id').order('name');
     if (res.error) res = await sb.from('avatar_characters').select('id, name, image_url').order('name');
     if (res.error) throw res.error;
@@ -12801,7 +12801,7 @@ function _inicioCardClick(key, idx) {
 // quien puede elegir desde su Perfil.
 const AVATAR_BG_COLORS = ['#22c55e','#3b82f6','#a855f7','#f59e0b','#ef4444','#06b6d4','#ec4899','#f97316','#64748b','#84cc16'];
 
-// v1.52.0-beta: ahora es una página completa ("Editar perfil") con previsualización en vivo.
+// v1.52.1-beta: ahora es una página completa ("Editar perfil") con previsualización en vivo.
 function openAvatarColorSheet() {
   document.getElementById('page-avatar-edit').classList.add('open');
   refreshAvatarEditPreview();
@@ -12823,7 +12823,7 @@ function refreshAvatarEditPreview() {
 
 async function setOwnAvatarColor(color) {
   if (!currentUser) return;
-  // v1.52.0-beta: elegir un color vuelve a las iniciales/ícono (quita el personaje si había uno).
+  // v1.52.1-beta: elegir un color vuelve a las iniciales/ícono (quita el personaje si había uno).
   const hadChar = !!_avatarCharIdCache[currentUser.name];
   const payload = hadChar ? { avatar_color: color, avatar_character: null } : { avatar_color: color };
   const { error } = await sb.from('platform_users')
@@ -12985,7 +12985,7 @@ async function saveAvatarCharacter() {
   if (error) {
     const missing = /avatar_characters|42P01/.test((error.message || '') + (error.code || ''));
     const noCol = /category_id/.test(error.message || '');
-    showError('avatar-char-error', noCol ? 'Falta la columna "category_id" en Supabase (ver supabase_avatares_categorias.sql).' : missing ? 'Falta crear la tabla "avatar_characters" en Supabase (ver supabase_avatares.sql).' : error.message);
+    showError('avatar-char-error', noCol ? _avatarCatErrMsg(error) : missing ? 'Falta crear la tabla "avatar_characters" en Supabase (ver supabase_avatares.sql).' : error.message);
     return;
   }
   showToast('Personaje agregado ✓', 'success');
@@ -13031,7 +13031,14 @@ async function renderAdminAvatares() {
   }
   list.innerHTML = html;
 }
-function _avatarCatMissing(error) { return /avatar_categories|category_id|42P01|42703/.test((error.message || '') + (error.code || '')); }
+function _avatarCatMissing(error) { return /42P01|42703|PGRST205|PGRST204/.test(error.code || '') || /does not exist|schema cache/i.test(error.message || ''); }
+function _avatarCatErrMsg(error) {
+  const c = error.code || '', m = error.message || '';
+  if (c === '42501' || /row-level security|permission denied/i.test(m)) return 'Supabase bloqueó el guardado por permisos (RLS). Ejecuta la sección de políticas de supabase_avatares_categorias.sql. Detalle: ' + m;
+  if (/PGRST205|schema cache/i.test(c + m)) return 'La tabla existe pero Supabase aún no la reconoce. Ejecuta: NOTIFY pgrst, \'reload schema\'; y reintenta. Detalle: ' + m;
+  if (_avatarCatMissing(error)) return 'Falta crear la tabla/columna en Supabase (ver supabase_avatares_categorias.sql). Detalle: ' + m;
+  return 'Error' + (c ? ' ' + c : '') + ': ' + m;
+}
 async function saveAvatarCategory() {
   if (currentRole !== 'dev') return;
   const inp = document.getElementById('avatar-cat-name');
@@ -13042,7 +13049,7 @@ async function saveAvatarCategory() {
   if (_avatarCatList.some(c => c.name.trim().toLowerCase() === name.toLowerCase())) { showError('avatar-cat-error', 'Ya existe una categoría con ese nombre'); return; }
   const order = _avatarCatList.reduce((m, c) => Math.max(m, c.sort_order || 0), 0) + 1;
   const { error } = await sb.from('avatar_categories').insert({ name, sort_order: order });
-  if (error) { showError('avatar-cat-error', _avatarCatMissing(error) ? 'Falta crear la tabla "avatar_categories" en Supabase (ver supabase_avatares_categorias.sql).' : error.message); return; }
+  if (error) { showError('avatar-cat-error', _avatarCatErrMsg(error)); return; }
   inp.value = '';
   showToast('Categoría agregada ✓', 'success');
   renderAdminAvatares();
@@ -13076,7 +13083,7 @@ async function moveAvatarCategory(id, dir) {
 async function setAvatarCharCategory(id, catId) {
   if (currentRole !== 'dev') return;
   const { error } = await sb.from('avatar_characters').update({ category_id: catId || null }).eq('id', id);
-  if (error) { showToast(_avatarCatMissing(error) ? 'Falta la columna category_id (ver supabase_avatares_categorias.sql)' : 'No se pudo mover', 'error'); renderAdminAvatares(); return; }
+  if (error) { showToast(_avatarCatErrMsg(error), 'error'); renderAdminAvatares(); return; }
   showToast('Categoría actualizada ✓', 'success');
   renderAdminAvatares();
 }
@@ -28256,7 +28263,7 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
   </div>
 </div>
 
-<!-- ── Editar perfil (v1.52.0-beta): página completa que reemplaza al antiguo menú pequeño de color/ícono/personajes ── -->
+<!-- ── Editar perfil (v1.52.1-beta): página completa que reemplaza al antiguo menú pequeño de color/ícono/personajes ── -->
 <div id="page-avatar-edit">
   <nav class="subpage-topbar">
     <button class="pill-back-btn" onclick="closeAvatarColorSheet()" title="Volver">
