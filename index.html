@@ -6096,6 +6096,325 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 .ms-footer-name { font-family: var(--font); font-size: 0.9rem; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 </style>
+
+<style id="home-css">
+/* ── Inicio (Experimento, v1.50.0-sb): solo móvil ── */
+.nav-page-title { display: none; font-size: 1.6rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.12; color: var(--text); text-align: left; }
+.home-bottom-nav { display: none; }
+.home-custom-overlay { display: none; }
+.home-only { display: none !important; }
+@media (max-width: 639px) {
+  html.inicio-mode .main-segment { display: none !important; }
+  html.inicio-mode .nav-page-title { display: block; }
+  html.inicio-mode .nav-center-row { flex: 1; justify-content: flex-start; padding: 0 0.5rem 0 0.1rem; }
+  html.inicio-mode .app-header-shell .topnav { height: auto; min-height: 64px; padding-top: 0.85rem; padding-bottom: 0.45rem; align-items: flex-start; }
+  html.inicio-mode .nav-icons { padding-top: 0.15rem; }
+  html.inicio-mode .home-only { display: flex !important; }
+  html.inicio-mode .main-content { padding-bottom: 6.5rem; }
+  html.inicio-mode .home-bottom-nav {
+    display: flex; position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+    z-index: 90; gap: 2px; padding: 5px; border-radius: 999px;
+    background: var(--nav-bg); border: 1px solid var(--border); box-shadow: var(--shadow-lg);
+    backdrop-filter: blur(var(--ui-blur,34px)) saturate(180%); -webkit-backdrop-filter: blur(var(--ui-blur,34px)) saturate(180%);
+  }
+  html.inicio-mode .home-custom-overlay.open { display: flex; }
+}
+.home-bn-btn {
+  border: none; background: transparent; color: var(--text); font-family: var(--font);
+  font-size: 0.84rem; font-weight: 600; padding: 9px 16px; border-radius: 999px; cursor: pointer;
+  transition: background 0.22s, color 0.22s; white-space: nowrap;
+}
+.home-bn-btn.active { background: var(--accent); color: #fff; box-shadow: 0 2px 12px rgba(0,122,255,0.35); }
+#home-content { padding: 0.25rem 0 1rem; }
+.home-section { margin-bottom: 1.6rem; }
+.home-section-title { font-size: 1.02rem; font-weight: 800; color: var(--text); margin: 0 0 0.7rem 0.1rem; letter-spacing: -0.01em; }
+.home-card-list { display: flex; flex-direction: column; gap: 10px; }
+.home-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 0.8rem 0.95rem; box-shadow: var(--shadow); cursor: pointer; transition: transform 0.15s; }
+.home-card:active { transform: scale(0.98); }
+.home-card-title { font-size: 0.9rem; font-weight: 700; color: var(--text); line-height: 1.3; }
+.home-card-sub { font-size: 0.85rem; color: var(--text2); margin-top: 2px; line-height: 1.3; }
+.home-card-meta { font-size: 0.68rem; color: var(--text3); margin-top: 3px; font-weight: 500; }
+.home-card.is-reminder { border-left: 3px solid var(--red); }
+.home-empty { text-align: center; color: var(--text3); font-size: 0.85rem; line-height: 1.45; padding: 1.1rem 1rem; border: 1px dashed var(--border); border-radius: 16px; }
+.home-custom-overlay { position: fixed; inset: 0; z-index: 250; background: var(--bg); flex-direction: column; overflow: hidden; }
+.home-custom-top { display: flex; align-items: center; gap: 12px; padding: 0.9rem 1rem; padding-top: calc(0.9rem + env(safe-area-inset-top, 0px)); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.home-custom-body { flex: 1; overflow-y: auto; padding: 1rem 1rem 3rem; }
+.home-custom-h { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text3); margin: 1.1rem 0.2rem 0.5rem; }
+.home-custom-row { display: flex; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 0.65rem 0.8rem; margin-bottom: 8px; }
+.home-custom-row.locked { opacity: 0.8; }
+.home-custom-name { flex: 1; min-width: 0; font-size: 0.88rem; font-weight: 600; color: var(--text); line-height: 1.25; }
+.home-custom-note { font-size: 0.72rem; color: var(--text3); font-weight: 500; margin-top: 1px; }
+.home-ico-btn { width: 34px; height: 34px; border-radius: 50%; border: none; background: var(--surface3); color: var(--text2); display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+.home-ico-btn:disabled { opacity: 0.3; cursor: default; }
+.home-ico-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.home-ico-btn.add { background: var(--accent); color: #fff; }
+.home-ico-btn.del { color: var(--red); }
+.home-custom-reset { margin-top: 1.2rem; width: 100%; padding: 0.7rem; border-radius: 12px; border: 1px solid var(--border); background: none; color: var(--text2); font-family: var(--font); font-weight: 600; font-size: 0.85rem; cursor: pointer; }
+</style>
+<script id="home-js">
+// ══════════════════════════════════════════════════════════════════════════
+//  Inicio (Experimento, v1.50.0-sb) — exclusivo de teléfonos móviles
+//  Pantalla de inicio personalizable + NavBar inferior (Inicio / Predicación /
+//  Reuniones). "Para tí" siempre va arriba y no se puede mover ni quitar; el
+//  resto de apartados se agregan, quitan y reordenan desde Más opciones →
+//  "Personalizar Inicio". La configuración se guarda por usuario en este
+//  dispositivo (localStorage).
+// ══════════════════════════════════════════════════════════════════════════
+const HOME_SECTIONS = {
+  hoy:      { title: 'Predicación Hoy' },
+  carritos: { title: 'Mis Carritos' },
+  vmc:      { title: 'Mis asignaciones en reunión Vida y Ministerio' },
+  fs:       { title: 'Mis asignaciones en reunión pública' },
+  aseo:     { title: 'Aseo del Salón para mi grupo' },
+  resp:     { title: 'Mis Responsabilidades' },
+  tips:     { title: 'Tips' },
+};
+const HOME_DEFAULT_LAYOUT = ['hoy', 'vmc', 'fs', 'resp'];
+
+function isInicioExpEnabled() { return localStorage.getItem('fleming_inicio_exp') === 'true'; }
+function isInicioActive() {
+  return isInicioExpEnabled() && window.innerWidth < 640 &&
+    !(typeof isModoSencilloActive === 'function' && isModoSencilloActive());
+}
+function updateHomeExpToggleUI() {
+  const t = document.getElementById('home-exp-toggle'), th = document.getElementById('home-exp-thumb');
+  if (!t || !th) return;
+  const on = isInicioExpEnabled();
+  t.style.background = on ? 'var(--accent)' : 'var(--surface3)';
+  th.style.left = on ? '21px' : '3px';
+}
+function toggleInicioExpPref() {
+  const next = !isInicioExpEnabled();
+  if (next && typeof isModoSencilloActive === 'function' && isModoSencilloActive()) {
+    showToast('Inicio no está disponible mientras el Modo Sencillo está activo.', 'error');
+    return;
+  }
+  localStorage.setItem('fleming_inicio_exp', next ? 'true' : 'false');
+  updateHomeExpToggleUI();
+  applyInicioUI();
+  if (next && window.innerWidth >= 640) showToast('Inicio activado. Solo se ve en un teléfono móvil.', 'success');
+  else showToast(next ? 'Inicio activado' : 'Inicio desactivado', next ? 'success' : '');
+}
+
+// Aplica/retira el modo Inicio (clase en <html>, título y barra inferior).
+function applyInicioUI(fromInit) {
+  const active = isInicioActive();
+  document.documentElement.classList.toggle('inicio-mode', active);
+  if (!fromInit && typeof currentUser !== 'undefined' && currentUser) {
+    if (!active && currentMainTab === 'inicio') {
+      const btn = document.querySelector('.main-seg-btn[data-tab="predicacion"]');
+      if (btn) switchMainTab('predicacion', btn);
+    } else if (active && !_homeWasActive && currentMainTab !== 'inicio' && document.getElementById('page-preferencias')?.classList.contains('open')) {
+      // recién activado desde Configuración: al salir se verá Inicio
+      const btn = document.querySelector('.main-seg-btn[data-tab="inicio"]');
+      if (btn) switchMainTab('inicio', btn);
+    }
+  }
+  _homeWasActive = active;
+  applyInicioChrome();
+}
+let _homeWasActive = false;
+
+function applyInicioChrome() {
+  const active = document.documentElement.classList.contains('inicio-mode');
+  const titleEl = document.getElementById('nav-page-title');
+  if (titleEl) {
+    if (!active) titleEl.innerHTML = '';
+    else if (currentMainTab === 'inicio') {
+      const first = ((currentUser && currentUser.name) || '').trim().split(/\s+/)[0] || '';
+      titleEl.innerHTML = 'Bienvenido' + (first ? '<br>' + escapeHtml(first) : '');
+    } else {
+      titleEl.textContent = currentMainTab === 'reuniones' ? t('nav.reuniones') : t('nav.predicacion');
+    }
+  }
+  document.querySelectorAll('#home-bottom-nav .home-bn-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === currentMainTab));
+}
+function homeNavGo(tab) {
+  if (tab === currentMainTab) { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+  const btn = document.querySelector('.main-seg-btn[data-tab="' + tab + '"]');
+  if (btn) switchMainTab(tab, btn);
+  window.scrollTo({ top: 0 });
+}
+window.addEventListener('resize', () => { try { applyInicioUI(); } catch {} });
+
+// ── Layout (apartados elegidos y su orden) ──
+function _homeLayoutKey() { return 'fleming_home_layout:' + ((typeof currentUser !== 'undefined' && currentUser && currentUser.name) || '').trim().toLowerCase(); }
+function getHomeLayout() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(_homeLayoutKey()));
+    if (Array.isArray(raw)) return raw.filter((k, i) => HOME_SECTIONS[k] && raw.indexOf(k) === i);
+  } catch {}
+  return HOME_DEFAULT_LAYOUT.slice();
+}
+function saveHomeLayout(arr) { try { localStorage.setItem(_homeLayoutKey(), JSON.stringify(arr)); } catch {} }
+
+// ── Fechas ──
+const _HOME_DAYS = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+const _HOME_MONTHS = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+function _homeYmd(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+function _homeMeetingDate(weekStart, dow) {
+  if (!weekStart || dow == null || isNaN(dow)) return null;
+  const d = new Date(weekStart + 'T00:00:00');
+  for (let i = 0; i < 7 && d.getDay() !== dow; i++) d.setDate(d.getDate() + 1);
+  return _homeYmd(d);
+}
+function _homeDiffDays(ymd) {
+  const a = new Date(_homeYmd(new Date()) + 'T00:00:00'), b = new Date(ymd + 'T00:00:00');
+  return Math.round((b - a) / 86400000);
+}
+function _homeLongDate(ymd) { const d = new Date(ymd + 'T00:00:00'); return _HOME_DAYS[d.getDay()] + ' ' + d.getDate() + ' de ' + _HOME_MONTHS[d.getMonth()]; }
+function _homeShortDate(ymd) { const d = new Date(ymd + 'T00:00:00'); const m = _HOME_MONTHS[d.getMonth()]; return d.getDate() + ' de ' + m.charAt(0).toUpperCase() + m.slice(1); }
+function _homeRelDay(ymd) {
+  const n = _homeDiffDays(ymd);
+  if (n === 0) return 'Hoy';
+  if (n === 1) return 'Mañana';
+  if (n > 1 && n < 7) return 'Este ' + _HOME_DAYS[new Date(ymd + 'T00:00:00').getDay()];
+  return 'El ' + _homeLongDate(ymd);
+}
+
+// ── Render ──
+let _homeActions = [], _homeSeq = 0;
+function homeAct(i) { const f = _homeActions[i]; if (typeof f === 'function') f(); }
+function _homeCard(c) {
+  const idx = _homeActions.push(c.onClick || null) - 1;
+  return '<div class="home-card' + (c.reminder ? ' is-reminder' : '') + '"' + (c.onClick ? ' onclick="homeAct(' + idx + ')"' : '') + '>' +
+    '<div class="home-card-title">' + escapeHtml(c.title || '') + '</div>' +
+    (c.sub ? '<div class="home-card-sub">' + escapeHtml(c.sub) + '</div>' : '') +
+    (c.meta ? '<div class="home-card-meta">' + escapeHtml(c.meta) + '</div>' : '') + '</div>';
+}
+function _homeSection(title, cardsHtml) {
+  return '<div class="home-section">' + (title ? '<div class="home-section-title">' + escapeHtml(title) + '</div>' : '') + cardsHtml + '</div>';
+}
+
+async function renderHome() {
+  const wrap = document.getElementById('home-content');
+  if (!wrap || typeof currentUser === 'undefined' || !currentUser) return;
+  const seq = ++_homeSeq;
+  _homeActions = [];
+  const layout = getHomeLayout();
+  if (!wrap.dataset.ready) wrap.innerHTML = '<div class="loader-wrap"><div class="loader"></div></div>';
+
+  const need = ['recordatorios', 'vmc', 'fs'];
+  ['carritos', 'aseo', 'resp'].forEach(k => { if (layout.includes(k)) need.push(k); });
+  let sections = [], tips = [];
+  try { sections = await collectInicioSections({ only: need }); } catch (e) { console.warn('Inicio:', e); }
+  try { tips = await loadTips(); } catch {}
+  if (seq !== _homeSeq) return;
+  const sec = (k) => sections.find(x => x.key === k);
+
+  // ── Para tí: recordatorios + próximas partes de reunión + novedades ──
+  const para = [];
+  (sec('recordatorios')?.items || []).forEach(it => para.push({
+    reminder: true, title: 'Recuerda realizar tu reporte de territorio',
+    sub: it.ter ? 'Territorio ' + it.ter : it.label, meta: it.dateRaw ? _homeShortDate(it.dateRaw) : '', onClick: it.onClick }));
+  const meet = [];
+  [['vmc', typeof MEETING_DAY_VMC !== 'undefined' ? MEETING_DAY_VMC : 4, 'Asignación para la reunión'],
+   ['fs',  typeof MEETING_DAY_FS  !== 'undefined' ? MEETING_DAY_FS  : 6, 'Asignación para la reunión pública']].forEach(([k, dow, ttl]) => {
+    (sec(k)?.items || []).forEach(it => {
+      const md = _homeMeetingDate(it.weekStart, dow);
+      if (!md) return;
+      const n = _homeDiffDays(md);
+      if (n >= 0 && n <= 7) meet.push({ date: md, title: ttl, sub: it.label, meta: _homeRelDay(md), onClick: it.onClick });
+    });
+  });
+  meet.sort((a, b) => a.date.localeCompare(b.date)).forEach(m => para.push(m));
+  const recentTips = (tips || []).filter(tp => tp.created_at && (Date.now() - new Date(tp.created_at).getTime()) < 14 * 86400000).slice(0, 2);
+  recentTips.forEach(tp => para.push({ title: 'Novedad: nuevo Tip', sub: tp.title || '', meta: 'Toca para leerlo', onClick: () => openTipDetailModal(tp.id) }));
+
+  let html = _homeSection('Para tí', para.length
+    ? '<div class="home-card-list">' + para.map(_homeCard).join('') + '</div>'
+    : '<div class="home-empty">Estás al día. Aquí verás tus recordatorios y novedades.</div>');
+
+  // ── Apartados elegidos, en el orden elegido ──
+  layout.forEach(k => {
+    if (k === 'hoy') { html += '<div class="home-section" id="home-hoy"></div>'; return; }
+    let cards = [];
+    if (k === 'carritos') cards = (sec('carritos')?.items || []).map(it => ({ title: it.label, sub: it.sub, onClick: it.onClick }));
+    else if (k === 'vmc' || k === 'fs') {
+      const dow = k === 'vmc' ? (typeof MEETING_DAY_VMC !== 'undefined' ? MEETING_DAY_VMC : 4) : (typeof MEETING_DAY_FS !== 'undefined' ? MEETING_DAY_FS : 6);
+      cards = (sec(k)?.items || []).map(it => { const md = _homeMeetingDate(it.weekStart, dow); return { title: it.label, sub: 'Semana ' + (it.sub || ''), meta: md ? _homeLongDate(md) : '', onClick: it.onClick }; });
+    }
+    else if (k === 'aseo') cards = (sec('aseo')?.items || []).filter(it => it.byGroup).map(it => ({ title: 'Tu grupo de servicio limpia el salón', sub: it.sub, onClick: it.onClick }));
+    else if (k === 'resp') cards = (sec('resp')?.items || []).map(it => ({ title: it.label, sub: it.sub, onClick: it.onClick }));
+    else if (k === 'tips') cards = (tips || []).slice(0, 5).map(tp => ({ title: tp.title || 'Tip', onClick: () => openTipDetailModal(tp.id) }));
+    if (!cards.length) { html += _homeSection(HOME_SECTIONS[k].title, '<div class="home-empty">Nada por ahora.</div>'); return; }
+    html += _homeSection(HOME_SECTIONS[k].title, '<div class="home-card-list">' + cards.map(_homeCard).join('') + '</div>');
+  });
+  wrap.innerHTML = html;
+  wrap.dataset.ready = '1';
+  if (layout.includes('hoy')) renderHomeHoy();
+}
+
+async function renderHomeHoy() {
+  const el = document.getElementById('home-hoy');
+  if (!el) return;
+  try { if (!assignments.length) await loadSchedule(); } catch {}
+  const el2 = document.getElementById('home-hoy');
+  if (!el2) return;
+  renderSchedule({ container: el2, onlyToday: true });
+  if (!el2.innerHTML.trim()) {
+    el2.innerHTML = '<div class="home-section-title">Predicación Hoy</div><div class="home-empty">No hay asignaciones de predicación para hoy.</div>';
+  }
+}
+function homeRefreshHoyIfVisible() {
+  if (currentMainTab === 'inicio' && document.getElementById('home-hoy')) {
+    renderSchedule({ container: document.getElementById('home-hoy'), onlyToday: true });
+    const el = document.getElementById('home-hoy');
+    if (el && !el.innerHTML.trim()) el.innerHTML = '<div class="home-section-title">Predicación Hoy</div><div class="home-empty">No hay asignaciones de predicación para hoy.</div>';
+  }
+}
+
+// ── Personalizar Inicio ──
+const _HOME_ICON = {
+  up: '<polyline points="18 15 12 9 6 15"/>', down: '<polyline points="6 9 12 15 18 9"/>',
+  x: '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>', plus: '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
+  lock: '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+};
+function _homeIco(name, cls, onclick, disabled) {
+  return '<button class="home-ico-btn ' + (cls || '') + '"' + (disabled ? ' disabled' : '') + (onclick ? ' onclick="' + onclick + '"' : '') + '><svg viewBox="0 0 24 24">' + _HOME_ICON[name] + '</svg></button>';
+}
+function openHomeCustomize() {
+  if (!isInicioActive()) return;
+  renderHomeCustomize();
+  document.getElementById('home-custom-overlay')?.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeHomeCustomize() {
+  document.getElementById('home-custom-overlay')?.classList.remove('open');
+  document.body.style.overflow = '';
+  if (currentMainTab === 'inicio') renderHome();
+}
+function renderHomeCustomize() {
+  const body = document.getElementById('home-custom-body');
+  if (!body) return;
+  const layout = getHomeLayout();
+  const avail = Object.keys(HOME_SECTIONS).filter(k => !layout.includes(k));
+  let h = '<div class="home-custom-h">Fijo</div>' +
+    '<div class="home-custom-row locked"><div class="home-custom-name">Para tí<div class="home-custom-note">Siempre se muestra arriba</div></div>' + _homeIco('lock', '', '', true) + '</div>';
+  h += '<div class="home-custom-h">Tus apartados</div>';
+  if (!layout.length) h += '<div class="home-empty">No tienes apartados. Agrega alguno abajo.</div>';
+  layout.forEach((k, i) => {
+    h += '<div class="home-custom-row"><div class="home-custom-name">' + escapeHtml(HOME_SECTIONS[k].title) + '</div>' +
+      _homeIco('up', '', "homeMove('" + k + "',-1)", i === 0) + _homeIco('down', '', "homeMove('" + k + "',1)", i === layout.length - 1) + _homeIco('x', 'del', "homeRemove('" + k + "')") + '</div>';
+  });
+  if (avail.length) {
+    h += '<div class="home-custom-h">Agregar</div>';
+    avail.forEach(k => { h += '<div class="home-custom-row"><div class="home-custom-name">' + escapeHtml(HOME_SECTIONS[k].title) + '</div>' + _homeIco('plus', 'add', "homeAdd('" + k + "')") + '</div>'; });
+  }
+  h += '<button class="home-custom-reset" onclick="homeResetLayout()">Restablecer por defecto</button>';
+  body.innerHTML = h;
+}
+function homeMove(k, dir) {
+  const l = getHomeLayout(), i = l.indexOf(k), j = i + dir;
+  if (i < 0 || j < 0 || j >= l.length) return;
+  [l[i], l[j]] = [l[j], l[i]];
+  saveHomeLayout(l); renderHomeCustomize();
+}
+function homeRemove(k) { saveHomeLayout(getHomeLayout().filter(x => x !== k)); renderHomeCustomize(); }
+function homeAdd(k) { const l = getHomeLayout(); if (!l.includes(k)) l.push(k); saveHomeLayout(l); renderHomeCustomize(); }
+function homeResetLayout() { saveHomeLayout(HOME_DEFAULT_LAYOUT.slice()); renderHomeCustomize(); }
+</script>
+
 </head>
 <body>
 
@@ -6386,6 +6705,22 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 </div>
 
 <div id="app">
+  <!-- NavBar inferior (Experimento "Inicio", v1.50.0-sb): solo móvil -->
+  <nav class="home-bottom-nav" id="home-bottom-nav">
+    <button class="home-bn-btn" data-tab="inicio" onclick="homeNavGo('inicio')">Inicio</button>
+    <button class="home-bn-btn" data-tab="predicacion" onclick="homeNavGo('predicacion')">Predicación</button>
+    <button class="home-bn-btn" data-tab="reuniones" onclick="homeNavGo('reuniones')">Reuniones</button>
+  </nav>
+  <!-- Personalizar Inicio -->
+  <div class="home-custom-overlay" id="home-custom-overlay">
+    <div class="home-custom-top">
+      <button class="pill-back-btn" onclick="closeHomeCustomize()" title="Volver">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <span class="pill-header-title">Personalizar Inicio</span>
+    </div>
+    <div class="home-custom-body" id="home-custom-body"></div>
+  </div>
   <div class="app-header-shell" id="app-header-shell">
   <nav class="topnav">
     <div class="nav-spacer">
@@ -6428,6 +6763,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
       <button class="main-seg-btn active" data-tab="predicacion" data-i18n="nav.predicacion" onclick="switchMainTab('predicacion',this)">Predicación</button>
       <button class="main-seg-btn" data-tab="reuniones" data-i18n="nav.reuniones" onclick="switchMainTab('reuniones',this)">Reuniones</button>
     </div>
+    <div class="nav-page-title" id="nav-page-title"></div>
     </div>
 
     <div class="nav-icons">
@@ -6507,6 +6843,10 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
             </button>
           </div>
           <div class="dropdown-divider"></div>
+          <button class="dropdown-item home-only" id="options-dropdown-home-item" onclick="openHomeCustomize();closeOptionsMenu()">
+            <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="14" y2="12"/><line x1="4" y1="18" x2="10" y2="18"/><circle cx="18" cy="16" r="3"/></svg>
+            Personalizar Inicio
+          </button>
           <button class="dropdown-item" id="admin-dropdown-btn" onclick="showPage('admin');closeOptionsMenu()" style="display:none">
             <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
             Administración
@@ -6694,6 +7034,9 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
       </div>
     </div>
 
+    <div class="page" id="page-inicio">
+      <div id="home-content"></div>
+    </div>
     <div class="page" id="page-reuniones">
 
       <!-- Vida y Ministerio -->
@@ -8539,8 +8882,28 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
       <div style="padding:0.55rem 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="pref.animaciones.desc">Usa transiciones fluidas en toda la plataforma. Prueba "Ultra Fluida" para animaciones aún más vivas y notorias, o elige "Reducidas" si eres sensible al movimiento.</div>
     </div>
 
-    <!-- Vista de Contenido + NavBar Grow&Shrink: comparten zona (ambos son
-         ajustes de presentación en Tablet/Escritorio) -->
+    <!-- Modo Sencillo (v1.32.7-beta; desde v1.50.0-sb vive en Preferencias, ya no es experimental). Reemplaza toda la
+         navegación por defecto por un encabezado mínimo + un menú overlay de
+         pantalla completa con botones grandes, para quienes tienen
+         dificultad para usar la interfaz por defecto. -->
+    <div class="profile-section">
+      <div class="profile-section-title" data-i18n="exp.modosencillo.section">Modo Sencillo</div>
+      <div class="profile-row" style="cursor:pointer" onclick="toggleModoSencilloPref()">
+        <div class="profile-row-icon" style="background:var(--ter-1-bg);color:var(--ter-1)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><rect x="3" y="3" width="18" height="18" rx="4"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="14" x2="16" y2="14"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label" data-i18n="exp.modosencillo.title">Activar Modo Sencillo</div>
+          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="exp.modosencillo.desc">Simplifica la interfaz: reemplaza la navegación por un menú de pantalla completa con botones grandes.</div>
+        </div>
+        <div id="modo-sencillo-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
+          <div id="modo-sencillo-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
+        </div>
+      </div>
+      <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="exp.modosencillo.help">Pensado para quienes tienen dificultad para usar la versión por defecto. Notificaciones y Live siguen activas, accesibles desde el menú.</div>
+    </div>
+
+    <!-- Vista de Contenido (ajuste de presentación en Tablet/Escritorio) -->
     <div class="profile-section">
       <div class="pref-desktop-only-row" style="padding:0.85rem 1rem 0.2rem;display:flex;align-items:center;gap:7px">
         <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--text3);fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
@@ -8557,27 +8920,6 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
         </button>
       </div>
       <div class="pref-desktop-only-row" style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="func.lateral.help">En "Lateral", el detalle de la asignación se abre a la derecha, dejando la lista visible a la izquierda.</div>
-      <!-- Selector: NavBar Grow&Shrink (solo Desktop) — Grow fijo, Shrink fijo,
-           o Automático (crece solo en el extremo superior; se encoge con cualquier scroll y no vuelve a crecer hasta llegar arriba del todo). ── -->
-      <div class="pref-desktop-only-row" style="padding:0.85rem 1rem 0.2rem;display:flex;align-items:center;gap:7px;border-top:1px solid var(--border)">
-        <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--text3);fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0"><polyline points="7 13 12 18 17 13"/><polyline points="7 6 12 11 17 6"/></svg>
-        <span style="font-size:0.72rem;font-weight:600;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase">NavBar Grow &amp; Shrink (<span data-i18n="func.escritorio">Escritorio</span>)</span>
-      </div>
-      <div class="pref-theme-row pref-desktop-only-row" id="pref-navbar-mode-row" style="margin:0 1rem 0.4rem">
-        <button class="pref-theme-opt" id="pref-navbar-mode-grow" onclick="setNavbarGrowMode('grow')">
-          <svg viewBox="0 0 24 24"><polyline points="7 8 12 3 17 8"/><polyline points="7 16 12 21 17 16"/></svg>
-          Grow
-        </button>
-        <button class="pref-theme-opt" id="pref-navbar-mode-shrink" onclick="setNavbarGrowMode('shrink')">
-          <svg viewBox="0 0 24 24"><polyline points="7 13 12 18 17 13"/><polyline points="7 6 12 11 17 6"/></svg>
-          Shrink
-        </button>
-        <button class="pref-theme-opt" id="pref-navbar-mode-auto" onclick="setNavbarGrowMode('auto')">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/><path d="M21 12.79A9 9 0 1 1 11.21 3" opacity="0.35"/></svg>
-          <span data-i18n="pref.theme.auto">Automático</span>
-        </button>
-      </div>
-      <div class="pref-desktop-only-row" style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="func.auto.help">En "Automático" (por defecto), la barra se encoge apenas haces scroll y solo recupera su tamaño al volver hasta arriba del todo.</div>
     </div>
   </div>
 </div>
@@ -8883,26 +9225,25 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
       </div>
     </div>
 
-    <!-- Modo Sencillo: función en pruebas, v1.32.7-beta. Reemplaza toda la
-         navegación por defecto por un encabezado mínimo + un menú overlay de
-         pantalla completa con botones grandes, para quienes tienen
-         dificultad para usar la interfaz por defecto. -->
+    <!-- Inicio (Experimento, v1.50.0-sb): pantalla de inicio personalizable + NavBar inferior.
+         Exclusivo de teléfonos móviles. -->
     <div class="profile-section">
-      <div class="profile-section-title" data-i18n="exp.modosencillo.section">Modo Sencillo</div>
-      <div class="profile-row" style="cursor:pointer" onclick="toggleModoSencilloPref()">
-        <div class="profile-row-icon" style="background:var(--ter-1-bg);color:var(--ter-1)">
-          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><rect x="3" y="3" width="18" height="18" rx="4"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="14" x2="16" y2="14"/></svg>
+      <div class="profile-section-title">Inicio</div>
+      <div class="profile-row" style="cursor:pointer" onclick="toggleInicioExpPref()">
+        <div class="profile-row-icon" style="background:var(--accent-light);color:var(--accent)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         </div>
         <div class="profile-row-content">
-          <div class="profile-row-label" data-i18n="exp.modosencillo.title">Activar Modo Sencillo</div>
-          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="exp.modosencillo.desc">Simplifica la interfaz: reemplaza la navegación por un menú de pantalla completa con botones grandes.</div>
+          <div class="profile-row-label">Activar pantalla de Inicio</div>
+          <div class="profile-row-value" style="font-size:0.8rem">Una pantalla personalizable con tus recordatorios y asignaciones, y una barra de navegación inferior (Inicio, Predicación y Reuniones).</div>
         </div>
-        <div id="modo-sencillo-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
-          <div id="modo-sencillo-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
+        <div id="home-exp-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
+          <div id="home-exp-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
         </div>
       </div>
-      <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="exp.modosencillo.help">Pensado para quienes tienen dificultad para usar la versión por defecto. Notificaciones y Live siguen activas, accesibles desde el menú.</div>
+      <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4">Función experimental, disponible solo en teléfonos móviles. Al activarla, el menú Más opciones suma "Personalizar Inicio". No está disponible junto al Modo Sencillo.</div>
     </div>
+
   </div>
 </div>
 
@@ -9471,12 +9812,17 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 // Biblia). Se guarda dentro del JSON `parts` con section:'maestros_b' (el
 // encargado es una entrada con header:true), sin cambios en la base de datos.
 // Los datos de 1.47.5 (assigned_b / assigned2_b) se migran solos al abrirse.
-// v1.47.6.1-beta: arreglo de la importación desde JW.ORG ("signal is aborted
+// v1.47.0-beta: arreglo de la importación desde JW.ORG ("signal is aborted
 // without reason"): las vías de conexión ahora se prueban EN PARALELO (gana
 // la primera que responde) en vez de una por una, hay más servicios de relevo
 // (incluido uno que entrega Markdown, también soportado), tiempo de espera
 // más generoso y caché por sesión.
-const APP_VERSION = '1.47.6.1-beta';
+// v1.50.0-sb: (1) "Modo Sencillo" deja de ser experimental y pasa a Configuración →
+// Preferencias (debajo de Animaciones). (2) Se retira "NavBar Grow & Shrink": en
+// Escritorio/pantallas grandes la NavBar queda siempre en estado Grow. (3) Nuevo
+// experimento "Inicio" (solo móvil): pantalla de inicio personalizable con barra de
+// navegación inferior (Inicio / Predicación / Reuniones) y "Personalizar Inicio".
+const APP_VERSION = '1.50.0-sb';
 // v1.36.0-beta: (1) Links de referencia ahora tienen 2 tipos — Único uso
 // (sin límite de tiempo, se desactiva tras el primer uso) y Con límite de
 // tiempo (reutilizable hasta que vence, o hasta que el Admin lo termina
@@ -9781,7 +10127,6 @@ const I18N = {
   'func.lateral':          { es: 'Lateral',                 en: 'Sidebar',  nl: 'Zijbalk' },
   'func.lateral.help':     { es: 'En "Lateral", el detalle de la asignación se abre a la derecha, dejando la lista visible a la izquierda.', en: 'In "Sidebar", the assignment detail opens on the right, keeping the list visible on the left.', nl: 'Bij "Zijbalk" opent het toewijzingsdetail rechts, terwijl de lijst links zichtbaar blijft.' },
   'func.escritorio':       { es: 'Escritorio',              en: 'Desktop',  nl: 'Desktop' },
-  'func.auto.help':        { es: 'En "Automático" (por defecto), la barra se encoge apenas haces scroll y solo recupera su tamaño al volver hasta arriba del todo.', en: 'In "Automatic" (default), the bar shrinks as soon as you scroll and only returns to full size when you reach the very top.', nl: 'Bij "Automatisch" (standaard) krimpt de balk zodra je scrolt en herstelt deze pas als je helemaal naar boven gaat.' },
   'func.live':             { es: 'Función Live',            en: 'Live Feature', nl: 'Live-functie' },
   'func.live.desc':        { es: 'Detección de calles y avisos de No Pasar en tiempo real', en: 'Real-time street detection and Do-Not-Pass alerts', nl: 'Realtime straatdetectie en Niet-Bezoeken-meldingen' },
   // ── Experimentos ──
@@ -11767,7 +12112,15 @@ async function renderInicio() {
   const wrap = document.getElementById('inicio-content');
   if (!wrap || !currentUser) return;
   wrap.innerHTML = '<div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Inicio</div></div>';
+  const sections = await collectInicioSections();
+  renderInicioSections(sections);
+}
 
+// v1.50.0-sb: la recolección de datos se separó del render para que la nueva
+// pantalla "Inicio" (móvil) y "Mis Asignaciones" del Perfil compartan la misma
+// lógica. `opts.only` (array de claves) limita qué bloques se consultan.
+async function collectInicioSections(opts) {
+  const want = (k) => !opts || !opts.only || opts.only.includes(k);
   const myName = getIdentityName().trim().toLowerCase();
   const today = todayStr();
   const sections = [];
@@ -11776,7 +12129,7 @@ async function renderInicio() {
   const myMembership = findMembershipForName(getIdentityName());
 
   // ── Casa en casa: próximas asignaciones donde soy el conductor/encargado ──
-  try {
+  if (want('casa')) try {
     const { data } = await sb.from('assignments')
       .select('id,date,time,conductor,territory_id')
       .gte('date', today).order('date').order('time');
@@ -11802,7 +12155,7 @@ async function renderInicio() {
   // Ahora se incluye el día de hoy y, para esas, solo se considera vencida
   // una vez transcurridas las horas configuradas en Reportes → Recordatorios
   // (mismo criterio que usa el push de checkTerritoryReportReminders). ──
-  if (RECORDATORIOS_TERRITORIO_ENABLED) try {
+  if (want('recordatorios') && RECORDATORIOS_TERRITORIO_ENABLED) try {
     const reminderHours = await getTerritoryReportReminderHours();
     const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 45);
     const cutoffStr = cutoff.toISOString().slice(0, 10);
@@ -11837,6 +12190,7 @@ async function renderInicio() {
             label: `Reportar territorio${ter ? ' N.º ' + ter.number : ''}`,
             sub: a.date < today ? `Predicaste el ${fmtInicioDate(a.date)}` : `Predicaste hoy a las ${(a.time || '').substring(0, 5)}hrs`,
             badge: 'Pendiente',
+            ter: ter ? ter.number : null, dateRaw: a.date,
             sortKey: _inicioSortKey(a.date, a.time),
             onClick: () => reportarTerritorioDesdeAsignacion(a.id),
           };
@@ -11846,7 +12200,7 @@ async function renderInicio() {
   } catch (e) { console.warn('Inicio (recordatorios territorio):', e); }
 
   // ── Carritos: turnos fijos donde aparezco como encargado ──
-  try {
+  if (want('carritos')) try {
     if (carritosVisibleForCurrentUser()) {
     const [{ data: turnos }, { data: puntos }] = await Promise.all([
       sb.from('cart_turnos').select('*'),
@@ -11872,7 +12226,7 @@ async function renderInicio() {
   } catch (e) { console.warn('Inicio (carritos):', e); }
 
   // ── Aseo del Salón: próximas fechas donde soy encargado o mi grupo está asignado ──
-  try {
+  if (want('aseo')) try {
     const { data } = await sb.from('aseo_salon').select('*').gte('fecha', today).order('fecha');
     const myGroupNum = myMembership ? myMembership.grupo.numero : null;
     const mine = (data || []).filter(r =>
@@ -11885,6 +12239,7 @@ async function renderInicio() {
         icon: '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
         items: mine.slice(0, 5).map(r => ({
           label: _namesMatch(r.encargado_nombre, getIdentityName()) ? 'Encargado del aseo' : 'Tu grupo de servicio limpia el salón',
+          byGroup: (myGroupNum != null && (r.grupo1_numero === myGroupNum || r.grupo2_numero === myGroupNum)),
           sub: fmtInicioDate(r.fecha),
           sortKey: _inicioSortKey(r.fecha, null),
           onClick: () => inicioGoTo('reuniones', 'aseo-salon'),
@@ -11894,7 +12249,7 @@ async function renderInicio() {
   } catch (e) { console.warn('Inicio (aseo):', e); }
 
   // ── Vida y Ministerio: partes y roles de cabecera en semanas vigentes ──
-  try {
+  if (want('vmc')) try {
     const { data } = await sb.from('vmc_weeks')
       .select('id,date_start,date_end,parts,presidente,prayer_close')
       .gte('date_end', today).order('date_start');
@@ -11905,7 +12260,7 @@ async function renderInicio() {
       for (const p of parts) {
         const a1 = (p.assigned || '').trim().toLowerCase();
         const a2 = (p.assigned2 || '').trim().toLowerCase();
-        if (a1 === myName || a2 === myName) items.push({ label: vmcPartLabel(p) || 'Parte', sub: rango, sortKey: _inicioSortKey(w.date_start, null), onClick: () => inicioGoTo('reuniones', 'vida-ministerio') });
+        if (a1 === myName || a2 === myName) items.push({ label: vmcPartLabel(p) || 'Parte', sub: rango, sortKey: _inicioSortKey(w.date_start, null), weekStart: w.date_start, onClick: () => inicioGoTo('reuniones', 'vida-ministerio') });
 
       }
       const roles = [
@@ -11913,7 +12268,7 @@ async function renderInicio() {
         { field: 'prayer_close', label: 'Oración de cierre' },
       ];
       for (const rol of roles) {
-        if ((w[rol.field] || '').trim().toLowerCase() === myName) items.push({ label: rol.label, sub: rango, sortKey: _inicioSortKey(w.date_start, null), onClick: () => inicioGoTo('reuniones', 'vida-ministerio') });
+        if ((w[rol.field] || '').trim().toLowerCase() === myName) items.push({ label: rol.label, sub: rango, sortKey: _inicioSortKey(w.date_start, null), weekStart: w.date_start, onClick: () => inicioGoTo('reuniones', 'vida-ministerio') });
       }
     }
     if (items.length) {
@@ -11926,7 +12281,7 @@ async function renderInicio() {
   } catch (e) { console.warn('Inicio (VMC):', e); }
 
   // ── Pública: roles de cabecera en semanas vigentes ──
-  try {
+  if (want('fs')) try {
     const { data } = await sb.from('fs_weeks')
       .select('id,date_start,date_end,presidente,watchtower_reader')
       .gte('date_end', today).order('date_start');
@@ -11938,7 +12293,7 @@ async function renderInicio() {
         { field: 'watchtower_reader', label: 'Lector de La Atalaya' },
       ];
       for (const rol of roles) {
-        if ((w[rol.field] || '').trim().toLowerCase() === myName) items.push({ label: rol.label, sub: rango, sortKey: _inicioSortKey(w.date_start, null), onClick: () => inicioGoTo('reuniones', 'fin-semana') });
+        if ((w[rol.field] || '').trim().toLowerCase() === myName) items.push({ label: rol.label, sub: rango, sortKey: _inicioSortKey(w.date_start, null), weekStart: w.date_start, onClick: () => inicioGoTo('reuniones', 'fin-semana') });
       }
     }
     if (items.length) {
@@ -11951,7 +12306,7 @@ async function renderInicio() {
   } catch (e) { console.warn('Inicio (FS):', e); }
 
   // ── Responsabilidades: próximos cargos (Audio/Video, Micrófonos, Plataforma, Acomodadores, etc.) ──
-  try {
+  if (want('resp')) try {
     const { data } = await sb.from('responsabilidades')
       .select('*').ilike('hermano', getIdentityName()).gte('fecha', today).order('fecha');
     if ((data || []).length) {
@@ -11968,7 +12323,7 @@ async function renderInicio() {
     }
   } catch (e) { console.warn('Inicio (responsabilidades):', e); }
 
-  renderInicioSections(sections);
+  return sections;
 }
 
 function fmtInicioDate(dateStr) {
@@ -12700,9 +13055,12 @@ async function enterApp() {
     currentSubTab  = _nav.subTab || 'casa';
   }
 
-  if (currentMainTab === 'inicio') {
+  const _homeOn = (typeof isInicioActive === 'function') && isInicioActive();
+  if (currentMainTab === 'inicio' && !_homeOn) {
     currentMainTab = 'predicacion';
     currentSubTab = 'casa';
+  } else if (_homeOn && !(_nav && _nav.mainTab)) {
+    currentMainTab = 'inicio'; // v1.50.0-sb: con "Inicio" activo, se abre en Inicio
   }
 
   // Sync main segment button
@@ -12717,8 +13075,13 @@ async function enterApp() {
   if (typeof applyModoSencilloUI === 'function') applyModoSencilloUI();
   if (typeof applyNavbarAvatarUI === 'function') applyNavbarAvatarUI();
 
+  if (typeof applyInicioUI === 'function') applyInicioUI(true);
+
   // Restore sub-page visibility
-  if (currentMainTab === 'predicacion') {
+  if (currentMainTab === 'inicio') {
+    showPage('inicio');
+    renderHome();
+  } else if (currentMainTab === 'predicacion') {
     showPage('schedule');
     ['casa','territorios','carritos','grupos'].forEach(id => {
       const el = document.getElementById('sub-content-' + id);
@@ -13989,7 +14352,7 @@ function switchMainTab(tab, btn) {
   } else if (tab === 'inicio') {
     renderSubTabs(tab); // SUB_TABS.inicio no existe → limpia el slider de sub-secciones
     showPage('inicio');
-    renderInicio();
+    renderHome();
   } else {
     const reunTabs = ['vida-ministerio','fin-semana','aseo-salon','hospitalidad','responsabilidades'];
     currentSubTab = currentSubTab && reunTabs.includes(currentSubTab) ? currentSubTab : 'vida-ministerio';
@@ -14000,6 +14363,7 @@ function switchMainTab(tab, btn) {
     if (currentSubTab === 'fin-semana') loadAndRenderFsUserView();
   }
   _saveNavState();
+  if (typeof applyInicioChrome === 'function') applyInicioChrome();
 }
 
 // Desliza el thumb de la píldora Predicación/Reuniones detrás del botón activo.
@@ -14639,9 +15003,12 @@ function _loadScheduleFromOfflineCache() {
   try { showToast(t('offline.cargando'), 'info'); } catch (e) {}
 }
 
-function renderSchedule() {
-  const container = document.getElementById('schedule-content');
+function renderSchedule(opts) {
+  // v1.50.0-sb: `opts.container` + `opts.onlyToday` permiten reutilizar las
+  // tarjetas de "Casa en casa" en la pantalla Inicio ("Predicación Hoy").
+  const container = (opts && opts.container) || document.getElementById('schedule-content');
   Object.keys(_otrosGruposByDate).forEach(k => delete _otrosGruposByDate[k]);
+  if (!assignments.length && opts && opts.onlyToday) { container.innerHTML = ''; return; }
   if (!assignments.length) {
     container.innerHTML = `<div class="empty-state"><div class="empty-state-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><h4>${t("casa.sinasignaciones")}</h4><p>${t("casa.sinpredicaciones")}</p></div>`;
     return;
@@ -14766,7 +15133,7 @@ function renderSchedule() {
     return `<span class="simp-ter-tag"><span class="simp-ter-tag-label">${label}</span>${circles}</span>`;
   }
 
-  Object.keys(grouped).sort().filter(date => date >= todayStr).forEach(date => {
+  Object.keys(grouped).sort().filter(date => date >= todayStr && !(opts && opts.onlyToday && date !== todayStr)).forEach(date => {
     const d = new Date(date+'T00:00:00');
     const isToday = date === todayStr;
     const isTomorrow = !isToday && date === tomorrowStr;
@@ -14980,6 +15347,7 @@ function renderSchedule() {
   });
   container.innerHTML = html;
   if (typeof _liveApplyCardGlow === 'function') _liveApplyCardGlow();
+  if (!opts && typeof homeRefreshHoyIfVisible === 'function') homeRefreshHoyIfVisible();
 }
 
 function _namesMatch(a, b) {
@@ -21450,11 +21818,11 @@ async function openPreferencias() {
   updateLiveToggleUI();
   updateTransparencyToggleUI();
   updateUiSizeToggleUI();
-  updateNavbarShrinkToggleUI();
   updateH2HViewModeUI();
   updateExperimentosNavVisibility();
   if (typeof _updateAppUpdateUI === 'function') _updateAppUpdateUI();
   _updatePwaInstallBannerUI();
+  if (typeof updateModoSencilloToggleUI === 'function') updateModoSencilloToggleUI();
   await renderPrefNotifList();
 }
 function closePreferencias() {
@@ -21469,11 +21837,11 @@ function openPrefScreen(name) {
   if (name === 'experimentos' && localStorage.getItem('fleming_egg_unlocked') !== '1') return;
   document.getElementById('page-pref-' + name)?.classList.add('open');
   trackEvent('settings_open', { screen: name });
-  if (name === 'funciones') { updateH2HViewModeUI(); updateNavbarShrinkToggleUI(); if (typeof updateLiveAlwaysOnToggleUI === 'function') updateLiveAlwaysOnToggleUI(); if (typeof updatePinFeatureToggleUI === 'function') updatePinFeatureToggleUI(); }
+  if (name === 'funciones') { updateH2HViewModeUI(); if (typeof updateLiveAlwaysOnToggleUI === 'function') updateLiveAlwaysOnToggleUI(); if (typeof updatePinFeatureToggleUI === 'function') updatePinFeatureToggleUI(); }
   if (name === 'notificaciones') renderPrefNotifList();
   if (name === 'ayuda') renderAyudaTipsList();
-  if (name === 'preferencias') { updateAnimationsEnabledToggleUI(); updateWeatherToggleUI(); }
-  if (name === 'experimentos') { updateAccentSwatchesUI(); updateTransparencyToggleUI(); updateSimplifiedModeToggleUI(); updateAccentBgToggleUI(); updateNavbarBtnSizeUI(); if (typeof updateModoSencilloToggleUI === 'function') updateModoSencilloToggleUI(); }
+  if (name === 'preferencias') { updateAnimationsEnabledToggleUI(); updateWeatherToggleUI(); if (typeof updateModoSencilloToggleUI === 'function') updateModoSencilloToggleUI(); }
+  if (name === 'experimentos') { updateAccentSwatchesUI(); updateTransparencyToggleUI(); updateSimplifiedModeToggleUI(); updateAccentBgToggleUI(); updateNavbarBtnSizeUI(); if (typeof updateHomeExpToggleUI === 'function') updateHomeExpToggleUI(); }
   if (name === 'legal-terms') renderPrefLegalTerms();
   if (name === 'legal-privacy') renderPrefLegalPrivacy();
   if (name === 'version') {
@@ -21597,20 +21965,9 @@ function isGroupMinicardsEnabled() {
       setCompact(shell, false);
       return;
     }
-    if (typeof getNavbarGrowMode === 'function') {
-      const mode = getNavbarGrowMode();
-      if (mode === 'grow') { setCompact(shell, false); return; }
-      if (mode === 'shrink') { setCompact(shell, true); return; }
-    }
-    const scrollable = document.documentElement.scrollHeight - window.innerHeight;
-    if (scrollable < MIN_SCROLLABLE) {
-      // No hay suficiente contenido como para justificar el modo compacto:
-      // se mantiene siempre expandida, sin importar el scrollY momentáneo.
-      setCompact(shell, false);
-      return;
-    }
-    const y = window.scrollY || document.documentElement.scrollTop;
-    setCompact(shell, y > TOP_THRESHOLD);
+    // v1.50.0-sb: se retira "NavBar Grow & Shrink"; en Escritorio la NavBar
+    // siempre se mantiene en estado Grow.
+    setCompact(shell, false);
   }
   window.addEventListener('scroll', onScroll, { passive: true });
   window.addEventListener('resize', onScroll);
@@ -21761,25 +22118,8 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () 
   if (isTransparencyEnabled()) applyTransparencyPref();
 });
 
-// ── NavBar Grow & Shrink en Desktop: Grow fijo / Shrink fijo / Automático ──
-// Por defecto es 'auto' (el comportamiento clásico: se encoge al bajar en la
-// página y recupera su tamaño al subir).
-function getNavbarGrowMode() {
-  const v = localStorage.getItem('fleming_navbar_mode');
-  return (v === 'grow' || v === 'shrink' || v === 'auto') ? v : 'auto';
-}
-function updateNavbarShrinkToggleUI() {
-  const mode = getNavbarGrowMode();
-  ['grow', 'shrink', 'auto'].forEach(m => {
-    document.getElementById('pref-navbar-mode-' + m)?.classList.toggle('active', m === mode);
-  });
-}
-function setNavbarGrowMode(mode) {
-  if (mode !== 'grow' && mode !== 'shrink' && mode !== 'auto') return;
-  localStorage.setItem('fleming_navbar_mode', mode);
-  updateNavbarShrinkToggleUI();
-  window.dispatchEvent(new Event('scroll'));
-}
+// v1.50.0-sb: "NavBar Grow & Shrink" ya no está disponible (la NavBar siempre es Grow).
+try { localStorage.removeItem('fleming_navbar_mode'); } catch {}
 
 // ── Casa en casa: vista de detalle en PopUp o en panel Lateral (Tablet/Desktop) ──
 function getHouseToHouseViewMode() {
@@ -22937,7 +23277,7 @@ async function renderAdminTipsList() {
 const PLATFORM_RESET_KEYS = [
   'fleming_accent', 'fleming_accent_bg', 'fleming_animations', 'fleming_blur_level',
   'fleming_dark_maps', 'fleming_egg_unlocked', 'fleming_group_minicards', 'fleming_h2h_view',
-  'fleming_lang', 'fleming_live_always_on', 'fleming_live_enabled', 'fleming_livehost_enabled', 'fleming_navbar_mode',
+  'fleming_lang', 'fleming_live_always_on', 'fleming_live_enabled', 'fleming_livehost_enabled',
   'fleming_navbar_options_avatar', 'fleming_navbar_btn_size', 'fleming_notif_levels', 'fleming_notif_prefs',
   'fleming_notif_templates', 'fleming_simplified_mode', 'fleming_modo_sencillo', 'fleming_theme', 'fleming_tip_font_scale',
   'fleming_transparency', 'fleming_transparency_level', 'fleming_ui_size', 'fleming_weather_enabled'
@@ -24829,6 +25169,7 @@ function applyModoSencilloUI() {
   const active = isModoSencilloActive();
   document.documentElement.classList.toggle('modo-sencillo-mode', active);
   if (!active) msCloseOverlay();
+  if (typeof applyInicioUI === 'function') applyInicioUI();
   if (typeof applyOwnAvatarToDropdowns === 'function') applyOwnAvatarToDropdowns();
   const msNameEl = document.getElementById('ms-footer-name');
   if (msNameEl && currentUser) msNameEl.textContent = currentUser.name;
