@@ -6099,7 +6099,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 
 <style id="home-css">
 /* ── Inicio (Experimento, v1.50.0-sb): solo móvil ── */
-.nav-page-title { display: none; font-size: 1.6rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.12; color: var(--text); text-align: left; }
+.nav-page-title { display: none; margin: 0; font-size: 1.6rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.12; color: var(--text); text-align: left; }
 .home-bottom-nav { display: none; }
 .home-custom-overlay { display: none; }
 .home-only { display: none !important; }
@@ -6107,8 +6107,10 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
   html.inicio-mode .main-segment { display: none !important; }
   html.inicio-mode .nav-page-title { display: block; }
   html.inicio-mode .nav-center-row { flex: 1; justify-content: flex-start; padding: 0 0.5rem 0 0.1rem; }
-  html.inicio-mode .app-header-shell .topnav { height: auto; min-height: 64px; padding-top: 0.85rem; padding-bottom: 0.45rem; align-items: flex-start; }
-  html.inicio-mode .nav-icons { padding-top: 0.15rem; }
+  html.inicio-mode .app-header-shell .topnav { height: auto; min-height: 64px; padding-top: 0.6rem; padding-bottom: 0.6rem; align-items: center; }
+  html.inicio-mode .nav-icons { align-self: center; }
+  html.inicio-mode.home-greeting .app-header-shell .topnav { align-items: flex-start; padding-top: 0.85rem; padding-bottom: 0.45rem; }
+  html.inicio-mode.home-greeting .nav-icons { align-self: flex-start; }
   html.inicio-mode .home-only { display: flex !important; }
   html.inicio-mode .main-content { padding-bottom: 6.5rem; }
   html.inicio-mode .home-bottom-nav {
@@ -6131,13 +6133,20 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 .home-card-list { display: flex; flex-direction: column; gap: 10px; }
 .home-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 0.8rem 0.95rem; box-shadow: var(--shadow); cursor: pointer; transition: transform 0.15s; }
 .home-card:active { transform: scale(0.98); }
+.home-card { display: flex; align-items: center; gap: 12px; }
+.home-card-body { flex: 1; min-width: 0; }
+.home-ico { flex-shrink: 0; width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.home-ico svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.home-ico img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.home-custom-ico { width: 36px; height: 36px; border-radius: 10px; }
+.home-custom-ico svg { width: 18px; height: 18px; }
 .home-card-title { font-size: 0.9rem; font-weight: 700; color: var(--text); line-height: 1.3; }
 .home-card-sub { font-size: 0.85rem; color: var(--text2); margin-top: 2px; line-height: 1.3; }
 .home-card-meta { font-size: 0.68rem; color: var(--text3); margin-top: 3px; font-weight: 500; }
 .home-card.is-reminder { border-left: 3px solid var(--red); }
 .home-empty { text-align: center; color: var(--text3); font-size: 0.85rem; line-height: 1.45; padding: 1.1rem 1rem; border: 1px dashed var(--border); border-radius: 16px; }
 .home-custom-overlay { position: fixed; inset: 0; z-index: 250; background: var(--bg); flex-direction: column; overflow: hidden; }
-.home-custom-top { display: flex; align-items: center; gap: 12px; padding: 0.9rem 1rem; padding-top: calc(0.9rem + env(safe-area-inset-top, 0px)); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.home-custom-top { padding-top: calc(0.85rem + env(safe-area-inset-top, 0px)); border-bottom: 1px solid var(--border); position: relative; }
 .home-custom-body { flex: 1; overflow-y: auto; padding: 1rem 1rem 3rem; }
 .home-custom-h { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text3); margin: 1.1rem 0.2rem 0.5rem; }
 .home-custom-row { display: flex; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 0.65rem 0.8rem; margin-bottom: 8px; }
@@ -6160,14 +6169,34 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 //  "Personalizar Inicio". La configuración se guarda por usuario en este
 //  dispositivo (localStorage).
 // ══════════════════════════════════════════════════════════════════════════
+const _HI = {
+  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>',
+  cart: '<circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>',
+  book: '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>',
+  cal: '<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',
+  house: '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
+  users: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+  bulb: '<path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.2 1 2V17h6v-.3c0-.8.4-1.5 1-2A7 7 0 0 0 12 2z"/>',
+  doc: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/><line x1="9" y1="11" x2="15" y2="11"/>',
+  star: '<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>',
+};
+const _HC = {
+  blue: ['var(--accent)', 'var(--accent-light)'], green: ['#34c759', 'rgba(52,199,89,0.12)'], red: ['var(--red)', 'rgba(255,59,48,0.12)'],
+  yellow: ['#e6b800', 'rgba(255,204,0,0.16)'], orange: ['var(--ter-6)', 'var(--ter-6-bg)'], purple: ['var(--ter-4)', 'var(--ter-4-bg)'], teal: ['var(--ter-9)', 'var(--ter-9-bg)'],
+};
+function _homeIcoBox(icon, col, extra, img) {
+  const c = _HC[col] || _HC.blue;
+  return '<div class="home-ico ' + (extra || '') + '" style="background:' + c[1] + ';color:' + c[0] + '">' +
+    (img ? '<img src="' + escapeHtml(img) + '" alt="" loading="lazy" onerror="this.outerHTML=\'<svg viewBox=&quot;0 0 24 24&quot;>' + (_HI[icon] || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;') + '</svg>\'">' : '<svg viewBox="0 0 24 24">' + (_HI[icon] || '') + '</svg>') + '</div>';
+}
 const HOME_SECTIONS = {
-  hoy:      { title: 'Predicación Hoy' },
-  carritos: { title: 'Mis Carritos' },
-  vmc:      { title: 'Mis asignaciones en reunión Vida y Ministerio' },
-  fs:       { title: 'Mis asignaciones en reunión pública' },
-  aseo:     { title: 'Aseo del Salón para mi grupo' },
-  resp:     { title: 'Mis Responsabilidades' },
-  tips:     { title: 'Tips' },
+  hoy:      { title: 'Predicación Hoy', icon: 'sun', col: 'blue' },
+  carritos: { title: 'Mis Carritos', icon: 'cart', col: 'teal' },
+  vmc:      { title: 'Mis asignaciones en reunión Vida y Ministerio', icon: 'book', col: 'blue' },
+  fs:       { title: 'Mis asignaciones en reunión pública', icon: 'cal', col: 'green' },
+  aseo:     { title: 'Aseo del Salón para mi grupo', icon: 'house', col: 'orange' },
+  resp:     { title: 'Mis Responsabilidades', icon: 'users', col: 'purple' },
+  tips:     { title: 'Tips', icon: 'bulb', col: 'yellow' },
 };
 const HOME_DEFAULT_LAYOUT = ['hoy', 'vmc', 'fs', 'resp'];
 
@@ -6227,6 +6256,7 @@ function applyInicioChrome() {
       titleEl.textContent = currentMainTab === 'reuniones' ? t('nav.reuniones') : t('nav.predicacion');
     }
   }
+  document.documentElement.classList.toggle('home-greeting', active && currentMainTab === 'inicio');
   document.querySelectorAll('#home-bottom-nav .home-bn-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === currentMainTab));
 }
 function homeNavGo(tab) {
@@ -6278,9 +6308,10 @@ function homeAct(i) { const f = _homeActions[i]; if (typeof f === 'function') f(
 function _homeCard(c) {
   const idx = _homeActions.push(c.onClick || null) - 1;
   return '<div class="home-card' + (c.reminder ? ' is-reminder' : '') + '"' + (c.onClick ? ' onclick="homeAct(' + idx + ')"' : '') + '>' +
-    '<div class="home-card-title">' + escapeHtml(c.title || '') + '</div>' +
+    (c.icon ? _homeIcoBox(c.icon, c.col, '', c.img) : '') +
+    '<div class="home-card-body"><div class="home-card-title">' + escapeHtml(c.title || '') + '</div>' +
     (c.sub ? '<div class="home-card-sub">' + escapeHtml(c.sub) + '</div>' : '') +
-    (c.meta ? '<div class="home-card-meta">' + escapeHtml(c.meta) + '</div>' : '') + '</div>';
+    (c.meta ? '<div class="home-card-meta">' + escapeHtml(c.meta) + '</div>' : '') + '</div></div>';
 }
 function _homeSection(title, cardsHtml) {
   return '<div class="home-section">' + (title ? '<div class="home-section-title">' + escapeHtml(title) + '</div>' : '') + cardsHtml + '</div>';
@@ -6305,21 +6336,21 @@ async function renderHome() {
   // ── Para tí: recordatorios + próximas partes de reunión + novedades ──
   const para = [];
   (sec('recordatorios')?.items || []).forEach(it => para.push({
-    reminder: true, title: 'Recuerda realizar tu reporte de territorio',
+    reminder: true, icon: 'doc', col: 'red', title: 'Recuerda realizar tu reporte de territorio',
     sub: it.ter ? 'Territorio ' + it.ter : it.label, meta: it.dateRaw ? _homeShortDate(it.dateRaw) : '', onClick: it.onClick }));
   const meet = [];
-  [['vmc', typeof MEETING_DAY_VMC !== 'undefined' ? MEETING_DAY_VMC : 4, 'Asignación para la reunión'],
-   ['fs',  typeof MEETING_DAY_FS  !== 'undefined' ? MEETING_DAY_FS  : 6, 'Asignación para la reunión pública']].forEach(([k, dow, ttl]) => {
+  [['vmc', typeof MEETING_DAY_VMC !== 'undefined' ? MEETING_DAY_VMC : 4, 'Asignación para la reunión', 'book', 'blue'],
+   ['fs',  typeof MEETING_DAY_FS  !== 'undefined' ? MEETING_DAY_FS  : 6, 'Asignación para la reunión pública', 'cal', 'green']].forEach(([k, dow, ttl, ic, cl]) => {
     (sec(k)?.items || []).forEach(it => {
       const md = _homeMeetingDate(it.weekStart, dow);
       if (!md) return;
       const n = _homeDiffDays(md);
-      if (n >= 0 && n <= 7) meet.push({ date: md, title: ttl, sub: it.label, meta: _homeRelDay(md), onClick: it.onClick });
+      if (n >= 0 && n <= 7) meet.push({ date: md, icon: ic, col: cl, title: ttl, sub: it.label, meta: _homeRelDay(md), onClick: it.onClick });
     });
   });
   meet.sort((a, b) => a.date.localeCompare(b.date)).forEach(m => para.push(m));
   const recentTips = (tips || []).filter(tp => tp.created_at && (Date.now() - new Date(tp.created_at).getTime()) < 14 * 86400000).slice(0, 2);
-  recentTips.forEach(tp => para.push({ title: 'Novedad: nuevo Tip', sub: tp.title || '', meta: 'Toca para leerlo', onClick: () => openTipDetailModal(tp.id) }));
+  recentTips.forEach(tp => para.push({ icon: 'bulb', col: 'yellow', img: tp.image_url || '', title: 'Novedad: nuevo Tip', sub: tp.title || '', meta: 'Toca para leerlo', onClick: () => openTipDetailModal(tp.id) }));
 
   let html = _homeSection('Para tí', para.length
     ? '<div class="home-card-list">' + para.map(_homeCard).join('') + '</div>'
@@ -6390,16 +6421,16 @@ function renderHomeCustomize() {
   const layout = getHomeLayout();
   const avail = Object.keys(HOME_SECTIONS).filter(k => !layout.includes(k));
   let h = '<div class="home-custom-h">Fijo</div>' +
-    '<div class="home-custom-row locked"><div class="home-custom-name">Para tí<div class="home-custom-note">Siempre se muestra arriba</div></div>' + _homeIco('lock', '', '', true) + '</div>';
+    '<div class="home-custom-row locked">' + _homeIcoBox('star', 'blue', 'home-custom-ico') + '<div class="home-custom-name">Para tí<div class="home-custom-note">Siempre se muestra arriba</div></div>' + _homeIco('lock', '', '', true) + '</div>';
   h += '<div class="home-custom-h">Tus apartados</div>';
   if (!layout.length) h += '<div class="home-empty">No tienes apartados. Agrega alguno abajo.</div>';
   layout.forEach((k, i) => {
-    h += '<div class="home-custom-row"><div class="home-custom-name">' + escapeHtml(HOME_SECTIONS[k].title) + '</div>' +
+    h += '<div class="home-custom-row">' + _homeIcoBox(HOME_SECTIONS[k].icon, HOME_SECTIONS[k].col, 'home-custom-ico') + '<div class="home-custom-name">' + escapeHtml(HOME_SECTIONS[k].title) + '</div>' +
       _homeIco('up', '', "homeMove('" + k + "',-1)", i === 0) + _homeIco('down', '', "homeMove('" + k + "',1)", i === layout.length - 1) + _homeIco('x', 'del', "homeRemove('" + k + "')") + '</div>';
   });
   if (avail.length) {
     h += '<div class="home-custom-h">Agregar</div>';
-    avail.forEach(k => { h += '<div class="home-custom-row"><div class="home-custom-name">' + escapeHtml(HOME_SECTIONS[k].title) + '</div>' + _homeIco('plus', 'add', "homeAdd('" + k + "')") + '</div>'; });
+    avail.forEach(k => { h += '<div class="home-custom-row">' + _homeIcoBox(HOME_SECTIONS[k].icon, HOME_SECTIONS[k].col, 'home-custom-ico') + '<div class="home-custom-name">' + escapeHtml(HOME_SECTIONS[k].title) + '</div>' + _homeIco('plus', 'add', "homeAdd('" + k + "')") + '</div>'; });
   }
   h += '<button class="home-custom-reset" onclick="homeResetLayout()">Restablecer por defecto</button>';
   body.innerHTML = h;
@@ -6713,7 +6744,7 @@ function homeResetLayout() { saveHomeLayout(HOME_DEFAULT_LAYOUT.slice()); render
   </nav>
   <!-- Personalizar Inicio -->
   <div class="home-custom-overlay" id="home-custom-overlay">
-    <div class="home-custom-top">
+    <div class="subpage-topbar home-custom-top">
       <button class="pill-back-btn" onclick="closeHomeCustomize()" title="Volver">
         <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
       </button>
@@ -7008,9 +7039,6 @@ function homeResetLayout() { saveHomeLayout(HOME_DEFAULT_LAYOUT.slice()); render
       </div>
       <div id="sub-content-territorios" class="sub-page" style="display:none">
         <div id="admin-shortcut-territorios" style="display:none"></div>
-        <div class="ter-view-header">
-          <span class="ter-view-title" data-i18n="territorios.title">Territorios</span>
-        </div>
         <!-- Banner: Mapa de la congregación (card, visible cuando hay mapa cargado) -->
         <div class="ter-map-banner" id="ter-map-banner" onclick="openFullMap()" role="button" aria-label="Mapa de la congregación" data-i18n-aria="territorios.mapabanner">
           <div class="ter-map-banner-thumb">
@@ -9817,12 +9845,17 @@ function homeResetLayout() { saveHomeLayout(HOME_DEFAULT_LAYOUT.slice()); render
 // la primera que responde) en vez de una por una, hay más servicios de relevo
 // (incluido uno que entrega Markdown, también soportado), tiempo de espera
 // más generoso y caché por sesión.
+// v1.50.1-beta: (1) corrige el título de "Personalizar Inicio" (quedaba centrado a media
+// pantalla); (2) tarjetas de "Para tí" y apartados de "Personalizar Inicio" con ícono
+// (los Tips nuevos muestran su imagen); (3) se quita el título redundante "Territorios"
+// dentro de la Sub-sección; (4) el título de Sección queda alineado con Notificaciones
+// y Más opciones.
 // v1.50.0-sb: (1) "Modo Sencillo" deja de ser experimental y pasa a Configuración →
 // Preferencias (debajo de Animaciones). (2) Se retira "NavBar Grow & Shrink": en
 // Escritorio/pantallas grandes la NavBar queda siempre en estado Grow. (3) Nuevo
 // experimento "Inicio" (solo móvil): pantalla de inicio personalizable con barra de
 // navegación inferior (Inicio / Predicación / Reuniones) y "Personalizar Inicio".
-const APP_VERSION = '1.50.0-sb';
+const APP_VERSION = '1.50.1-beta';
 // v1.36.0-beta: (1) Links de referencia ahora tienen 2 tipos — Único uso
 // (sin límite de tiempo, se desactiva tras el primer uso) y Con límite de
 // tiempo (reutilizable hasta que vence, o hasta que el Admin lo termina
