@@ -10257,7 +10257,9 @@ function homeResetLayout() { setHomeTextoTop(false); saveHomeLayout(HOME_DEFAULT
 // (3) Comandos nuevos: agregar territorios ("agrega el territorio 5 y 6 al miércoles") y comandos compuestos
 // ("cambia al encargado del viernes a las 6 de la tarde por Ramón, y asígnale el territorio 22"). (4) Quién puede
 // usar Voz se define en Administración → FlemingApp → Voz.
-const APP_VERSION = '1.57.0-beta';
+// v1.57.1-beta: Voz junta todo lo que dices en una misma frase (espera una breve pausa de silencio) en vez de crear
+// un cuadro y una respuesta por cada trozo; así se genera un solo preview por comando.
+const APP_VERSION = '1.57.1-beta';
 // ═════════════════════════════════════════════════════════════════════════
 // Voz (v1.57.0-beta) — botón junto a la NavBar de Inicio (desde v1.55.0-beta: Asistente de Voz)
 // Motor por reglas (NO es IA): normaliza el texto, detecta la intención con
@@ -10714,7 +10716,7 @@ function vozFlip(toNav) {
 function vozOpen() {
   if (VOZ.open || !canUseVoz()) return;
   const layer = vozById('voz-layer'), SR = VOZ_SR();
-  Object.assign(VOZ, { open: true, state: 'idle', items: [], picks: [], ask: null, manual: false, quiet: 0 });
+  Object.assign(VOZ, { buf: '', open: true, state: 'idle', items: [], picks: [], ask: null, manual: false, quiet: 0 });
   vozById('voz-stream').innerHTML = ''; VOZ.liveEl = VOZ.thinkEl = null;
   layer.classList.toggle('txt', !SR);
   layer.classList.add('open');
@@ -10731,7 +10733,7 @@ function vozClose() {
   if (!VOZ.open) return;
   VOZ.open = false; VOZ.manual = true; VOZ.ask = null;
   try { VOZ.rec && VOZ.rec.abort(); } catch (e) {}
-  VOZ.on = false; vozLive(''); vozThink(false); vozMicUi();
+  VOZ.on = false; VOZ.buf = ''; clearTimeout(VOZ.flushT); vozLive(''); vozThink(false); vozMicUi();
   const layer = vozById('voz-layer'), mic = vozById('voz-mic-btn');
   layer.classList.remove('show');
   vozFlip(true);
@@ -10751,23 +10753,36 @@ function vozListen() {
   const r = new SR(); r.lang = 'es-CL'; r.interimResults = true; r.continuous = true; VOZ.rec = r;
   r.onstart = () => { VOZ.on = true; vozMicUi(); };
   r.onresult = e => {
+    // v1.57.1-beta: todo lo dicho se junta en UNA sola frase; se procesa tras una pausa de silencio.
     let im = '';
     for (let i = e.resultIndex; i < e.results.length; i++) {
-      const tr = e.results[i][0].transcript;
-      if (e.results[i].isFinal) { VOZ.quiet = 0; vozLive(''); vozHear(tr); } else im += tr;
+      const tr = e.results[i][0].transcript.trim();
+      if (e.results[i].isFinal) {
+        const a = vozNorm(VOZ.buf || ''), b = vozNorm(tr);
+        if (!a) VOZ.buf = tr; else if (b.startsWith(a)) VOZ.buf = tr; else if (!a.endsWith(b)) VOZ.buf += ' ' + tr;
+      } else im += tr;
     }
-    if (im) vozLive(im);
+    VOZ.quiet = 0;
+    vozLive(((VOZ.buf || '') + ' ' + im).trim());
+    clearTimeout(VOZ.flushT);
+    VOZ.flushT = setTimeout(vozFlush, im ? 2200 : 1500);
   };
   r.onerror = e => {
     if (e.error === 'not-allowed' || e.error === 'service-not-allowed') { VOZ.manual = true; vozById('voz-layer').classList.add('txt'); vozSay('Necesito permiso para usar el micrófono. Mientras tanto puedes escribir tu comando.', '', 'err'); }
     else if (e.error === 'network') vozSay('No pude conectar con el servicio de voz. Revisa tu conexión.', '', 'err');
   };
   r.onend = () => {
-    VOZ.on = false; vozLive(''); vozMicUi();
+    VOZ.on = false; vozFlush(); vozMicUi();
     // Si Voz espera una respuesta (confirmar/elegir), vuelve a escuchar sola.
     if (VOZ.open && !VOZ.manual && VOZ.ask && VOZ.quiet < 3) { VOZ.quiet++; setTimeout(() => vozListen(), 250); }
   };
   try { r.start(); } catch (e) { showToast('No se pudo iniciar el micrófono.', 'error'); }
+}
+function vozFlush() {
+  clearTimeout(VOZ.flushT);
+  const t = (VOZ.buf || '').trim(); VOZ.buf = '';
+  vozLive('');
+  if (t) vozHear(t);
 }
 function vozSendText() { const i = vozById('voz-text'); const v = i.value; i.value = ''; vozHear(v); }
 function vozHear(text) { VOZ.chain = VOZ.chain.then(() => vozHandle(text)).catch(e => console.warn('Voz:', e)); }
