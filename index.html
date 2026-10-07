@@ -6095,6 +6095,33 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 .ms-footer-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .ms-footer-name { font-family: var(--font); font-size: 0.9rem; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
+  /* ── Asistente de Voz (v1.55.0-beta) ── */
+  .voz-top{display:flex;flex-direction:column;gap:12px;margin-bottom:1rem}
+  #voz-mic{display:flex;align-items:center;justify-content:center;gap:10px;padding:16px;border-radius:var(--radius);border:1.5px solid var(--border);background:var(--surface2);color:var(--text);font:inherit;font-weight:700;cursor:pointer}
+  #voz-mic svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2}
+  #voz-mic.rec{background:var(--red);color:#fff;border-color:var(--red);animation:vozPulse 1.4s infinite}
+  #voz-mic:disabled{opacity:.5;cursor:not-allowed}
+  @keyframes vozPulse{50%{box-shadow:0 0 0 8px rgba(239,68,68,.18)}}
+  .voz-row{display:flex;gap:8px}.voz-row .form-input{flex:1}
+  #voz-live{min-height:1.2em;color:var(--text3);font-size:.85rem;font-style:italic}
+  .voz-card{position:relative;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 38px 12px 12px;margin-bottom:10px}
+  .voz-card.err{border-color:var(--red)}.voz-card.off{opacity:.5}
+  .voz-say{font-size:.8rem;color:var(--text3);margin-bottom:6px}.voz-msg{color:var(--red);font-size:.88rem}
+  .voz-kind{display:inline-block;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--accent);margin-bottom:4px}
+  .voz-target{font-size:.88rem;font-weight:600;margin-bottom:6px}
+  .voz-diff{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:.86rem;padding:3px 0}
+  .voz-diff b{color:var(--text2);min-width:92px}.voz-diff s{color:var(--text3)}.voz-diff em{font-style:normal;font-weight:700;color:var(--green)}
+  .voz-warn{font-size:.78rem;color:var(--orange);margin-top:4px}.voz-hint{font-size:.76rem;color:var(--text3);margin:4px 0 8px}
+  .voz-x{position:absolute;top:8px;right:8px;background:none;border:none;color:var(--text3);font-size:1rem;cursor:pointer}
+  .voz-chk{display:flex;gap:6px;align-items:center;font-size:.76rem;color:var(--text2);margin-bottom:6px}.voz-chk.big{font-size:.88rem;margin:12px 0}
+  .voz-empty{color:var(--text3);font-size:.88rem;padding:1rem 0}
+  #voz-undo{display:flex;gap:10px;align-items:center;justify-content:space-between;font-size:.85rem;padding:10px 12px;border:1px dashed var(--border);border-radius:var(--radius-sm);margin-top:10px}
+  #voz-modal{display:none;position:fixed;inset:0;z-index:10050;background:rgba(0,0,0,.55);align-items:flex-end;justify-content:center}
+  #voz-modal.open{display:flex}
+  .voz-sheet{background:var(--bg);width:100%;max-width:560px;max-height:88vh;overflow:auto;border-radius:18px 18px 0 0;padding:18px}
+  @media(min-width:700px){#voz-modal{align-items:center}.voz-sheet{border-radius:18px}}
+  .voz-actions{display:flex;gap:10px;justify-content:flex-end}.voz-actions button:disabled{opacity:.45}
+  .voz-examples{font-size:.82rem;color:var(--text2);line-height:1.7}
 </style>
 
 <style id="home-css">
@@ -7440,6 +7467,7 @@ function homeResetLayout() { setHomeTextoTop(false); saveHomeLayout(HOME_DEFAULT
         <button class="admin-tab" id="admin-tab-monitor" data-tab="monitor" onclick="switchAdminTab('monitor')" style="display:none">Monitor</button>
         <button class="admin-tab" id="admin-tab-legal" data-tab="legal" onclick="switchAdminTab('legal')" style="display:none">Legal</button>
         <button class="admin-tab" id="admin-tab-avatares" data-tab="avatares" onclick="switchAdminTab('avatares')" style="display:none">Avatares</button>
+        <button class="admin-tab" id="admin-tab-voz" data-tab="voz" onclick="switchAdminTab('voz')" style="display:none">Voz</button>
       </div>
       <div class="admin-section active" id="admin-assignments">
         <div style="display:flex;gap:10px;margin-bottom:1.1rem;align-items:center">
@@ -7937,6 +7965,28 @@ function homeResetLayout() { setHomeTextoTop(false); saveHomeLayout(HOME_DEFAULT
         </div>
         <div style="font-size:0.8rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.04em;margin:0.5rem 0 0.6rem">Tips publicados</div>
         <div id="admin-tips-list"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Tips</div></div></div>
+      </div>
+
+      <!-- ── Asistente de Voz (v1.55.0-beta) — DEV, o Admins con el módulo "voz" ── -->
+      <div class="admin-section" id="admin-voz">
+        <div style="display:flex;align-items:center;margin-bottom:.4rem"><span style="flex:1;font-size:.95rem;font-weight:700">Asistente de Voz</span><span class="voz-kind">Beta</span></div>
+        <div class="voz-hint">Funciona por reglas (no es IA). Interpreta tu comando, te muestra el antes y el después, y solo guarda cuando confirmas.</div>
+        <div class="voz-top">
+          <button id="voz-mic" onclick="vozMicToggle()"><svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg><span>Toca para hablar</span></button>
+          <div id="voz-live"></div>
+          <div class="voz-row"><input class="form-input" id="voz-text" placeholder="…o escribe: cambia el territorio del jueves al 12" onkeydown="if(event.key==='Enter')vozRunText()"><button class="btn-primary" onclick="vozRunText()">Interpretar</button></div>
+          <div id="voz-status" class="voz-hint"></div>
+        </div>
+        <div id="voz-queue"></div>
+        <div class="voz-row" style="margin-top:6px"><button class="btn-primary" id="voz-review-btn" onclick="vozOpenConfirm()" disabled>Revisar y aplicar (0)</button><button class="btn-secondary" id="voz-clear-btn" onclick="vozClear()" style="display:none">Limpiar</button></div>
+        <div id="voz-undo" style="display:none"></div>
+        <details style="margin-top:1rem"><summary style="cursor:pointer;font-weight:600;font-size:.88rem">Ejemplos de comandos</summary><div class="voz-examples">
+          • “Cambia el grupo del miércoles de las 6 de la tarde a las 6 y media”<br>• “Cambia el territorio del jueves al territorio 12” (también “segundo territorio”)<br>• “Cambia el grupo del jueves al grupo 3”<br>• “Cambia el conductor del sábado a Pedro Gómez”<br>• “Cambia la oración final a María López”<br>• “Cambia el presidente de la reunión de entre semana a …”<br>• “Cambia el orador / el lector de La Atalaya del fin de semana a …”<br>• “Pon a Luis Ramírez en la lectura de la Biblia” · “ayudante de la primera conversación a …”<br>• Fechas: hoy, mañana, el jueves, el próximo jueves, la próxima semana, el 14 de octubre<br>• Por voz: “aplicar cambios” abre la confirmación (nunca guarda solo); “cancelar” limpia la lista.</div></details>
+        <div class="dev-only-el" style="margin-top:1.2rem">
+          <div class="form-label2" style="margin-bottom:6px">Acceso de Administradores</div>
+          <div class="voz-hint">Por defecto solo tú (DEV) ves esta función. Activa a los Admins que también puedan usarla.</div>
+          <div id="voz-access-list"></div>
+        </div>
       </div>
 
       <!-- ── Avatares de Personajes Bíblicos (v1.51.0-beta) — exclusivo del Usuario DEV ── -->
@@ -10166,7 +10216,465 @@ function homeResetLayout() { setHomeTextoTop(false); saveHomeLayout(HOME_DEFAULT
 // el comentario. (4) Cambiar la foto de perfil ahora abre una página completa "Editar perfil" (Back + título,
 // previsualización, Colores, Iniciales e íconos y Personajes). (5) Administración → Avatares: categorías de
 // personajes; en Editar perfil cada categoría es una fila deslizable estilo Netflix, una debajo de otra.
-const APP_VERSION = '1.52.1-beta';
+// v1.55.0-beta: (1) Nuevo "Asistente de Voz" (Administración → Asistente de Voz): cambia datos hablando o
+// escribiendo, con un motor por reglas (no es IA). Cubre horario, territorio, grupo y conductor de las
+// asignaciones de predicación, y presidente, oración final, orador, lector y partes de Vida y Ministerio /
+// Reunión Pública. Muestra el antes → después, pide confirmación, verifica lo guardado y permite deshacer.
+// (2) Solo el DEV lo ve por defecto; el DEV decide qué Admins lo tienen (módulo "Asistente de Voz").
+const APP_VERSION = '1.55.0-beta';
+// ═════════════════════════════════════════════════════════════════════════
+// Asistente de Voz (v1.55.0-beta) — Administración → Asistente de Voz
+// Motor por reglas (NO es IA): normaliza el texto, detecta la intención con
+// patrones, resuelve fechas/horas/nombres y propone cambios para revisarlos
+// antes de aplicarlos. Solo DEV (o Admins con el módulo "voz" activado).
+// ═════════════════════════════════════════════════════════════════════════
+const VOZ = { data: null, queue: [], undo: null, rec: null, on: false, n: 0 };
+const VOZ_DIAS = ['domingo','lunes','martes','miercoles','jueves','viernes','sabado'];
+const VOZ_MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const VOZ_NUM = {cero:0,uno:1,dos:2,tres:3,cuatro:4,cinco:5,seis:6,siete:7,ocho:8,nueve:9,diez:10,once:11,doce:12,trece:13,catorce:14,quince:15,dieciseis:16,diecisiete:17,dieciocho:18,diecinueve:19,veinte:20,veintiuno:21,veintidos:22,veintitres:23,veinticuatro:24,veinticinco:25,veintiseis:26,veintisiete:27,veintiocho:28,veintinueve:29,treinta:30,cuarenta:40,cincuenta:50};
+
+function canUseVoz() {
+  if (currentRole === 'dev') return true;
+  return currentRole === 'admin' && !!(_currentUserPermsCache && _currentUserPermsCache.voz === true);
+}
+function vozApplyTabVisibility() {
+  const t = document.getElementById('admin-tab-voz');
+  if (t) t.style.display = canUseVoz() ? '' : 'none';
+}
+
+// ── Utilidades de texto / fecha ─────────────────────────────────────────
+const vozISO = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+const vozAdd = (iso, n) => { const [y, m, d] = iso.split('-').map(Number); return vozISO(new Date(y, m - 1, d + n)); };
+const vozDow = iso => new Date(iso + 'T12:00:00').getDay();
+const vozFmtDate = iso => new Date(iso + 'T12:00:00').toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' });
+const vozHM = s => (s || '').substring(0, 5);
+const vozEsc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+function vozNorm(s) {
+  let t = String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  t = t.replace(/\b([ap])\.?\s?m\.?(?=\s|$)/g, '$1m').replace(/(\d)\.(\d{2})\b/g, '$1:$2');
+  t = t.replace(/[^a-z0-9: ]+/g, ' ').replace(/\s+/g, ' ').trim();
+  t = t.replace(/\b(treinta|cuarenta|cincuenta) y (uno|dos|tres|cuatro|cinco|seis|siete|ocho|nueve)\b/g, (m, a, b) => VOZ_NUM[a] + VOZ_NUM[b]);
+  t = t.replace(/\b(la|las) una\b/g, '$1 1');
+  return t.replace(/\b[a-z]+\b/g, w => Object.prototype.hasOwnProperty.call(VOZ_NUM, w) ? String(VOZ_NUM[w]) : w);
+}
+
+// Hora: devuelve {H,M,assumed} (H en 24h). `inherit` = 'am'|'pm' tomado de otra hora de la frase.
+function vozTime(raw, inherit) {
+  const s = ' ' + raw + ' ';
+  if (/\bmediodia\b/.test(s)) return { H: 12, M: 0, assumed: false };
+  if (/\bmedianoche\b/.test(s)) return { H: 0, M: 0, assumed: false };
+  let h, M = 0, m = s.match(/(\d{1,2}):(\d{2})/);
+  if (m) { h = +m[1]; M = +m[2]; }
+  else {
+    m = s.match(/(\d{1,2})(?:\s+y\s+(media|cuarto|\d{1,2})|\s+menos\s+(cuarto|\d{1,2}))?/);
+    if (!m) return null;
+    h = +m[1];
+    if (m[2]) M = m[2] === 'media' ? 30 : m[2] === 'cuarto' ? 15 : +m[2];
+    else if (m[3]) { h -= 1; M = 60 - (m[3] === 'cuarto' ? 15 : +m[3]); }
+  }
+  if (h > 23 || M > 59 || h < 0) return null;
+  let per = /\b(de la manana|de la madrugada|am)\b/.test(s) ? 'am' : /\b(de la tarde|de la noche|pm)\b/.test(s) ? 'pm' : null;
+  let H = h, assumed = false;
+  if (h >= 1 && h <= 12 && !(h === 12 && !per)) {
+    const p = per || inherit;
+    if (p === 'pm' && h < 12) H = h + 12;
+    else if (p === 'am' && h === 12) H = 0;
+    else if (!p) { assumed = true; H = (h >= 1 && h <= 6) ? h + 12 : h; }
+  }
+  return { H, M, assumed, per };
+}
+const vozTimeStr = x => String(x.H).padStart(2, '0') + ':' + String(x.M).padStart(2, '0');
+
+// Fecha: {date, weekday, explicit} o {week} o {}
+function vozDate(t) {
+  const today = vozISO(new Date()), cur = new Date().getDay();
+  const s = t.replace(/de la (manana|tarde|noche|madrugada)/g, ' ');
+  let m = s.match(new RegExp('\\b(\\d{1,2}) de (' + VOZ_MESES.join('|') + ')(?: de (\\d{4}))?'));
+  if (m) {
+    let y = m[3] ? +m[3] : new Date().getFullYear();
+    let iso = y + '-' + String(VOZ_MESES.indexOf(m[2]) + 1).padStart(2, '0') + '-' + String(+m[1]).padStart(2, '0');
+    if (!m[3] && iso < vozAdd(today, -30)) iso = (y + 1) + iso.slice(4);
+    return { date: iso, explicit: true };
+  }
+  if (/\bpasado manana\b/.test(s)) return { date: vozAdd(today, 2), explicit: true };
+  if (/\bmanana\b/.test(s)) return { date: vozAdd(today, 1), explicit: true };
+  if (/\bhoy\b/.test(s)) return { date: today, explicit: true };
+  const wd = s.match(/\b(domingo|lunes|martes|miercoles|jueves|viernes|sabado)s?\b/);
+  const nextWeek = /\b(proxima semana|semana que viene|semana siguiente|siguiente semana)\b/.test(s);
+  const thisWeek = /\besta semana\b/.test(s);
+  const nxt = /\b(proximo|proxima|que viene|siguiente)\b/.test(s);
+  if (wd) {
+    const idx = VOZ_DIAS.indexOf(wd[1]);
+    if (nextWeek) return { date: vozAdd(today, -((cur + 6) % 7) + 7 + ((idx + 6) % 7)), weekday: idx, explicit: true };
+    let diff = (idx - cur + 7) % 7; if (nxt && diff === 0) diff = 7;
+    return { date: vozAdd(today, diff), weekday: idx, explicit: false };
+  }
+  if (nextWeek) return { week: vozAdd(today, 7) };
+  if (thisWeek) return { week: today };
+  return {};
+}
+
+// ── Coincidencia difusa de nombres (tolera errores del reconocimiento de voz) ──
+const vozPhon = w => w.replace(/v/g, 'b').replace(/ll/g, 'y').replace(/h/g, '').replace(/z/g, 's').replace(/c([ei])/g, 's$1').replace(/qu/g, 'k').replace(/c/g, 'k').replace(/y$/, 'i');
+function vozLev(a, b) {
+  const d = Array.from({ length: a.length + 1 }, (_, i) => [i, ...Array(b.length).fill(0)]);
+  for (let j = 1; j <= b.length; j++) d[0][j] = j;
+  for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++)
+    d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+  return d[a.length][b.length];
+}
+function vozTokMatch(q, c) {
+  if (q === c) return 1;
+  const pq = vozPhon(q), pc = vozPhon(c);
+  if (pq === pc) return 0.95;
+  if (q.length >= 3 && (c.startsWith(q) || q.startsWith(c))) return 0.8;
+  if (Math.min(q.length, c.length) >= 4 && vozLev(pq, pc) <= 1) return 0.85;
+  return 0;
+}
+function vozPeople(query, list, nameFn) {
+  const q = vozNorm(query).replace(/\b(el|la|los|las|hermano|hermana|hno|hna|don|dona|senor|senora)\b/g, ' ').split(' ').filter(Boolean);
+  if (!q.length) return [];
+  return list.map(p => {
+    const toks = vozNorm(nameFn(p)).split(' ').filter(Boolean);
+    let sc = 0; const used = new Set();
+    q.forEach(w => { let best = 0, bi = -1; toks.forEach((c, i) => { if (used.has(i)) return; const v = vozTokMatch(w, c); if (v > best) { best = v; bi = i; } }); if (bi >= 0) used.add(bi); sc += best; });
+    return { p, score: sc / Math.max(q.length, 1) * (q.length >= 2 || toks.length === 1 ? 1 : 0.9) };
+  }).filter(x => x.score >= 0.7).sort((a, b) => b.score - a.score)
+    .filter((x, _, arr) => x.score >= arr[0].score - 0.12).slice(0, 4);
+}
+
+// Texto después del último "a / por / para …" (valor nuevo), sin títulos
+function vozTail(t) {
+  const m = t.match(/.*\b(?:a|al|por|para|sea|sera|con)\s+(?!las?\b\d)(?!\d)(.+)$/);
+  return m ? m[1].replace(/^(el|la|los|las)\s+/, '').replace(/^(hermano|hermana|hno|hna)\s+/, '').trim() : '';
+}
+// "pon a Juan como presidente" / "que Juan sea el presidente" → {who, role}
+function vozWhoRole(t) {
+  let m = t.match(/\b(?:pon|ponga|poner|asigna|asigne|designa|designe|nombra|coloca)\s+(?:a |al )?(.+?)\s+(?:como|de|en|para|a cargo de|encargado de|encargada de)\s+(.+)$/);
+  if (m) return { who: m[1], role: m[2] };
+  m = t.match(/\bque\s+(?:el hermano |la hermana )?(.+?)\s+(?:sea|haga|este|se encargue|lea|ore|presida)\b\s*(.*)$/);
+  if (m) return { who: m[1], role: (m[2] || '') + ' ' + t.replace(m[0], '') };
+  return null;
+}
+
+// ── Construcción de opciones (cada opción = un cambio completo y revisable) ──
+const vozOpt = (table, row, label, patch, rows, warn) => ({ table, id: row.id, label, patch, prev: Object.fromEntries(Object.keys(patch).map(k => [k, row[k]])), rows, warn: warn || [] });
+const vozPartsOf = w => Array.isArray(w.parts) ? w.parts : (() => { try { return JSON.parse(w.parts || '[]'); } catch (e) { return []; } })();
+const vozPerson = (name) => name || '— sin asignar —';
+const vozRange = w => vozFmtDate(w.date_start) + ' → ' + vozFmtDate(w.date_end);
+
+function vozAsgLabel(a) {
+  const D = VOZ.data, g = D.gru.find(x => x.id === a.grupo_id), t = D.ter.find(x => x.id === a.territory_id);
+  return [vozFmtDate(a.date), vozHM(a.time), g ? 'Grupo ' + g.numero : null, t ? 'Terr. ' + t.number : null, a.conductor || null].filter(Boolean).join(' · ');
+}
+function vozFindAsg(d, fromT, grupoN) {
+  const D = VOZ.data, today = vozISO(new Date());
+  if (!d.date) return { err: 'Indica el día (por ejemplo "el miércoles" o "el 14 de octubre").' };
+  let list = D.asg.filter(a => !['evento', 'especial'].includes(a.type));
+  list = d.explicit ? list.filter(a => a.date === d.date)
+    : list.filter(a => a.date >= d.date && vozDow(a.date) === d.weekday);
+  if (!list.length) return { err: 'No hay asignaciones de predicación para ' + vozFmtDate(d.date) + '.' };
+  const all = list;
+  if (fromT) list = list.filter(a => { const [h, m] = vozHM(a.time).split(':').map(Number); return m === fromT.M && (h === fromT.H || (fromT.assumed && h === (fromT.H + 12) % 24)); });
+  if (grupoN != null) { const g = D.gru.find(x => String(x.numero) === String(grupoN)); list = list.filter(a => g && a.grupo_id === g.id); }
+  if (!list.length) return { err: 'No encontré esa asignación (hora/grupo). Ese día hay: ' + all.slice(0, 4).map(x => vozAsgLabel(x)).join(' | ') };
+  return { list: list.slice(0, 8) };
+}
+
+function vozPreach(t) {
+  const D = VOZ.data, d = vozDate(t), out = [];
+  const rng = t.match(/\bde(?: las?)? ((?:\d|mediodia).*?) (?:a|hasta)(?: las?)? ((?:\d|mediodia).*)$/);
+  const gm = t.match(/\bgrupo (\d+)/g), gLast = gm ? gm[gm.length - 1].match(/\d+/)[0] : null;
+  let tm = [...t.matchAll(/\bterritorio (?:numero |n |no )?(\d+)(?:\s?([a-z])\b)?/g)];
+  if (!tm.length) { const z = t.match(/\b(?:al|a|por|para)\s+(\d+)(?:\s?([a-z])\b)?\s*$/); if (z) tm = [z]; }
+  const conductorIntent = /\b(conductor|conduce|dirige|encargad[oa] de (la )?(predicacion|salida))\b/.test(t) && !/\b(oracion|presidente|lector|orador)\b/.test(t);
+  const timeOnly = rng ? null : (t.match(/.*\ba las? ((?:\d|mediodia)[^]*)$/) || (/\b(?:hora|horario)\b/.test(t) ? t.match(/.*\ba ((?:\d|mediodia)[^]*)$/) : null));
+  let intent = null;
+  if (rng || (timeOnly && !conductorIntent && !/\bterritorio\b/.test(t))) intent = 'time';
+  else if (conductorIntent) intent = 'conductor';
+  else if (/\bterritorio\b/.test(t)) intent = 'territory';
+  else if (/\bgrupo\b/.test(t) && gLast) intent = 'group';
+  if (!intent) return null;
+
+  let fromT = null, toT = null;
+  if (intent === 'time') {
+    if (rng) { fromT = vozTime(rng[1]); toT = vozTime(rng[2], fromT && (fromT.H >= 12 ? 'pm' : 'am')); if (fromT && fromT.assumed && toT && !toT.assumed) { const p = toT.H >= 12 ? 'pm' : 'am'; fromT = vozTime(rng[1], p); } }
+    else toT = vozTime(timeOnly[1]);
+    if (!toT) return { err: 'No entendí la hora nueva.' };
+  }
+  const f = vozFindAsg(d, fromT, intent === 'time' && gLast ? gLast : null);
+  if (f.err) return { err: f.err };
+  const opts = [];
+  let valueErr = null, extraWarn = [];
+  if (intent === 'time') {
+    const nt = vozTimeStr(toT);
+    if (toT.H < 5 || toT.H > 22) extraWarn.push('Hora inusual (' + nt + '). Revisa AM/PM.');
+    else if (toT.assumed) extraWarn.push('No dijiste mañana/tarde: asumí ' + nt + '.');
+    f.list.forEach(a => opts.push(vozOpt('assignments', a, vozAsgLabel(a), { time: nt }, [['Hora', vozHM(a.time), nt]], extraWarn)));
+  } else if (intent === 'territory') {
+    if (!tm.length) valueErr = 'No entendí el número del territorio.';
+    else {
+      const last = tm[tm.length - 1], find = n => D.ter.find(x => String(x.number).toLowerCase() === n), ter = (last[2] && find(last[1] + last[2])) || find(last[1]), num = ter ? String(ter.number).toLowerCase() : last[1];
+      const slot = /\b(segundo|2do)\b/.test(t) ? 2 : /\b(tercer|tercero|3ro)\b/.test(t) ? 3 : 1;
+      if (!ter) valueErr = 'No existe el territorio ' + num.toUpperCase() + '.';
+      else f.list.forEach(a => {
+        if (a.type === 'visita') return;
+        const k = slot === 1 ? 'territory_id' : 'territory_id_' + slot, mk = slot === 1 ? 'manzanas_asignadas' : 'manzanas_asignadas_' + slot;
+        const old = D.ter.find(x => x.id === a[k]);
+        opts.push(vozOpt('assignments', a, vozAsgLabel(a), { [k]: ter.id, [mk]: [] },
+          [['Territorio' + (slot > 1 ? ' ' + slot : ''), old ? old.number : '—', ter.number], ...((a[mk] || []).length ? [['Manzanas', (a[mk] || []).join(', '), 'se limpian']] : [])]));
+      });
+      if (!opts.length && !valueErr) valueErr = 'Esa asignación es de tipo Visita; edítala manualmente.';
+    }
+  } else if (intent === 'group') {
+    const g = D.gru.find(x => String(x.numero) === gLast);
+    if (!g) valueErr = 'No existe el grupo ' + gLast + '.';
+    else f.list.forEach(a => { const old = D.gru.find(x => x.id === a.grupo_id); opts.push(vozOpt('assignments', a, vozAsgLabel(a), { grupo_id: g.id }, [['Grupo', old ? old.numero : '—', g.numero]])); });
+  } else if (intent === 'conductor') {
+    const q = (vozWhoRole(t) || {}).who || vozTail(t);
+    const ms = vozPeople(q, D.con, c => c.nombre + ' ' + c.apellido);
+    if (!ms.length) valueErr = 'No encontré al conductor "' + q + '".';
+    else f.list.forEach(a => ms.forEach(({ p: c }) => {
+      const w = D.asg.some(o => o.id !== a.id && o.date === a.date && vozHM(o.time) === vozHM(a.time) && o.conductor_id === c.id) ? ['Ya tiene otra asignación a esa hora.'] : [];
+      opts.push(vozOpt('assignments', a, vozAsgLabel(a) + (ms.length > 1 ? ' → ' + c.nombre + ' ' + c.apellido : ''), { conductor: c.nombre + ' ' + c.apellido, conductor_id: c.id, phone: c.telefono || null }, [['Conductor', a.conductor || '—', c.nombre + ' ' + c.apellido]], w));
+    }));
+  }
+  if (valueErr) return { err: valueErr };
+  return { kind: 'Predicación', opts };
+}
+
+function vozWeek(list, d) {
+  const today = vozISO(new Date()), ref = d.date || d.week;
+  if (ref) return list.find(w => w.date_start <= ref && ref <= w.date_end) || null;
+  return list.find(w => w.date_start <= today && today <= w.date_end) || list.find(w => w.date_start > today) || null;
+}
+const VOZ_STOP = new Set(['de', 'la', 'el', 'los', 'las', 'del', 'un', 'una', 'y', 'en', 'que', 'para', 'por', 'con', 'al', 'su', 'sus', 'cambia', 'cambie', 'pon', 'ponga']);
+function vozPartMatch(t, parts) {
+  const tt = new Set(t.split(' ')); let best = null;
+  parts.forEach((p, i) => {
+    if (p.header || !p.name) return;
+    const toks = vozNorm(p.name).split(' ').filter(w => w.length >= 4 && !VOZ_STOP.has(w));
+    if (!toks.length) return;
+    const sc = toks.filter(w => [...tt].some(x => vozTokMatch(x, w) >= 0.8)).length / toks.length;
+    if (sc >= 0.5 && (!best || sc > best.sc)) best = { i, sc };
+  });
+  return best;
+}
+
+function vozMeeting(t) {
+  const D = VOZ.data, d = vozDate(t), wr = vozWhoRole(t);
+  const vm = /\b(entre semana|vida y ministerio|vmc|tesoros|perlas|seamos mejores|nuestra vida cristiana|sala b|oracion (final|de cierre|de clausura)|estudio biblico de la congregacion|ayudante)\b/.test(t);
+  const fm = /\b(fin de semana|reunion publica|publica|atalaya|orador|conferencista|visitante|lector)\b/.test(t);
+  const roleText = wr ? wr.role + ' ' + t : t;
+  let q = wr ? wr.who : vozTail(t);
+  const isPrayer = /\boracion\b/.test(t), isPres = /\bpresidente|presidencia|preside\b/.test(t);
+  const isSpeaker = /\b(orador|conferencista|discurso)\b/.test(t), isReader = /\b(lector|lee la atalaya|lectura de la atalaya)\b/.test(t);
+  const isTitle = /\b(tema|titulo)\b/.test(t) && !/\bparte\b/.test(t);
+  const mk = (kind, w, field, label, value, valueIsPerson, extra) => ({ kind, w, field, label, value, person: valueIsPerson, extra });
+  const specs = [];
+
+  if (isPrayer) { if (!/\b(inicial|apertura)\b/.test(t)) { const w = vozWeek(D.vmc, d); specs.push(mk('Vida y Ministerio', w, 'prayer_close', 'Oración final', q, true)); } else return { err: 'La oración inicial no tiene campo propio en la plataforma.' }; }
+  else if (isPres) {
+    if (fm && !vm) specs.push(mk('Reunión Pública', vozWeek(D.fs, d), 'presidente', 'Presidente', q, true));
+    else if (vm && !fm) specs.push(mk('Vida y Ministerio', vozWeek(D.vmc, d), 'presidente', 'Presidente', q, true));
+    else { specs.push(mk('Vida y Ministerio', vozWeek(D.vmc, d), 'presidente', 'Presidente', q, true)); specs.push(mk('Reunión Pública', vozWeek(D.fs, d), 'presidente', 'Presidente', q, true)); }
+  } else if (isReader && !vm) specs.push(mk('Reunión Pública', vozWeek(D.fs, d), 'watchtower_reader', 'Lector de La Atalaya', q, true));
+  else {
+    // ¿Es una parte de Vida y Ministerio?
+    const w = vozWeek(D.vmc, d), parts = w ? vozPartsOf(w) : [], pm = (!fm || vm) && w ? vozPartMatch(roleText, parts.filter(p => /sala b|salab/.test(t) ? true : p.section !== 'maestros_b')) : null;
+    if (pm) {
+      const pool = parts.filter(p => /sala b|salab/.test(t) ? true : p.section !== 'maestros_b'), idx = parts.indexOf(pool[pm.i]);
+      const second = /\bayudante\b/.test(t);
+      specs.push(mk('Vida y Ministerio', w, 'parts', (second ? 'Ayudante — ' : '') + parts[idx].name, q, true, { idx, second }));
+    } else if (isTitle) specs.push(mk('Reunión Pública', vozWeek(D.fs, d), 'talk_title', 'Tema del discurso', (t.match(/.*\b(?:a|por|sea|sera)\s+(.+)$/) || [])[1] || '', false));
+    else if (isSpeaker) specs.push(mk('Reunión Pública', vozWeek(D.fs, d), 'speaker_name', 'Orador', q, true));
+  }
+  if (!specs.length) return null;
+
+  const opts = []; let err = null;
+  specs.forEach(s => {
+    if (!s.w) { err = err || 'No encontré la semana de ' + s.kind + ' para esa fecha.'; return; }
+    if (!s.value) { err = err || 'No entendí a quién asignar.'; return; }
+    const ppl = vozPeople(s.value, D.ppl, p => p.full_name || ((p.first_name || '') + ' ' + (p.last_name || '')));
+    const names = ppl.length ? ppl.map(x => x.p.full_name || (x.p.first_name + ' ' + x.p.last_name)) : [];
+    if (!names.length) { err = 'No encontré a "' + s.value + '" en la lista de personas.'; return; }
+    names.forEach(nm => {
+      const lab = s.kind + ' · ' + vozRange(s.w) + (names.length > 1 ? ' → ' + nm : '');
+      if (s.field === 'parts') {
+        const parts = vozPartsOf(s.w).map(p => ({ ...p })), k = s.extra.second ? 'assigned2' : 'assigned', old = parts[s.extra.idx][k];
+        parts[s.extra.idx][k] = nm;
+        { const o = vozOpt('vmc_weeks', s.w, lab, { parts }, [[s.label, vozPerson(old), nm]]); o.partOp = { idx: s.extra.idx, k, val: nm, was: old }; opts.push(o); }
+      } else opts.push(vozOpt(s.kind === 'Vida y Ministerio' ? 'vmc_weeks' : 'fs_weeks', s.w, lab, { [s.field]: nm }, [[s.label, vozPerson(s.w[s.field]), nm]]));
+    });
+  });
+  if (!opts.length) return { err: err || 'No pude armar el cambio.' };
+  return { kind: 'Reunión', opts };
+}
+
+const vozNormV = v => (v == null || (Array.isArray(v) && !v.length)) ? '' : JSON.stringify(v);
+const vozSameKey = (k, a, b) => k === 'time' ? vozHM(a) === vozHM(b) : vozNormV(a) === vozNormV(b);
+const vozNoop = o => o.partOp ? (o.partOp.was || '') === o.partOp.val : Object.keys(o.patch).filter(k => k !== 'phone' && !k.startsWith('manzanas')).every(k => vozSameKey(k, o.prev[k], o.patch[k]));
+
+// Divide una frase larga en comandos y devuelve las propuestas
+function vozParse(raw) {
+  const t0 = vozNorm(raw);
+  const chunks = t0.split(/\b(?:ademas|tambien|luego|despues|y ahora|y tambien)\b/).map(s => s.trim()).filter(s => s.length > 3);
+  return chunks.map(t => {
+    let r = (/\b(oracion|presidente|presidencia|lector|orador|conferencista|discurso|atalaya|entre semana|vida y ministerio|fin de semana|parte|ayudante|sala b|tema|titulo)\b/.test(t) ? vozMeeting(t) : null) || vozPreach(t) || vozMeeting(t);
+    if (r && r.opts) { r.opts = r.opts.filter(o => !vozNoop(o)); if (!r.opts.length) r = { err: 'Ya está así: no hay nada que cambiar.' }; }
+    return { id: ++VOZ.n, text: t, res: r || { err: 'No entendí el comando. Prueba con: "cambia el territorio del jueves al 12".' }, sel: 0, inc: true };
+  });
+}
+
+// ═══ Interfaz, aplicación verificada y deshacer ═══════════════════════════
+async function vozLoad() {
+  const today = vozISO(new Date());
+  const q = (t, f) => sb.from(t).select(f || '*');
+  const [a, t, g, c, v, f, p] = await Promise.all([
+    q('assignments').gte('date', vozAdd(today, -1)).order('date').order('time'), q('territories', 'id,number'), q('grupos', 'id,numero'),
+    q('conductores'), q('vmc_weeks').order('date_start'), q('fs_weeks').order('date_start'), q('vmc_people')]);
+  VOZ.data = { asg: a.data || [], ter: t.data || [], gru: g.data || [], con: c.data || [], vmc: v.data || [], fs: f.data || [], ppl: p.data || [] };
+}
+async function vozOnOpen() {
+  if (!canUseVoz()) return;
+  const box = document.getElementById('voz-status');
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  document.getElementById('voz-mic').disabled = !SR;
+  box.textContent = SR ? 'Listo. Toca el micrófono o escribe un comando.' : 'Este navegador no soporta dictado por voz; usa el cuadro de texto (o Chrome/Edge/Safari).';
+  try { await vozLoad(); } catch (e) { box.textContent = 'No se pudieron cargar los datos: ' + e.message; }
+  vozRenderQueue(); vozRenderUndo(); if (currentRole === 'dev') vozLoadAccess();
+}
+function vozSubmit(text) {
+  text = (text || '').trim(); if (!text) return;
+  const n = vozNorm(text);
+  if (/^(aplica|aplicar|confirma|confirmar)( los)?( cambios)?$/.test(n)) return vozOpenConfirm();
+  if (/^(cancela|cancelar|descarta|descartar|limpia|limpiar)( todo| los cambios)?$/.test(n)) return vozClear();
+  if (!VOZ.data) { showToast('Los datos aún se están cargando.', 'error'); return; }
+  VOZ.queue.push(...vozParse(text)); vozRenderQueue();
+}
+function vozRunText() { const i = document.getElementById('voz-text'); vozSubmit(i.value); i.value = ''; }
+function vozClear() { VOZ.queue = []; vozRenderQueue(); }
+function vozRemove(id) { VOZ.queue = VOZ.queue.filter(p => p.id !== id); vozRenderQueue(); }
+function vozPick(id, v) { const p = VOZ.queue.find(x => x.id === id); if (p) { p.sel = +v; vozRenderQueue(); } }
+function vozInc(id, v) { const p = VOZ.queue.find(x => x.id === id); if (p) { p.inc = v; vozRenderQueue(true); } }
+
+function vozMicToggle() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition; if (!SR) return;
+  if (VOZ.on) { VOZ.rec.stop(); return; }
+  const r = new SR(); r.lang = 'es-CL'; r.interimResults = true; r.continuous = true; VOZ.rec = r;
+  const live = document.getElementById('voz-live');
+  r.onstart = () => { VOZ.on = true; vozMicUi(); };
+  r.onresult = e => { let im = ''; for (let i = e.resultIndex; i < e.results.length; i++) { const tr = e.results[i][0].transcript; if (e.results[i].isFinal) { vozSubmit(tr); live.textContent = ''; } else im += tr; } if (im) live.textContent = '“' + im + '”'; };
+  r.onerror = e => { if (e.error !== 'no-speech' && e.error !== 'aborted') showToast('Micrófono: ' + e.error, 'error'); };
+  r.onend = () => { VOZ.on = false; live.textContent = ''; vozMicUi(); };
+  try { r.start(); } catch (e) { showToast('No se pudo iniciar el micrófono.', 'error'); }
+}
+function vozMicUi() { const b = document.getElementById('voz-mic'); b.classList.toggle('rec', VOZ.on); b.querySelector('span').textContent = VOZ.on ? 'Escuchando… toca para parar' : 'Toca para hablar'; }
+
+function vozRenderQueue(keepFocus) {
+  const el = document.getElementById('voz-queue'), n = VOZ.queue.filter(p => p.res.opts && p.inc).length;
+  document.getElementById('voz-review-btn').textContent = 'Revisar y aplicar (' + n + ')';
+  document.getElementById('voz-review-btn').disabled = !n;
+  document.getElementById('voz-clear-btn').style.display = VOZ.queue.length ? '' : 'none';
+  if (!VOZ.queue.length) { el.innerHTML = '<div class="voz-empty">Aún no hay comandos. Los cambios propuestos aparecerán aquí para que los revises.</div>'; return; }
+  el.innerHTML = VOZ.queue.map(p => {
+    const rm = `<button class="voz-x" onclick="vozRemove(${p.id})" title="Quitar">✕</button>`;
+    if (p.res.err) return `<div class="voz-card err"><div class="voz-say">“${vozEsc(p.text)}”</div><div class="voz-msg">⚠ ${vozEsc(p.res.err)}</div>${rm}</div>`;
+    const o = p.res.opts[p.sel] || p.res.opts[0];
+    const sel = p.res.opts.length > 1 ? `<select class="form-select" onchange="vozPick(${p.id},this.value)">${p.res.opts.map((x, i) => `<option value="${i}" ${i === p.sel ? 'selected' : ''}>${vozEsc(x.label)}</option>`).join('')}</select><div class="voz-hint">Hay ${p.res.opts.length} posibilidades: elige la correcta.</div>` : `<div class="voz-target">${vozEsc(o.label)}</div>`;
+    return `<div class="voz-card${p.inc ? '' : ' off'}"><label class="voz-chk"><input type="checkbox" ${p.inc ? 'checked' : ''} onchange="vozInc(${p.id},this.checked)"> Incluir</label>
+      <div class="voz-say">“${vozEsc(p.text)}”</div><span class="voz-kind">${vozEsc(p.res.kind)}</span>${sel}
+      ${o.rows.map(r => `<div class="voz-diff"><b>${vozEsc(r[0])}</b><s>${vozEsc(r[1])}</s><span>→</span><em>${vozEsc(r[2])}</em></div>`).join('')}
+      ${o.warn.map(w => `<div class="voz-warn">⚠ ${vozEsc(w)}</div>`).join('')}${rm}</div>`;
+  }).join('');
+}
+
+function vozChosen() { return VOZ.queue.filter(p => p.res.opts && p.inc).map(p => p.res.opts[p.sel] || p.res.opts[0]); }
+function vozOpenConfirm() {
+  const ch = vozChosen(); if (!ch.length) { showToast('No hay cambios para aplicar.', 'error'); return; }
+  const m = document.getElementById('voz-modal');
+  m.innerHTML = `<div class="voz-sheet"><h3>Confirma los cambios</h3><p class="voz-hint">Se guardarán ${ch.length} cambio(s) en la base de datos. Podrás deshacerlos después.</p>
+    ${ch.map(o => `<div class="voz-card"><div class="voz-target">${vozEsc(o.label)}</div>${o.rows.map(r => `<div class="voz-diff"><b>${vozEsc(r[0])}</b><s>${vozEsc(r[1])}</s><span>→</span><em>${vozEsc(r[2])}</em></div>`).join('')}${o.warn.map(w => `<div class="voz-warn">⚠ ${vozEsc(w)}</div>`).join('')}</div>`).join('')}
+    <label class="voz-chk big"><input type="checkbox" id="voz-ok" onchange="document.getElementById('voz-go').disabled=!this.checked"> Revisé cada cambio y quiero aplicarlos</label>
+    <div class="voz-actions"><button class="btn-secondary" onclick="vozCloseConfirm()">Volver</button><button class="btn-primary" id="voz-go" disabled onclick="vozApply()">Aplicar cambios</button></div></div>`;
+  m.classList.add('open');
+}
+function vozCloseConfirm() { document.getElementById('voz-modal').classList.remove('open'); }
+
+async function vozApply() {
+  const btn = document.getElementById('voz-go'); btn.disabled = true; btn.textContent = 'Aplicando…';
+  const groups = {};
+  vozChosen().forEach(o => { (groups[o.table + ':' + o.id] = groups[o.table + ':' + o.id] || []).push(o); });
+  const done = [], fails = [], undo = [];
+  for (const key of Object.keys(groups)) {
+    const opts = groups[key], { table, id } = opts[0];
+    try {
+      const { data: fresh, error: e1 } = await sb.from(table).select('*').eq('id', id).single();
+      if (e1 || !fresh) throw new Error('no se encontró el registro');
+      const patch = {}; let partsOps = [];
+      for (const o of opts) {
+        if (o.partOp) { partsOps.push(o.partOp); continue; }
+        for (const k of Object.keys(o.patch)) { if (!vozSameKey(k, fresh[k], o.prev[k])) throw new Error('cambió mientras revisabas (' + k + '); vuelve a pedirlo'); patch[k] = o.patch[k]; }
+      }
+      if (partsOps.length) {
+        const parts = vozPartsOf(fresh).map(p => ({ ...p }));
+        for (const op of partsOps) { if ((parts[op.idx] || {})[op.k] !== op.was && (parts[op.idx] || {})[op.k] != null && (op.was || '') !== (parts[op.idx][op.k] || '')) throw new Error('la parte cambió mientras revisabas'); parts[op.idx][op.k] = op.val; }
+        patch.parts = parts;
+      }
+      const prevFull = Object.fromEntries(Object.keys(patch).map(k => [k, fresh[k]]));
+      const { error: e2 } = await sb.from(table).update(patch).eq('id', id);
+      if (e2) throw new Error(e2.message);
+      const { data: chk } = await sb.from(table).select('*').eq('id', id).single();
+      if (!chk || Object.keys(patch).some(k => !vozSameKey(k, chk[k], patch[k]))) throw new Error('no se pudo verificar el guardado');
+      undo.push({ table, id, prev: prevFull }); done.push(opts.map(o => o.label).join(' / '));
+      if (table === 'vmc_weeks' && typeof vmcNotifyNewAssignments === 'function') { try { await vmcNotifyNewAssignments({ ...fresh, ...patch }, fresh, vmcFormatRange(fresh)); } catch (e) { console.warn(e.message); } }
+      if (table === 'fs_weeks' && typeof fsNotifyNewAssignments === 'function') { try { await fsNotifyNewAssignments({ ...fresh, ...patch }, fresh, fsFormatRange(fresh)); } catch (e) { console.warn(e.message); } }
+    } catch (e) { fails.push(opts[0].label + ': ' + e.message); }
+  }
+  vozCloseConfirm();
+  if (undo.length) VOZ.undo = undo;
+  trackEvent('voz_apply', { ok: done.length, fail: fails.length });
+  await vozRefreshApp(); VOZ.queue = []; await vozLoad().catch(() => {}); vozRenderQueue(); vozRenderUndo();
+  showToast(fails.length ? `Aplicados ${done.length}, con errores: ${fails.length}` : `✓ ${done.length} cambio(s) aplicados y verificados`, fails.length ? 'error' : 'success');
+  if (fails.length) alert('No se aplicaron:\n\n' + fails.join('\n'));
+}
+async function vozRefreshApp() {
+  try { if (typeof loadSchedule === 'function') await loadSchedule(); if (typeof renderAdminAssignments === 'function') renderAdminAssignments(); } catch (e) {}
+  try { await loadVmcWeeks(); renderAdminVmc(); renderVmcUserView(); } catch (e) {}
+  try { await loadFsWeeks(); renderAdminFs(); renderFsUserView(); } catch (e) {}
+}
+function vozRenderUndo() {
+  const el = document.getElementById('voz-undo');
+  el.style.display = VOZ.undo ? '' : 'none';
+  el.innerHTML = VOZ.undo ? `<span>Último lote: ${VOZ.undo.length} registro(s) modificados.</span><button class="btn-secondary" onclick="vozUndo()">Deshacer</button>` : '';
+}
+async function vozUndo() {
+  if (!VOZ.undo || !confirm('¿Deshacer el último lote de cambios del asistente de voz?')) return;
+  let ok = 0;
+  for (const u of VOZ.undo) { const { error } = await sb.from(u.table).update(u.prev).eq('id', u.id); if (!error) ok++; }
+  showToast(ok === VOZ.undo.length ? 'Cambios deshechos ✓' : 'Algunos cambios no se pudieron deshacer', ok === VOZ.undo.length ? 'success' : 'error');
+  VOZ.undo = null; await vozRefreshApp(); await vozLoad().catch(() => {}); vozRenderUndo();
+}
+
+// Solo DEV: elegir qué Admins pueden usar el asistente
+async function vozLoadAccess() {
+  const el = document.getElementById('voz-access-list');
+  const { data } = await sb.from('platform_users').select('id,name,role,permissions').eq('role', 'admin').order('name');
+  if (!data || !data.length) { el.innerHTML = '<div class="voz-hint">No hay Administradores.</div>'; return; }
+  el.innerHTML = data.map(u => `<div class="profile-row" style="padding:0.55rem 0.7rem;cursor:pointer" onclick="vozToggleAccess('${u.id}')"><div class="profile-row-content"><div class="profile-row-label" style="font-size:0.85rem">${vozEsc(u.name)}</div></div><div class="toggle-switch${parsePermissions(u.permissions).voz ? ' on' : ''}" id="voz-acc-${u.id}"><div class="toggle-thumb"></div></div></div>`).join('');
+}
+async function vozToggleAccess(uid) {
+  if (currentRole !== 'dev') return;
+  const { data: u } = await sb.from('platform_users').select('permissions').eq('id', uid).single();
+  const perms = parsePermissions(u && u.permissions); perms.voz = !perms.voz;
+  const { error } = await sb.from('platform_users').update({ permissions: perms }).eq('id', uid);
+  if (error) { showToast('Error: ' + error.message, 'error'); return; }
+  const t = document.getElementById('voz-acc-' + uid); if (t) t.classList.toggle('on', perms.voz);
+  showToast(perms.voz ? 'Acceso concedido' : 'Acceso retirado', 'success');
+}
+
+
 // v1.36.0-beta: (1) Links de referencia ahora tienen 2 tipos — Único uso
 // (sin límite de tiempo, se desactiva tras el primer uso) y Con límite de
 // tiempo (reutilizable hasta que vence, o hasta que el Admin lo termina
@@ -13699,6 +14207,7 @@ async function enterApp() {
   if (legalAdminTab) legalAdminTab.style.display = (currentRole === 'dev') ? '' : 'none';
   const avataresAdminTab = document.getElementById('admin-tab-avatares');
   if (avataresAdminTab) avataresAdminTab.style.display = (currentRole === 'dev') ? '' : 'none';
+  vozApplyTabVisibility();
   // v1.38.0-beta: botones "Subir CSV" — exclusivos del Usuario DEV.
   document.querySelectorAll('.dev-only-el').forEach(el => { el.style.display = (currentRole === 'dev') ? '' : 'none'; });
 
@@ -15320,7 +15829,7 @@ async function openAdminPage(requestedTab) {
   // currentRole === 'admin': resolvemos los permisos ANTES de mostrar nada.
   await refreshCurrentUserPermsCache();
   const perms = _currentUserPermsCache;
-  const isTabAllowed = (tab) => !ADMIN_TAB_PERM_KEY[tab] || canAccessModule(perms, ADMIN_TAB_PERM_KEY[tab]);
+  const isTabAllowed = (tab) => tab === 'voz' ? canUseVoz() : (!ADMIN_TAB_PERM_KEY[tab] || canAccessModule(perms, ADMIN_TAB_PERM_KEY[tab]));
 
   let targetTab = requestedTab;
   if (targetTab) {
@@ -15373,7 +15882,7 @@ const ADMIN_TAB_SECTION = {
   assignments: 'predicacion', territories: 'predicacion', conductores: 'predicacion',
   casas: 'predicacion', grupos: 'predicacion', carritos: 'predicacion', reports: 'predicacion',
   vmc: 'reuniones', 'fin-semana': 'reuniones', audiovideo: 'reuniones', acomodacion: 'reuniones', 'aseo-salon': 'reuniones', hospitalidad: 'reuniones',
-  usuarios: 'fleming', notificaciones: 'fleming', tips: 'fleming', monitor: 'fleming', legal: 'fleming', avatares: 'fleming',
+  usuarios: 'fleming', notificaciones: 'fleming', tips: 'fleming', monitor: 'fleming', legal: 'fleming', avatares: 'fleming', voz: 'fleming',
 };
 
 // Cambia la sección visible (Predicación/Reuniones) y activa la primera sub-pestaña disponible dentro de ella.
@@ -15409,6 +15918,10 @@ async function switchAdminTab(tab) {
   }
   // Legal (v1.41.0-stable_beta): edición exclusiva del Usuario DEV, no delegable a Admins.
   // Avatares de Personajes (v1.51.0-beta): gestión exclusiva del Usuario DEV.
+  if (tab === 'voz' && !canUseVoz()) {
+    showToast('No tienes permisos para acceder a este módulo.', 'error');
+    return;
+  }
   if (tab === 'avatares' && currentRole !== 'dev') {
     showToast('No tienes permisos para acceder a este módulo.', 'error');
     return;
@@ -15437,6 +15950,7 @@ async function switchAdminTab(tab) {
     if (shared) shared.style.display = '';
     loadResponsabilidadesAdmin();
   }
+  if (tab === 'voz') vozOnOpen();
   if (tab === 'aseo-salon') loadAseoSalonAdmin();
   if (tab === 'hospitalidad') loadHospAdmin();
   if (tab === 'usuarios') {
@@ -15528,6 +16042,7 @@ function _applyAdminSectionTabsVisibility() {
 
   // Si la Sección actualmente activa quedó oculta (p.ej. el DEV le quitó al
   // Admin todos los módulos de Predicación), saltamos a la primera visible.
+  vozApplyTabVisibility();
   const activeSecBtn = document.querySelector('.admin-section-tab.active');
   if (activeSecBtn && activeSecBtn.style.display === 'none') {
     const firstVisible = Object.values(tabs).find(el => el && el.style.display !== 'none');
@@ -20729,6 +21244,7 @@ const PERM_MODULES = [
   { key: 'notificaciones',    label: 'Notificaciones',      group: 'sistema',   icon: '<svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>' },
   // v1.35.5-beta: módulo "Compartir" — habilita el botón "Invitar" en el
   // Panel de Usuarios para generar Links de referencia con caducidad.
+  { key: 'voz',               label: 'Asistente de Voz',    group: 'sistema',   icon: '<svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>' },
   { key: 'compartir',         label: 'Compartir',           group: 'sistema',   icon: '<svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/><line x1="15.4" y1="6.5" x2="8.6" y2="10.5"/></svg>' },
 ];
 
@@ -20740,7 +21256,7 @@ const PERM_MODULES = [
 // trae la clave legada "responsabilidades" y no trae las nuevas claves, se
 // usa ese valor legado como punto de partida para ambos módulos nuevos.
 function parsePermissions(raw) {
-  const defaults = { territories: true, assignments: true, conductores: true, casas: true, grupos: true, carritos: true, territory_reports: false, vida_ministerio: true, fin_semana: true, hospitalidad: true, audiovideo: true, acomodacion: true, aseo_salon: true, usuarios: false, admin_tags: false, notificaciones: false };
+  const defaults = { territories: true, assignments: true, conductores: true, casas: true, grupos: true, carritos: true, territory_reports: false, vida_ministerio: true, fin_semana: true, hospitalidad: true, audiovideo: true, acomodacion: true, aseo_salon: true, usuarios: false, admin_tags: false, notificaciones: false, voz: false };
   if (!raw) return { ...defaults };
   try {
     const p = typeof raw === 'string' ? JSON.parse(raw) : raw;
@@ -20762,6 +21278,7 @@ function parsePermissions(raw) {
       usuarios:          p.usuarios          === true,
       admin_tags:        p.admin_tags        === true,
       notificaciones:    p.notificaciones    === true,
+      voz:               p.voz               === true,
     };
   } catch { return { ...defaults }; }
 }
@@ -21908,6 +22425,7 @@ async function refreshCurrentUserPermsCache(force) {
     const { data } = await sb.from('platform_users').select('permissions').ilike('name', currentUser.name).single();
     _currentUserPermsCache = data ? parsePermissions(data.permissions) : parsePermissions(null);
     _permsCacheTime = Date.now();
+    vozApplyTabVisibility();
   } catch (e) {
     _currentUserPermsCache = parsePermissions(null);
     _permsCacheTime = Date.now();
@@ -22139,6 +22657,7 @@ async function syncRoleFromServer() {
       if (legalAdminTab) legalAdminTab.style.display = (currentRole === 'dev') ? '' : 'none';
       const avataresAdminTab = document.getElementById('admin-tab-avatares');
       if (avataresAdminTab) avataresAdminTab.style.display = (currentRole === 'dev') ? '' : 'none';
+      vozApplyTabVisibility();
       // If user was viewing the Fleming App / Usuarios section and lost access, send them back to predicación
       const usuariosSection = document.getElementById('admin-usuarios');
       if (usuariosSection && usuariosSection.classList.contains('active') && !['dev','admin'].includes(currentRole)) {
@@ -24261,6 +24780,7 @@ function syncAdminDropdown() {
   if (legalAdminTab) legalAdminTab.style.display = (currentRole === 'dev') ? '' : 'none';
   const avataresAdminTab = document.getElementById('admin-tab-avatares');
   if (avataresAdminTab) avataresAdminTab.style.display = (currentRole === 'dev') ? '' : 'none';
+  vozApplyTabVisibility();
   const themeLabel = document.getElementById('theme-btn-label-admin');
   if (themeLabel) _updateThemeActive(document.documentElement.getAttribute('data-theme') || 'auto');
 }
@@ -31497,5 +32017,6 @@ function shareCasaEnCasaAssignment() {
 <div class="ct-form-overlay" id="cartFormOverlay" role="dialog" aria-modal="true">
   <div class="ct-form-sheet" id="cartFormSheet"></div>
 </div>
+<div id="voz-modal" onclick="if(event.target===this)vozCloseConfirm()"></div>
 </body>
 </html>
