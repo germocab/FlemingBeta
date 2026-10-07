@@ -6095,33 +6095,65 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 .ms-footer-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .ms-footer-name { font-family: var(--font); font-size: 0.9rem; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-  /* ── Asistente de Voz (v1.55.0-beta) ── */
-  .voz-top{display:flex;flex-direction:column;gap:12px;margin-bottom:1rem}
-  #voz-mic{display:flex;align-items:center;justify-content:center;gap:10px;padding:16px;border-radius:var(--radius);border:1.5px solid var(--border);background:var(--surface2);color:var(--text);font:inherit;font-weight:700;cursor:pointer}
-  #voz-mic svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2}
-  #voz-mic.rec{background:var(--red);color:#fff;border-color:var(--red);animation:vozPulse 1.4s infinite}
-  #voz-mic:disabled{opacity:.5;cursor:not-allowed}
-  @keyframes vozPulse{50%{box-shadow:0 0 0 8px rgba(239,68,68,.18)}}
-  .voz-row{display:flex;gap:8px}.voz-row .form-input{flex:1}
-  #voz-live{min-height:1.2em;color:var(--text3);font-size:.85rem;font-style:italic}
-  .voz-card{position:relative;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 38px 12px 12px;margin-bottom:10px}
-  .voz-card.err{border-color:var(--red)}.voz-card.off{opacity:.5}
-  .voz-say{font-size:.8rem;color:var(--text3);margin-bottom:6px}.voz-msg{color:var(--red);font-size:.88rem}
+  /* ── Voz (v1.57.0-beta) ── */
+  .voz-hint{font-size:.76rem;color:var(--text3);margin:4px 0 8px}
   .voz-kind{display:inline-block;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--accent);margin-bottom:4px}
-  .voz-target{font-size:.88rem;font-weight:600;margin-bottom:6px}
+  .voz-examples{font-size:.82rem;color:var(--text2);line-height:1.7}
+  /* Botón de Voz junto a la NavBar inferior (solo Inicio) */
+  .home-bn-pill{display:flex;gap:2px;padding:5px;border-radius:999px;background:var(--nav-bg);border:1px solid var(--border);box-shadow:var(--shadow-lg);backdrop-filter:blur(var(--ui-blur,34px)) saturate(180%);-webkit-backdrop-filter:blur(var(--ui-blur,34px)) saturate(180%);transition:opacity .22s ease,transform .32s var(--ease-fluid-soft,ease)}
+  .home-voz-btn{display:none;flex-shrink:0;width:48px;height:48px;padding:0;border-radius:50%;border:1px solid var(--border);background:var(--nav-bg);color:var(--text);align-items:center;justify-content:center;cursor:pointer;box-shadow:var(--shadow-lg);backdrop-filter:blur(var(--ui-blur,34px)) saturate(180%);-webkit-backdrop-filter:blur(var(--ui-blur,34px)) saturate(180%);-webkit-tap-highlight-color:transparent;transition:transform .15s}
+  .home-voz-btn:active{transform:scale(.92)}
+  .home-voz-btn svg,.voz-btn svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  html.voz-avail .home-voz-btn{display:flex;animation:vozPop .34s var(--ease-ultra,ease)}
+  html.voz-avail .home-bn-btn{padding:9px 12px}
+  @keyframes vozPop{from{opacity:0;transform:scale(.5)}}
+  html.voz-open .home-bn-pill{opacity:0;transform:scale(.9);pointer-events:none}
+  html.voz-open .home-voz-btn{visibility:hidden}
+  html.voz-open body{overflow:hidden}
+  /* Capa de Voz */
+  #voz-layer{display:none;position:fixed;inset:0;z-index:10040;touch-action:manipulation}
+  #voz-layer.open{display:block}
+  .voz-backdrop{position:absolute;inset:0;opacity:0;transition:opacity .35s ease;background:rgba(0,0,0,.35);background:color-mix(in srgb,var(--bg) 40%,transparent);-webkit-backdrop-filter:blur(18px) saturate(140%);backdrop-filter:blur(18px) saturate(140%);-webkit-mask-image:linear-gradient(to top,#000 0,#000 50%,transparent 100%);mask-image:linear-gradient(to top,#000 0,#000 50%,transparent 100%)}
+  #voz-layer.show .voz-backdrop{opacity:1}
+  .voz-stream{position:absolute;left:0;right:0;top:0;bottom:calc(env(safe-area-inset-bottom,0px) + 14px + 64px + 12px);display:flex;flex-direction:column;gap:10px;padding:calc(env(safe-area-inset-top,0px) + 16px) 14px 4px;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;-webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 56px);mask-image:linear-gradient(to bottom,transparent 0,#000 56px)}
+  .voz-stream::-webkit-scrollbar{display:none}
+  .voz-stream::before{content:'';margin-top:auto}
+  #voz-layer.txt .voz-stream{bottom:calc(env(safe-area-inset-bottom,0px) + 14px + 64px + 12px + 54px)}
+  .voz-b{flex-shrink:0;border-radius:24px;padding:14px 16px;background:var(--surface);border:1px solid var(--border);box-shadow:var(--shadow);color:var(--text);font-size:.92rem;line-height:1.4;animation:vozIn .34s var(--ease-fluid-soft,ease) both}
+  @keyframes vozIn{from{opacity:0;transform:translateY(14px) scale(.98)}}
+  .voz-b .voz-t{font-weight:600}
+  .voz-b.u{align-self:flex-end;margin-left:34px;text-align:right}
+  .voz-b.a{align-self:stretch}
+  .voz-b.live{opacity:.65}.voz-b.live .voz-t{font-style:italic}
+  .voz-b.err .voz-t{color:var(--red)}
+  .voz-b.hint .voz-ex{margin-top:6px;font-size:.8rem;font-weight:500;color:var(--text3)}
+  .voz-dots{display:inline-flex;gap:5px;padding:4px 2px}
+  .voz-dots i{width:7px;height:7px;border-radius:50%;background:var(--text3);animation:vozDot 1s infinite ease-in-out}
+  .voz-dots i:nth-child(2){animation-delay:.15s}.voz-dots i:nth-child(3){animation-delay:.3s}
+  @keyframes vozDot{0%,80%,100%{opacity:.25;transform:scale(.8)}40%{opacity:1;transform:scale(1)}}
+  .voz-prev{margin-top:10px}
+  .voz-cap{font-size:.68rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text3);margin:0 2px 6px}
+  .voz-prev .assignment-card{margin:0;cursor:default;background:var(--surface2);box-shadow:none}
+  .voz-prev .assignment-card:hover,.voz-prev .assignment-card:active{transform:none;box-shadow:none}
+  .voz-prev+.voz-prev{margin-top:12px}
+  .voz-mp{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:10px 14px}
   .voz-diff{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:.86rem;padding:3px 0}
   .voz-diff b{color:var(--text2);min-width:92px}.voz-diff s{color:var(--text3)}.voz-diff em{font-style:normal;font-weight:700;color:var(--green)}
-  .voz-warn{font-size:.78rem;color:var(--orange);margin-top:4px}.voz-hint{font-size:.76rem;color:var(--text3);margin:4px 0 8px}
-  .voz-x{position:absolute;top:8px;right:8px;background:none;border:none;color:var(--text3);font-size:1rem;cursor:pointer}
-  .voz-chk{display:flex;gap:6px;align-items:center;font-size:.76rem;color:var(--text2);margin-bottom:6px}.voz-chk.big{font-size:.88rem;margin:12px 0}
-  .voz-empty{color:var(--text3);font-size:.88rem;padding:1rem 0}
-  #voz-undo{display:flex;gap:10px;align-items:center;justify-content:space-between;font-size:.85rem;padding:10px 12px;border:1px dashed var(--border);border-radius:var(--radius-sm);margin-top:10px}
-  #voz-modal{display:none;position:fixed;inset:0;z-index:10050;background:rgba(0,0,0,.55);align-items:flex-end;justify-content:center}
-  #voz-modal.open{display:flex}
-  .voz-sheet{background:var(--bg);width:100%;max-width:560px;max-height:88vh;overflow:auto;border-radius:18px 18px 0 0;padding:18px}
-  @media(min-width:700px){#voz-modal{align-items:center}.voz-sheet{border-radius:18px}}
-  .voz-actions{display:flex;gap:10px;justify-content:flex-end}.voz-actions button:disabled{opacity:.45}
-  .voz-examples{font-size:.82rem;color:var(--text2);line-height:1.7}
+  .voz-warn{font-size:.76rem;color:var(--orange);margin:6px 4px 0}
+  .voz-opt{display:flex;gap:10px;align-items:center;margin-top:8px;padding:10px 12px;border-radius:18px;background:var(--surface2);border:1px solid var(--border);font-size:.84rem;font-weight:600;cursor:pointer}
+  .voz-opt b{flex:0 0 24px;height:24px;border-radius:50%;background:var(--text);color:var(--bg);display:flex;align-items:center;justify-content:center;font-size:.76rem}
+  .voz-dock{position:absolute;left:0;right:0;bottom:calc(14px + env(safe-area-inset-bottom,0px));padding:0 16px;display:flex;align-items:center;justify-content:space-between}
+  .voz-btn{display:flex;align-items:center;justify-content:center;border-radius:50%;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  #voz-x-btn{width:52px;height:52px;border:1px solid var(--border);background:var(--surface);color:var(--text);box-shadow:var(--shadow-lg);opacity:0;transform:translateX(70px) scale(.5);transition:transform .42s var(--ease-ultra,ease),opacity .25s ease}
+  #voz-layer.show #voz-x-btn{opacity:1;transform:none;transition-delay:.06s}
+  #voz-mic-btn{width:64px;height:64px;border:none;background:var(--text);color:var(--bg);box-shadow:0 8px 28px rgba(0,0,0,.35);transition:transform .45s cubic-bezier(.34,1.3,.64,1)}
+  #voz-mic-btn svg{width:26px;height:26px}
+  #voz-mic-btn.rec{animation:vozPulse 1.5s infinite}
+  @keyframes vozPulse{0%{box-shadow:0 0 0 0 rgba(128,128,128,.55)}70%{box-shadow:0 0 0 18px rgba(128,128,128,0)}100%{box-shadow:0 0 0 0 rgba(128,128,128,0)}}
+  .voz-textrow{display:none;position:absolute;left:16px;right:16px;bottom:calc(14px + env(safe-area-inset-bottom,0px) + 64px + 10px);gap:8px}
+  #voz-layer.txt .voz-textrow{display:flex}
+  .voz-textrow input{flex:1;min-width:0;height:44px;border-radius:999px;border:1px solid var(--border);background:var(--surface);color:var(--text);padding:0 16px;font:inherit;font-size:16px}
+  .voz-textrow button{width:44px;height:44px;border-radius:50%;border:none;background:var(--text);color:var(--bg);font-size:1.1rem;font-weight:800;cursor:pointer}
 </style>
 
 <style id="home-css">
@@ -6141,10 +6173,8 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
   html.inicio-mode .home-only { display: flex !important; }
   html.inicio-mode .main-content { padding-bottom: 6.5rem; }
   html.inicio-mode .home-bottom-nav {
-    display: flex; position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(14px + env(safe-area-inset-bottom, 0px));
-    z-index: 90; gap: 2px; padding: 5px; border-radius: 999px;
-    background: var(--nav-bg); border: 1px solid var(--border); box-shadow: var(--shadow-lg);
-    backdrop-filter: blur(var(--ui-blur,34px)) saturate(180%); -webkit-backdrop-filter: blur(var(--ui-blur,34px)) saturate(180%);
+    display: flex; align-items: center; gap: 10px; position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+    z-index: 90; max-width: calc(100vw - 12px);
   }
   html.inicio-mode .home-custom-overlay.open { display: flex; }
 }
@@ -6348,8 +6378,11 @@ function applyInicioChrome() {
     }
   }
   document.documentElement.classList.toggle('home-greeting', active && currentMainTab === 'inicio');
+  // v1.57.0-beta: el botón Voz solo aparece en Inicio y para quien tenga acceso.
+  document.documentElement.classList.toggle('voz-avail', active && currentMainTab === 'inicio' && _vozAllowed());
   document.querySelectorAll('#home-bottom-nav .home-bn-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === currentMainTab));
 }
+function _vozAllowed() { try { return typeof canUseVoz === 'function' && !!canUseVoz(); } catch (e) { return false; } }
 function homeNavGo(tab) {
   if (tab === currentMainTab) { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
   const btn = document.querySelector('.main-seg-btn[data-tab="' + tab + '"]');
@@ -7029,9 +7062,13 @@ function homeResetLayout() { setHomeTextoTop(false); saveHomeLayout(HOME_DEFAULT
 <div id="app">
   <!-- NavBar inferior (Experimento "Inicio", v1.50.0-sb): solo móvil -->
   <nav class="home-bottom-nav" id="home-bottom-nav">
-    <button class="home-bn-btn" data-tab="inicio" onclick="homeNavGo('inicio')">Inicio</button>
-    <button class="home-bn-btn" data-tab="predicacion" onclick="homeNavGo('predicacion')">Predicación</button>
-    <button class="home-bn-btn" data-tab="reuniones" onclick="homeNavGo('reuniones')">Reuniones</button>
+    <div class="home-bn-pill" id="home-bn-pill">
+      <button class="home-bn-btn" data-tab="inicio" onclick="homeNavGo('inicio')">Inicio</button>
+      <button class="home-bn-btn" data-tab="predicacion" onclick="homeNavGo('predicacion')">Predicación</button>
+      <button class="home-bn-btn" data-tab="reuniones" onclick="homeNavGo('reuniones')">Reuniones</button>
+    </div>
+    <!-- v1.57.0-beta: Voz — solo visible en Inicio y para quienes tengan acceso (Administración → FlemingApp → Voz) -->
+    <button class="home-voz-btn" id="home-voz-btn" onclick="vozOpen()" aria-label="Voz" title="Voz"><svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg></button>
   </nav>
   <!-- Personalizar Inicio -->
   <div class="home-custom-overlay" id="home-custom-overlay">
@@ -7967,24 +8004,16 @@ function homeResetLayout() { setHomeTextoTop(false); saveHomeLayout(HOME_DEFAULT
         <div id="admin-tips-list"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Tips</div></div></div>
       </div>
 
-      <!-- ── Asistente de Voz (v1.55.0-beta) — DEV, o Admins con el módulo "voz" ── -->
+      <!-- ── Voz (v1.57.0-beta) — Administración → FlemingApp → Voz: define quién puede usarla (solo DEV) ── -->
       <div class="admin-section" id="admin-voz">
-        <div style="display:flex;align-items:center;margin-bottom:.4rem"><span style="flex:1;font-size:.95rem;font-weight:700">Asistente de Voz</span><span class="voz-kind">Beta</span></div>
-        <div class="voz-hint">Funciona por reglas (no es IA). Interpreta tu comando, te muestra el antes y el después, y solo guarda cuando confirmas.</div>
-        <div class="voz-top">
-          <button id="voz-mic" onclick="vozMicToggle()"><svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg><span>Toca para hablar</span></button>
-          <div id="voz-live"></div>
-          <div class="voz-row"><input class="form-input" id="voz-text" placeholder="…o escribe: cambia el territorio del jueves al 12" onkeydown="if(event.key==='Enter')vozRunText()"><button class="btn-primary" onclick="vozRunText()">Interpretar</button></div>
-          <div id="voz-status" class="voz-hint"></div>
-        </div>
-        <div id="voz-queue"></div>
-        <div class="voz-row" style="margin-top:6px"><button class="btn-primary" id="voz-review-btn" onclick="vozOpenConfirm()" disabled>Revisar y aplicar (0)</button><button class="btn-secondary" id="voz-clear-btn" onclick="vozClear()" style="display:none">Limpiar</button></div>
-        <div id="voz-undo" style="display:none"></div>
-        <details style="margin-top:1rem"><summary style="cursor:pointer;font-weight:600;font-size:.88rem">Ejemplos de comandos</summary><div class="voz-examples">
-          • “Cambia el grupo del miércoles de las 6 de la tarde a las 6 y media”<br>• “Cambia el territorio del jueves al territorio 12” (también “segundo territorio”)<br>• “Cambia el grupo del jueves al grupo 3”<br>• “Cambia el conductor del sábado a Pedro Gómez”<br>• “Cambia la oración final a María López”<br>• “Cambia el presidente de la reunión de entre semana a …”<br>• “Cambia el orador / el lector de La Atalaya del fin de semana a …”<br>• “Pon a Luis Ramírez en la lectura de la Biblia” · “ayudante de la primera conversación a …”<br>• Fechas: hoy, mañana, el jueves, el próximo jueves, la próxima semana, el 14 de octubre<br>• Por voz: “aplicar cambios” abre la confirmación (nunca guarda solo); “cancelar” limpia la lista.</div></details>
+        <div style="display:flex;align-items:center;margin-bottom:.4rem"><span style="flex:1;font-size:.95rem;font-weight:700">Voz</span><span class="voz-kind">Beta</span></div>
+        <div class="voz-hint">Voz es un botón circular junto a la NavBar, disponible solo en Inicio. Interpreta lo que dices por reglas (no es IA), te muestra cómo quedaría el cambio y solo guarda cuando le dices que sí.</div>
+        <details style="margin:.6rem 0 1rem"><summary style="cursor:pointer;font-weight:600;font-size:.88rem">Ejemplos de comandos</summary><div class="voz-examples">
+          • “Agrega el territorio 5 y 6 al miércoles”<br>• “Cambia al encargado de predicación del viernes a las 6 de la tarde por Ramón, y asígnale el territorio 22”<br>• “Cambia el territorio del jueves al 12” (también “segundo territorio”)<br>• “Cambia el grupo del miércoles de las 6 de la tarde a las 6 y media”<br>• “Cambia el grupo del jueves al grupo 3”<br>• “Cambia el conductor del sábado a Pedro Gómez”<br>• “Cambia la oración final a María López”<br>• “Pon a Luis Ramírez en la lectura de la Biblia” · “cambia el presidente de la reunión de entre semana a …”<br>• Para responder el preview: “sí, confirmo” o “no” · “deshacer” revierte el último cambio · “cerrar” cierra Voz<br>• Fechas: hoy, mañana, el jueves, el próximo jueves, la próxima semana, el 14 de octubre
+        </div></details>
         <div class="dev-only-el" style="margin-top:1.2rem">
           <div class="form-label2" style="margin-bottom:6px">Acceso de Administradores</div>
-          <div class="voz-hint">Por defecto solo tú (DEV) ves esta función. Activa a los Admins que también puedan usarla.</div>
+          <div class="voz-hint">Por defecto solo tú (DEV) ves el botón Voz. Activa a los Admins que también puedan usarlo.</div>
           <div id="voz-access-list"></div>
         </div>
       </div>
@@ -10221,9 +10250,16 @@ function homeResetLayout() { setHomeTextoTop(false); saveHomeLayout(HOME_DEFAULT
 // asignaciones de predicación, y presidente, oración final, orador, lector y partes de Vida y Ministerio /
 // Reunión Pública. Muestra el antes → después, pide confirmación, verifica lo guardado y permite deshacer.
 // (2) Solo el DEV lo ve por defecto; el DEV decide qué Admins lo tienen (módulo "Asistente de Voz").
-const APP_VERSION = '1.55.0-beta';
+// v1.57.0-beta: (1) "Voz" pasa a la parte inferior de Inicio: botón circular junto a la NavBar (solo en Inicio;
+// Predicación y Reuniones muestran solo Inicio y las otras dos secciones). Al presionarlo se agranda, la NavBar
+// se reemplaza por dos botones (X y micrófono) y Voz escucha de inmediato. (2) Interfaz mínima: tu comando, la
+// respuesta y un preview del cambio (tarjeta de asignación); se acepta o rechaza hablando ("sí, confirmo" / "no").
+// (3) Comandos nuevos: agregar territorios ("agrega el territorio 5 y 6 al miércoles") y comandos compuestos
+// ("cambia al encargado del viernes a las 6 de la tarde por Ramón, y asígnale el territorio 22"). (4) Quién puede
+// usar Voz se define en Administración → FlemingApp → Voz.
+const APP_VERSION = '1.57.0-beta';
 // ═════════════════════════════════════════════════════════════════════════
-// Asistente de Voz (v1.55.0-beta) — Administración → Asistente de Voz
+// Voz (v1.57.0-beta) — botón junto a la NavBar de Inicio (desde v1.55.0-beta: Asistente de Voz)
 // Motor por reglas (NO es IA): normaliza el texto, detecta la intención con
 // patrones, resuelve fechas/horas/nombres y propone cambios para revisarlos
 // antes de aplicarlos. Solo DEV (o Admins con el módulo "voz" activado).
@@ -10239,7 +10275,8 @@ function canUseVoz() {
 }
 function vozApplyTabVisibility() {
   const t = document.getElementById('admin-tab-voz');
-  if (t) t.style.display = canUseVoz() ? '' : 'none';
+  if (t) t.style.display = currentRole === 'dev' ? '' : 'none';
+  try { applyInicioChrome(); } catch (e) {}
 }
 
 // ── Utilidades de texto / fecha ─────────────────────────────────────────
@@ -10252,7 +10289,7 @@ const vozEsc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '
 
 function vozNorm(s) {
   let t = String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-  t = t.replace(/\b([ap])\.?\s?m\.?(?=\s|$)/g, '$1m').replace(/(\d)\.(\d{2})\b/g, '$1:$2');
+  t = t.replace(/(\d)\s?([ap])\.?\s?m\b\.?/g, '$1 $2m').replace(/\b([ap])\.?\s?m\.?(?=\s|$)/g, '$1m').replace(/(\d)\.(\d{2})\b/g, '$1:$2');
   t = t.replace(/[^a-z0-9: ]+/g, ' ').replace(/\s+/g, ' ').trim();
   t = t.replace(/\b(treinta|cuarenta|cincuenta) y (uno|dos|tres|cuatro|cinco|seis|siete|ocho|nueve)\b/g, (m, a, b) => VOZ_NUM[a] + VOZ_NUM[b]);
   t = t.replace(/\b(la|las) una\b/g, '$1 1');
@@ -10372,8 +10409,12 @@ function vozFindAsg(d, fromT, grupoN) {
   const D = VOZ.data, today = vozISO(new Date());
   if (!d.date) return { err: 'Indica el día (por ejemplo "el miércoles" o "el 14 de octubre").' };
   let list = D.asg.filter(a => !['evento', 'especial'].includes(a.type));
-  list = d.explicit ? list.filter(a => a.date === d.date)
-    : list.filter(a => a.date >= d.date && vozDow(a.date) === d.weekday);
+  if (d.explicit) list = list.filter(a => a.date === d.date);
+  else {
+    // v1.57.0-beta: si dijo solo el día de la semana, se toma el más próximo.
+    list = list.filter(a => a.date >= d.date && vozDow(a.date) === d.weekday);
+    if (list.length) { const first = list[0].date; list = list.filter(a => a.date === first); }
+  }
   if (!list.length) return { err: 'No hay asignaciones de predicación para ' + vozFmtDate(d.date) + '.' };
   const all = list;
   if (fromT) list = list.filter(a => { const [h, m] = vozHM(a.time).split(':').map(Number); return m === fromT.M && (h === fromT.H || (fromT.assumed && h === (fromT.H + 12) % 24)); });
@@ -10382,65 +10423,162 @@ function vozFindAsg(d, fromT, grupoN) {
   return { list: list.slice(0, 8) };
 }
 
-function vozPreach(t) {
-  const D = VOZ.data, d = vozDate(t), out = [];
-  const rng = t.match(/\bde(?: las?)? ((?:\d|mediodia).*?) (?:a|hasta)(?: las?)? ((?:\d|mediodia).*)$/);
-  const gm = t.match(/\bgrupo (\d+)/g), gLast = gm ? gm[gm.length - 1].match(/\d+/)[0] : null;
-  let tm = [...t.matchAll(/\bterritorio (?:numero |n |no )?(\d+)(?:\s?([a-z])\b)?/g)];
-  if (!tm.length) { const z = t.match(/\b(?:al|a|por|para)\s+(\d+)(?:\s?([a-z])\b)?\s*$/); if (z) tm = [z]; }
-  const conductorIntent = /\b(conductor|conduce|dirige|encargad[oa] de (la )?(predicacion|salida))\b/.test(t) && !/\b(oracion|presidente|lector|orador)\b/.test(t);
-  const timeOnly = rng ? null : (t.match(/.*\ba las? ((?:\d|mediodia)[^]*)$/) || (/\b(?:hora|horario)\b/.test(t) ? t.match(/.*\ba ((?:\d|mediodia)[^]*)$/) : null));
+// ── Predicación (v1.57.0-beta): motor multi-operación ──────────────────
+// Una frase puede traer varias operaciones sobre la MISMA asignación:
+// "cambia al encargado del viernes a las 6 de la tarde por Ramón, y asígnale el territorio 22".
+const VOZ_TP = '(\\d{1,2}(?::\\d{2})?(?:\\s+y\\s+(?:media|cuarto|\\d{1,2})|\\s+menos\\s+(?:cuarto|\\d{1,2}))?(?:\\s*(?:am|pm|de la (?:manana|tarde|noche|madrugada)))?|mediodia)';
+const VOZ_VERBS = 'asignale|asignele|asignarle|agregale|agreguele|cambiale|ponle|dale|asigna|asigne|agrega|agregue|agregar|anade|suma|incluye|cambia|cambie|reemplaza|sustituye|pon';
+function vozSplitFollow(t) {
+  const re = new RegExp('\\s+(?:(?:y|e)\\s+)?(?:ademas\\s+)?(?:' + VOZ_VERBS + ')\\b(?=[^]*\\b(?:territorios?|conductor|encargad[oa]|grupo|hora|horario)\\b)');
+  const m = re.exec(t);
+  if (!m || m.index < 8) return [t];
+  return [t.slice(0, m.index).trim(), t.slice(m.index).replace(/^\s*(?:(?:y|e)\s+)?(?:ademas\s+)?/, '').trim()];
+}
+function vozTerNums(s) {
+  const take = toks => { const out = []; for (const w of toks) { if (/^(numero|n|no|y|e)$/.test(w)) continue; if (/^\d+[a-z]?$/.test(w)) out.push(w); else break; } return out; };
+  let nums = [];
+  for (const m of s.matchAll(/\bterritorios?\b/g)) { const r = take(s.slice(m.index).replace(/^territorios?\s*/, '').split(' ')); if (r.length) nums = r; }
+  if (!nums.length) { const z = s.match(/\b(?:al|a|por|para)\s+((?:\d+[a-z]?|y|e)(?:\s+(?:\d+[a-z]?|y|e))*)\s*$/); if (z) nums = take(z[1].split(' ')); }
+  return nums.filter((n, k) => nums.indexOf(n) === k);
+}
+const vozJoin = a => a.length > 1 ? a.slice(0, -1).join(', ') + ' y ' + a[a.length - 1] : (a[0] || '');
+function vozSayDay(iso) {
+  const dt = new Date(iso + 'T12:00:00'), n = Math.round((dt - new Date(vozISO(new Date()) + 'T12:00:00')) / 86400000);
+  const wd = dt.toLocaleDateString('es-CL', { weekday: 'long' });
+  if (n === 0) return 'hoy'; if (n === 1) return 'mañana';
+  if (n > 1 && n < 7) return 'el ' + wd;
+  return 'el ' + wd + ' ' + dt.toLocaleDateString('es-CL', { day: 'numeric', month: 'long' });
+}
+// Analiza un tramo de la frase y devuelve { op, selT, gSel } o { err }
+function vozSegOps(s, follow) {
+  const ter = /\bterritorios?\b/.test(s);
+  const gm = s.match(/\bgrupo (\d+)/g), gLast = gm ? gm[gm.length - 1].match(/\d+/)[0] : null;
+  const conductorIntent = /\b(conductor|conduce|dirige|encargad[oa]|responsable de (?:la )?(?:predicacion|salida))\b/.test(s)
+    && !/\b(oracion|presidente|lector|orador|aseo|audio|video|acomodacion|hospitalidad|microfono|plataforma|carrito)\b/.test(s);
+  const rng = s.match(/\bde(?: las?)? ((?:\d|mediodia).*?) (?:a|hasta)(?: las?)? ((?:\d|mediodia).*)$/);
+  const timeOnly = rng ? null : (s.match(/.*\ba las? ((?:\d|mediodia)[^]*)$/) || (/\b(?:hora|horario)\b/.test(s) ? s.match(/.*\ba ((?:\d|mediodia)[^]*)$/) : null));
   let intent = null;
-  if (rng || (timeOnly && !conductorIntent && !/\bterritorio\b/.test(t))) intent = 'time';
+  if (rng || (timeOnly && !conductorIntent && !ter)) intent = 'time';
   else if (conductorIntent) intent = 'conductor';
-  else if (/\bterritorio\b/.test(t)) intent = 'territory';
-  else if (/\bgrupo\b/.test(t) && gLast) intent = 'group';
-  if (!intent) return null;
+  else if (ter) intent = 'territory';
+  else if (/\bgrupo\b/.test(s) && gLast) intent = 'group';
+  if (!intent) return {};
 
-  let fromT = null, toT = null;
   if (intent === 'time') {
+    let fromT = null, toT = null;
     if (rng) { fromT = vozTime(rng[1]); toT = vozTime(rng[2], fromT && (fromT.H >= 12 ? 'pm' : 'am')); if (fromT && fromT.assumed && toT && !toT.assumed) { const p = toT.H >= 12 ? 'pm' : 'am'; fromT = vozTime(rng[1], p); } }
     else toT = vozTime(timeOnly[1]);
     if (!toT) return { err: 'No entendí la hora nueva.' };
+    return { op: { type: 'time', toT }, selT: fromT, gSel: gLast };
   }
-  const f = vozFindAsg(d, fromT, intent === 'time' && gLast ? gLast : null);
+  let selT = null, gSel = null;
+  if (!follow) {
+    const sm = s.match(new RegExp('\\b(?:a|de) las? ' + VOZ_TP));
+    if (sm) selT = vozTime(sm[1]);
+    const gs = s.match(/\b(?:del|el|al|de) grupo (\d+)/);
+    if (gs && intent !== 'group') gSel = gs[1];
+  }
+  if (intent === 'group') return { op: { type: 'group', n: gLast }, selT, gSel };
+  if (intent === 'conductor') return { op: { type: 'conductor', q: (vozWhoRole(s) || {}).who || vozTail(s) }, selT, gSel };
+  const nums = vozTerNums(s);
+  if (!nums.length) return { err: 'No entendí el número del territorio.' };
+  const slot = /\b(segundo|2do)\b/.test(s) ? 2 : /\b(tercer|tercero|3ro)\b/.test(s) ? 3 : 0;
+  const first = (s.match(/^\w+/) || [''])[0];
+  const addV = /^(agrega|agregue|agregar|agregale|agreguele|anade|anadir|suma|sumar|incluye|incluir|asigna|asigne|asignar|asignale|asignele|ponle|dale|pon|poner|ponga)$/.test(first)
+    || (/\b(agrega|agregue|agregar|anade|incluye|asigna|asigne|asignar)\b/.test(s) && !/\b(cambia|cambie|cambiar|reemplaza|sustituye)\b/.test(s));
+  return { op: { type: 'territory', nums, slot, mode: ((follow || addV) && !slot) ? 'add' : 'set' }, selT, gSel };
+}
+
+function vozPreach(t) {
+  const D = VOZ.data, d = vozDate(t), segs = vozSplitFollow(t), ops = [];
+  let selT = null, gSel = null;
+  for (let i = 0; i < segs.length; i++) {
+    const r = vozSegOps(segs[i], i > 0);
+    if (r.err) return { err: r.err };
+    if (r.op) ops.push(r.op);
+    if (i === 0) { selT = r.selT || null; gSel = r.gSel || null; }
+  }
+  if (!ops.length) return null;
+  const f = vozFindAsg(d, selT, gSel);
   if (f.err) return { err: f.err };
-  const opts = [];
-  let valueErr = null, extraWarn = [];
-  if (intent === 'time') {
-    const nt = vozTimeStr(toT);
-    if (toT.H < 5 || toT.H > 22) extraWarn.push('Hora inusual (' + nt + '). Revisa AM/PM.');
-    else if (toT.assumed) extraWarn.push('No dijiste mañana/tarde: asumí ' + nt + '.');
-    f.list.forEach(a => opts.push(vozOpt('assignments', a, vozAsgLabel(a), { time: nt }, [['Hora', vozHM(a.time), nt]], extraWarn)));
-  } else if (intent === 'territory') {
-    if (!tm.length) valueErr = 'No entendí el número del territorio.';
-    else {
-      const last = tm[tm.length - 1], find = n => D.ter.find(x => String(x.number).toLowerCase() === n), ter = (last[2] && find(last[1] + last[2])) || find(last[1]), num = ter ? String(ter.number).toLowerCase() : last[1];
-      const slot = /\b(segundo|2do)\b/.test(t) ? 2 : /\b(tercer|tercero|3ro)\b/.test(t) ? 3 : 1;
-      if (!ter) valueErr = 'No existe el territorio ' + num.toUpperCase() + '.';
-      else f.list.forEach(a => {
-        if (a.type === 'visita') return;
-        const k = slot === 1 ? 'territory_id' : 'territory_id_' + slot, mk = slot === 1 ? 'manzanas_asignadas' : 'manzanas_asignadas_' + slot;
-        const old = D.ter.find(x => x.id === a[k]);
-        opts.push(vozOpt('assignments', a, vozAsgLabel(a), { [k]: ter.id, [mk]: [] },
-          [['Territorio' + (slot > 1 ? ' ' + slot : ''), old ? old.number : '—', ter.number], ...((a[mk] || []).length ? [['Manzanas', (a[mk] || []).join(', '), 'se limpian']] : [])]));
-      });
-      if (!opts.length && !valueErr) valueErr = 'Esa asignación es de tipo Visita; edítala manualmente.';
+
+  // Resolver conductor / territorios / grupo una sola vez
+  let ms = null;
+  const cop = ops.find(o => o.type === 'conductor');
+  if (cop) { ms = vozPeople(cop.q, D.con, c => c.nombre + ' ' + c.apellido); if (!ms.length) return { err: 'No encontré al conductor "' + cop.q + '".' }; }
+  const terFind = n => D.ter.find(x => String(x.number).toLowerCase() === n);
+  for (const o of ops) {
+    if (o.type === 'territory') {
+      o.ters = [];
+      for (const n of o.nums) {
+        const ter = terFind(n) || (/\d[a-z]$/.test(n) && terFind(n.slice(0, -1)));
+        if (!ter) return { err: 'No existe el territorio ' + n.toUpperCase() + '.' };
+        o.ters.push(ter);
+      }
+      if (o.mode === 'set' && !o.slot && o.ters.length > 3) return { err: 'Solo caben 3 territorios por asignación.' };
+    } else if (o.type === 'group') {
+      o.g = D.gru.find(x => String(x.numero) === o.n);
+      if (!o.g) return { err: 'No existe el grupo ' + o.n + '.' };
     }
-  } else if (intent === 'group') {
-    const g = D.gru.find(x => String(x.numero) === gLast);
-    if (!g) valueErr = 'No existe el grupo ' + gLast + '.';
-    else f.list.forEach(a => { const old = D.gru.find(x => x.id === a.grupo_id); opts.push(vozOpt('assignments', a, vozAsgLabel(a), { grupo_id: g.id }, [['Grupo', old ? old.numero : '—', g.numero]])); });
-  } else if (intent === 'conductor') {
-    const q = (vozWhoRole(t) || {}).who || vozTail(t);
-    const ms = vozPeople(q, D.con, c => c.nombre + ' ' + c.apellido);
-    if (!ms.length) valueErr = 'No encontré al conductor "' + q + '".';
-    else f.list.forEach(a => ms.forEach(({ p: c }) => {
-      const w = D.asg.some(o => o.id !== a.id && o.date === a.date && vozHM(o.time) === vozHM(a.time) && o.conductor_id === c.id) ? ['Ya tiene otra asignación a esa hora.'] : [];
-      opts.push(vozOpt('assignments', a, vozAsgLabel(a) + (ms.length > 1 ? ' → ' + c.nombre + ' ' + c.apellido : ''), { conductor: c.nombre + ' ' + c.apellido, conductor_id: c.id, phone: c.telefono || null }, [['Conductor', a.conductor || '—', c.nombre + ' ' + c.apellido]], w));
-    }));
   }
-  if (valueErr) return { err: valueErr };
+  const S = ['territory_id', 'territory_id_2', 'territory_id_3'], M = ['manzanas_asignadas', 'manzanas_asignadas_2', 'manzanas_asignadas_3'];
+  const hasCond = !!cop, opts = []; let firstErr = null;
+  f.list.forEach(a => {
+    (ms || [null]).forEach(m => {
+      const w = { ...a }, patch = {}, rows = [], warn = [], say = [];
+      let bad = null;
+      const put = (i, ter) => {
+        const oldT = D.ter.find(x => x.id === w[S[i]]), newId = ter ? ter.id : null;
+        if ((w[S[i]] || null) === newId) return;
+        rows.push(['Territorio' + (i ? ' ' + (i + 1) : ''), oldT ? oldT.number : '—', ter ? ter.number : '—']);
+        if ((w[M[i]] || []).length) rows.push(['Manzanas' + (i ? ' ' + (i + 1) : ''), (w[M[i]] || []).join(', '), 'se limpian']);
+        patch[S[i]] = newId; patch[M[i]] = []; w[S[i]] = newId; w[M[i]] = [];
+        if (ter && D.asg.some(o => o.id !== a.id && o.date === a.date && !['evento', 'especial'].includes(o.type) && S.some(k => o[k] === ter.id))) warn.push('El territorio ' + ter.number + ' ya está en otra salida ese día.');
+      };
+      ops.forEach(op => {
+        if (bad) return;
+        if (op.type === 'time') {
+          const nt = vozTimeStr(op.toT);
+          if (op.toT.H < 5 || op.toT.H > 22) warn.push('Hora inusual (' + nt + '). Revisa AM/PM.');
+          else if (op.toT.assumed) warn.push('No dijiste mañana/tarde: asumí ' + nt + '.');
+          rows.push(['Hora', vozHM(a.time), nt]); patch.time = nt; w.time = nt; say.push('empieza la salida');
+        } else if (op.type === 'group') {
+          const old = D.gru.find(x => x.id === a.grupo_id);
+          rows.push(['Grupo', old ? old.numero : '—', op.g.numero]); patch.grupo_id = op.g.id; w.grupo_id = op.g.id; say.push('es del Grupo ' + op.g.numero);
+        } else if (op.type === 'conductor') {
+          const c = m.p, nm = c.nombre + ' ' + c.apellido;
+          if (D.asg.some(o => o.id !== a.id && o.date === a.date && vozHM(o.time) === vozHM(w.time) && o.conductor_id === c.id)) warn.push('Ya tiene otra asignación a esa hora.');
+          rows.push(['Conductor', a.conductor || '—', nm]);
+          Object.assign(patch, { conductor: nm, conductor_id: c.id, phone: c.telefono || null }); w.conductor = nm; say.push('se hará cargo ' + nm);
+        } else if (op.type === 'territory') {
+          if (a.type === 'visita') { bad = 'Esa asignación es de tipo Visita; edítala manualmente.'; return; }
+          const placed = [];
+          if (op.mode === 'add') {
+            for (const ter of op.ters) {
+              const cur = S.map(k => w[k] || null);
+              if (cur.includes(ter.id)) { warn.push('El territorio ' + ter.number + ' ya estaba en esta asignación.'); continue; }
+              const free = cur.indexOf(null);
+              if (free < 0) { bad = 'Esa asignación ya tiene 3 territorios.'; return; }
+              put(free, ter); placed.push(ter.number);
+            }
+          } else if (op.slot) { const ter = op.ters[op.ters.length - 1]; put(op.slot - 1, ter); placed.push(ter.number); }
+          else {
+            op.ters.forEach((ter, i) => { put(i, ter); placed.push(ter.number); });
+            if (op.ters.length > 1) for (let i = op.ters.length; i < 3; i++) put(i, null);
+          }
+          if (placed.length) say.push(hasCond ? 'trabajará ' + (placed.length === 1 ? 'el Territorio ' + placed[0] : 'los Territorios ' + vozJoin(placed))
+            : (placed.length === 1 ? 'queda asignado el Territorio ' + placed[0] : 'quedan asignados los Territorios ' + vozJoin(placed)));
+        }
+      });
+      if (bad) { firstErr = firstErr || bad; return; }
+      const o = vozOpt('assignments', a, vozAsgLabel(a) + (m && ms.length > 1 ? ' → ' + m.p.nombre + ' ' + m.p.apellido : ''), patch, rows, warn);
+      o.card = w;
+      const dy = vozSayDay(a.date);
+      o.say = (dy === 'hoy' || dy === 'mañana' ? dy : 'ahora ' + dy) + ' a las ' + vozHM(w.time) + ' hrs ' + vozJoin(say) + '.';
+      opts.push(o);
+    });
+  });
+  if (!opts.length) return { err: firstErr || 'No pude armar el cambio.' };
   return { kind: 'Predicación', opts };
 }
 
@@ -10504,8 +10642,8 @@ function vozMeeting(t) {
       if (s.field === 'parts') {
         const parts = vozPartsOf(s.w).map(p => ({ ...p })), k = s.extra.second ? 'assigned2' : 'assigned', old = parts[s.extra.idx][k];
         parts[s.extra.idx][k] = nm;
-        { const o = vozOpt('vmc_weeks', s.w, lab, { parts }, [[s.label, vozPerson(old), nm]]); o.partOp = { idx: s.extra.idx, k, val: nm, was: old }; opts.push(o); }
-      } else opts.push(vozOpt(s.kind === 'Vida y Ministerio' ? 'vmc_weeks' : 'fs_weeks', s.w, lab, { [s.field]: nm }, [[s.label, vozPerson(s.w[s.field]), nm]]));
+        { const o = vozOpt('vmc_weeks', s.w, lab, { parts }, [[s.label, vozPerson(old), nm]]); o.partOp = { idx: s.extra.idx, k, val: nm, was: old }; o.say = 'ahora ' + nm + ' tiene «' + s.label + '» en ' + s.kind + '.'; opts.push(o); }
+      } else { const o = vozOpt(s.kind === 'Vida y Ministerio' ? 'vmc_weeks' : 'fs_weeks', s.w, lab, { [s.field]: nm }, [[s.label, vozPerson(s.w[s.field]), nm]]); o.say = 'ahora ' + nm + ' es «' + s.label + '» en ' + s.kind + '.'; opts.push(o); }
     });
   });
   if (!opts.length) return { err: err || 'No pude armar el cambio.' };
@@ -10523,90 +10661,227 @@ function vozParse(raw) {
   return chunks.map(t => {
     let r = (/\b(oracion|presidente|presidencia|lector|orador|conferencista|discurso|atalaya|entre semana|vida y ministerio|fin de semana|parte|ayudante|sala b|tema|titulo)\b/.test(t) ? vozMeeting(t) : null) || vozPreach(t) || vozMeeting(t);
     if (r && r.opts) { r.opts = r.opts.filter(o => !vozNoop(o)); if (!r.opts.length) r = { err: 'Ya está así: no hay nada que cambiar.' }; }
-    return { id: ++VOZ.n, text: t, res: r || { err: 'No entendí el comando. Prueba con: "cambia el territorio del jueves al 12".' }, sel: 0, inc: true };
+    return { id: ++VOZ.n, text: t, res: r || { err: 'No entendí el comando. Prueba con: “cambia el territorio del jueves al 12”.', unk: true }, sel: 0, inc: true };
   });
 }
 
-// ═══ Interfaz, aplicación verificada y deshacer ═══════════════════════════
+// ═══ Voz (v1.57.0-beta): interfaz mínima junto a la NavBar de Inicio ═════════════
+Object.assign(VOZ, { open: false, state: 'idle', items: [], picks: [], ask: null, loading: null, loadErr: null, manual: false, quiet: 0, liveEl: null, thinkEl: null, chain: Promise.resolve() });
+const vozById = id => document.getElementById(id);
+const VOZ_SR = () => window.SpeechRecognition || window.webkitSpeechRecognition;
+const VOZ_NO = /\b(no|rechazo|rechazar|rechaza|cancela|cancelar|cancelo|descarta|descartar|olvidalo|incorrecto|negativo)\b/;
+const VOZ_YES = /\b(si|sii|siii|sip|claro|dale|ok|okey|okay|vale|correcto|exacto|perfecto|adelante|hazlo|hagalo|confirmo|confirma|confirmado|confirmar|acepto|acepta|aceptar|aplica|aplicar|guarda|guardar|apruebo|aprobado)\b|de acuerdo|esta bien|asi es|por supuesto/;
+const vozYesNo = n => VOZ_NO.test(n) ? 'no' : (VOZ_YES.test(n) ? 'yes' : null);
+
 async function vozLoad() {
   const today = vozISO(new Date());
   const q = (t, f) => sb.from(t).select(f || '*');
   const [a, t, g, c, v, f, p] = await Promise.all([
-    q('assignments').gte('date', vozAdd(today, -1)).order('date').order('time'), q('territories', 'id,number'), q('grupos', 'id,numero'),
+    q('assignments').gte('date', vozAdd(today, -1)).order('date').order('time'), q('territories', 'id,number,color'), q('grupos', 'id,numero'),
     q('conductores'), q('vmc_weeks').order('date_start'), q('fs_weeks').order('date_start'), q('vmc_people')]);
   VOZ.data = { asg: a.data || [], ter: t.data || [], gru: g.data || [], con: c.data || [], vmc: v.data || [], fs: f.data || [], ppl: p.data || [] };
 }
-async function vozOnOpen() {
-  if (!canUseVoz()) return;
-  const box = document.getElementById('voz-status');
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  document.getElementById('voz-mic').disabled = !SR;
-  box.textContent = SR ? 'Listo. Toca el micrófono o escribe un comando.' : 'Este navegador no soporta dictado por voz; usa el cuadro de texto (o Chrome/Edge/Safari).';
-  try { await vozLoad(); } catch (e) { box.textContent = 'No se pudieron cargar los datos: ' + e.message; }
-  vozRenderQueue(); vozRenderUndo(); if (currentRole === 'dev') vozLoadAccess();
-}
-function vozSubmit(text) {
-  text = (text || '').trim(); if (!text) return;
-  const n = vozNorm(text);
-  if (/^(aplica|aplicar|confirma|confirmar)( los)?( cambios)?$/.test(n)) return vozOpenConfirm();
-  if (/^(cancela|cancelar|descarta|descartar|limpia|limpiar)( todo| los cambios)?$/.test(n)) return vozClear();
-  if (!VOZ.data) { showToast('Los datos aún se están cargando.', 'error'); return; }
-  VOZ.queue.push(...vozParse(text)); vozRenderQueue();
-}
-function vozRunText() { const i = document.getElementById('voz-text'); vozSubmit(i.value); i.value = ''; }
-function vozClear() { VOZ.queue = []; vozRenderQueue(); }
-function vozRemove(id) { VOZ.queue = VOZ.queue.filter(p => p.id !== id); vozRenderQueue(); }
-function vozPick(id, v) { const p = VOZ.queue.find(x => x.id === id); if (p) { p.sel = +v; vozRenderQueue(); } }
-function vozInc(id, v) { const p = VOZ.queue.find(x => x.id === id); if (p) { p.inc = v; vozRenderQueue(true); } }
+async function vozOnOpen() { if (currentRole === 'dev') vozLoadAccess(); }
 
-function vozMicToggle() {
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition; if (!SR) return;
-  if (VOZ.on) { VOZ.rec.stop(); return; }
+// ── Burbujas ──
+function vozScroll() { const s = vozById('voz-stream'); if (s) s.scrollTo({ top: s.scrollHeight, behavior: 'smooth' }); }
+function vozBubble(cls, html) { const el = document.createElement('div'); el.className = 'voz-b ' + cls; el.innerHTML = html; vozById('voz-stream').appendChild(el); vozScroll(); return el; }
+const vozSay = (text, extra, cls) => vozBubble('a' + (cls ? ' ' + cls : ''), '<div class="voz-t">' + vozEsc(text) + '</div>' + (extra || ''));
+const vozUser = text => vozBubble('u', '<div class="voz-t">' + vozEsc(text) + '</div>');
+function vozLive(txt) {
+  if (!txt) { if (VOZ.liveEl) { VOZ.liveEl.remove(); VOZ.liveEl = null; } return; }
+  if (!VOZ.liveEl) VOZ.liveEl = vozBubble('u live', '<div class="voz-t"></div>');
+  VOZ.liveEl.firstChild.textContent = txt; vozScroll();
+}
+function vozThink(on) {
+  if (on && !VOZ.thinkEl) VOZ.thinkEl = vozBubble('a', '<span class="voz-dots"><i></i><i></i><i></i></span>');
+  if (!on && VOZ.thinkEl) { VOZ.thinkEl.remove(); VOZ.thinkEl = null; }
+}
+
+// ── Abrir / cerrar (el micrófono se agranda desde la NavBar y X devuelve la NavBar) ──
+function vozFlip(toNav) {
+  try {
+    const mic = vozById('voz-mic-btn'), nb = vozById('home-voz-btn');
+    if (!nb || !nb.offsetWidth) return;
+    const a = nb.getBoundingClientRect();
+    mic.style.transition = 'none'; mic.style.transform = '';
+    const b = mic.getBoundingClientRect();
+    const tf = 'translate(' + (a.left + a.width / 2 - (b.left + b.width / 2)) + 'px,' + (a.top + a.height / 2 - (b.top + b.height / 2)) + 'px) scale(' + (a.width / b.width) + ')';
+    if (toNav) { void mic.offsetWidth; mic.style.transition = ''; mic.style.transform = tf; }
+    else { mic.style.transform = tf; void mic.offsetWidth; mic.style.transition = ''; mic.style.transform = ''; }
+  } catch (e) {}
+}
+function vozOpen() {
+  if (VOZ.open || !canUseVoz()) return;
+  const layer = vozById('voz-layer'), SR = VOZ_SR();
+  Object.assign(VOZ, { open: true, state: 'idle', items: [], picks: [], ask: null, manual: false, quiet: 0 });
+  vozById('voz-stream').innerHTML = ''; VOZ.liveEl = VOZ.thinkEl = null;
+  layer.classList.toggle('txt', !SR);
+  layer.classList.add('open');
+  vozFlip(false);
+  document.documentElement.classList.add('voz-open');
+  requestAnimationFrame(() => layer.classList.add('show'));
+  VOZ.loadErr = null;
+  VOZ.loading = vozLoad().catch(e => { VOZ.loadErr = e; });
+  vozSay(SR ? 'Te escucho. Dime qué quieres cambiar.' : 'Este navegador no soporta dictado por voz. Escribe tu comando.', '<div class="voz-ex">“Cambia el territorio del jueves al 12”</div>', 'hint');
+  if (SR) vozListen(); else setTimeout(() => { const i = vozById('voz-text'); if (i) i.focus(); }, 350);
+  try { trackEvent('voz_open', {}); } catch (e) {}
+}
+function vozClose() {
+  if (!VOZ.open) return;
+  VOZ.open = false; VOZ.manual = true; VOZ.ask = null;
+  try { VOZ.rec && VOZ.rec.abort(); } catch (e) {}
+  VOZ.on = false; vozLive(''); vozThink(false); vozMicUi();
+  const layer = vozById('voz-layer'), mic = vozById('voz-mic-btn');
+  layer.classList.remove('show');
+  vozFlip(true);
+  setTimeout(() => { document.documentElement.classList.remove('voz-open'); }, 300);
+  setTimeout(() => { if (VOZ.open) return; layer.classList.remove('open'); mic.style.transition = 'none'; mic.style.transform = ''; void mic.offsetWidth; mic.style.transition = ''; }, 420);
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && VOZ.open) vozClose(); });
+
+// ── Micrófono ──
+function vozMicUi() { const b = vozById('voz-mic-btn'); if (b) b.classList.toggle('rec', !!VOZ.on); }
+function vozMicTap() {
+  if (VOZ.on) { VOZ.manual = true; try { VOZ.rec.stop(); } catch (e) {} }
+  else { VOZ.manual = false; vozListen(); }
+}
+function vozListen() {
+  const SR = VOZ_SR(); if (!SR || VOZ.on || !VOZ.open) return;
   const r = new SR(); r.lang = 'es-CL'; r.interimResults = true; r.continuous = true; VOZ.rec = r;
-  const live = document.getElementById('voz-live');
   r.onstart = () => { VOZ.on = true; vozMicUi(); };
-  r.onresult = e => { let im = ''; for (let i = e.resultIndex; i < e.results.length; i++) { const tr = e.results[i][0].transcript; if (e.results[i].isFinal) { vozSubmit(tr); live.textContent = ''; } else im += tr; } if (im) live.textContent = '“' + im + '”'; };
-  r.onerror = e => { if (e.error !== 'no-speech' && e.error !== 'aborted') showToast('Micrófono: ' + e.error, 'error'); };
-  r.onend = () => { VOZ.on = false; live.textContent = ''; vozMicUi(); };
+  r.onresult = e => {
+    let im = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      const tr = e.results[i][0].transcript;
+      if (e.results[i].isFinal) { VOZ.quiet = 0; vozLive(''); vozHear(tr); } else im += tr;
+    }
+    if (im) vozLive(im);
+  };
+  r.onerror = e => {
+    if (e.error === 'not-allowed' || e.error === 'service-not-allowed') { VOZ.manual = true; vozById('voz-layer').classList.add('txt'); vozSay('Necesito permiso para usar el micrófono. Mientras tanto puedes escribir tu comando.', '', 'err'); }
+    else if (e.error === 'network') vozSay('No pude conectar con el servicio de voz. Revisa tu conexión.', '', 'err');
+  };
+  r.onend = () => {
+    VOZ.on = false; vozLive(''); vozMicUi();
+    // Si Voz espera una respuesta (confirmar/elegir), vuelve a escuchar sola.
+    if (VOZ.open && !VOZ.manual && VOZ.ask && VOZ.quiet < 3) { VOZ.quiet++; setTimeout(() => vozListen(), 250); }
+  };
   try { r.start(); } catch (e) { showToast('No se pudo iniciar el micrófono.', 'error'); }
 }
-function vozMicUi() { const b = document.getElementById('voz-mic'); b.classList.toggle('rec', VOZ.on); b.querySelector('span').textContent = VOZ.on ? 'Escuchando… toca para parar' : 'Toca para hablar'; }
+function vozSendText() { const i = vozById('voz-text'); const v = i.value; i.value = ''; vozHear(v); }
+function vozHear(text) { VOZ.chain = VOZ.chain.then(() => vozHandle(text)).catch(e => console.warn('Voz:', e)); }
 
-function vozRenderQueue(keepFocus) {
-  const el = document.getElementById('voz-queue'), n = VOZ.queue.filter(p => p.res.opts && p.inc).length;
-  document.getElementById('voz-review-btn').textContent = 'Revisar y aplicar (' + n + ')';
-  document.getElementById('voz-review-btn').disabled = !n;
-  document.getElementById('voz-clear-btn').style.display = VOZ.queue.length ? '' : 'none';
-  if (!VOZ.queue.length) { el.innerHTML = '<div class="voz-empty">Aún no hay comandos. Los cambios propuestos aparecerán aquí para que los revises.</div>'; return; }
-  el.innerHTML = VOZ.queue.map(p => {
-    const rm = `<button class="voz-x" onclick="vozRemove(${p.id})" title="Quitar">✕</button>`;
-    if (p.res.err) return `<div class="voz-card err"><div class="voz-say">“${vozEsc(p.text)}”</div><div class="voz-msg">⚠ ${vozEsc(p.res.err)}</div>${rm}</div>`;
-    const o = p.res.opts[p.sel] || p.res.opts[0];
-    const sel = p.res.opts.length > 1 ? `<select class="form-select" onchange="vozPick(${p.id},this.value)">${p.res.opts.map((x, i) => `<option value="${i}" ${i === p.sel ? 'selected' : ''}>${vozEsc(x.label)}</option>`).join('')}</select><div class="voz-hint">Hay ${p.res.opts.length} posibilidades: elige la correcta.</div>` : `<div class="voz-target">${vozEsc(o.label)}</div>`;
-    return `<div class="voz-card${p.inc ? '' : ' off'}"><label class="voz-chk"><input type="checkbox" ${p.inc ? 'checked' : ''} onchange="vozInc(${p.id},this.checked)"> Incluir</label>
-      <div class="voz-say">“${vozEsc(p.text)}”</div><span class="voz-kind">${vozEsc(p.res.kind)}</span>${sel}
-      ${o.rows.map(r => `<div class="voz-diff"><b>${vozEsc(r[0])}</b><s>${vozEsc(r[1])}</s><span>→</span><em>${vozEsc(r[2])}</em></div>`).join('')}
-      ${o.warn.map(w => `<div class="voz-warn">⚠ ${vozEsc(w)}</div>`).join('')}${rm}</div>`;
-  }).join('');
+// ── Conversación ──
+async function vozHandle(text) {
+  text = (text || '').trim(); if (!text || !VOZ.open) return;
+  vozUser(text);
+  const n = vozNorm(text);
+  if (/^(cerrar|cierra|salir|sal|terminar|termina|adios|chao)( voz)?$/.test(n)) return vozClose();
+  if (VOZ.loading) { vozThink(true); await VOZ.loading; VOZ.loading = null; vozThink(false); }
+  if (VOZ.loadErr || !VOZ.data) { vozSay('No pude cargar los datos de la plataforma. Revisa tu conexión y vuelve a abrir Voz.', '', 'err'); return; }
+  const st = VOZ.state, yn = vozYesNo(n), long = n.split(' ').length > 4;
+  if (st === 'undo') {
+    if (yn === 'yes') return vozDoUndo();
+    if (yn === 'no') { VOZ.state = 'idle'; VOZ.ask = null; return vozSay('Ok, lo dejo como está.'); }
+    return vozSay('¿Deshago el último cambio? Dime sí o no.');
+  }
+  if (/\b(deshacer|deshaz|deshago|revertir|revierte)\b/.test(n)) return vozAskUndo();
+  if (st === 'confirm') {
+    if (!yn || long) { const pr = vozParse(text); if (pr.some(p => !p.res.unk)) return vozPropose(pr); }
+    if (yn === 'yes') return vozCommit();
+    if (yn === 'no') { VOZ.items = []; VOZ.state = 'idle'; VOZ.ask = null; return vozSay('Está bien, no hice ningún cambio. Dime si necesitas otra cosa.'); }
+    return vozSay('No te entendí. ¿Confirmas el cambio? Dime sí o no.');
+  }
+  if (st === 'pick') {
+    const idx = vozPickIdx(n, VOZ.picks[0].res.opts);
+    if (idx) return vozResolve(idx);
+    if (long) { const pr = vozParse(text); if (pr.some(p => !p.res.unk)) return vozPropose(pr); }
+    if (yn === 'no') { VOZ.items = []; VOZ.picks = []; VOZ.state = 'idle'; VOZ.ask = null; return vozSay('Está bien, lo cancelé. Dime si necesitas otra cosa.'); }
+    return vozSay('No te entendí. Dime «primera», «segunda»… o la hora de la salida.');
+  }
+  if (yn && !long) return vozSay('No hay ningún cambio pendiente. Dime qué quieres cambiar.');
+  return vozPropose(vozParse(text));
 }
 
-function vozChosen() { return VOZ.queue.filter(p => p.res.opts && p.inc).map(p => p.res.opts[p.sel] || p.res.opts[0]); }
-function vozOpenConfirm() {
-  const ch = vozChosen(); if (!ch.length) { showToast('No hay cambios para aplicar.', 'error'); return; }
-  const m = document.getElementById('voz-modal');
-  m.innerHTML = `<div class="voz-sheet"><h3>Confirma los cambios</h3><p class="voz-hint">Se guardarán ${ch.length} cambio(s) en la base de datos. Podrás deshacerlos después.</p>
-    ${ch.map(o => `<div class="voz-card"><div class="voz-target">${vozEsc(o.label)}</div>${o.rows.map(r => `<div class="voz-diff"><b>${vozEsc(r[0])}</b><s>${vozEsc(r[1])}</s><span>→</span><em>${vozEsc(r[2])}</em></div>`).join('')}${o.warn.map(w => `<div class="voz-warn">⚠ ${vozEsc(w)}</div>`).join('')}</div>`).join('')}
-    <label class="voz-chk big"><input type="checkbox" id="voz-ok" onchange="document.getElementById('voz-go').disabled=!this.checked"> Revisé cada cambio y quiero aplicarlos</label>
-    <div class="voz-actions"><button class="btn-secondary" onclick="vozCloseConfirm()">Volver</button><button class="btn-primary" id="voz-go" disabled onclick="vozApply()">Aplicar cambios</button></div></div>`;
-  m.classList.add('open');
+function vozPropose(pr) {
+  VOZ.items = []; VOZ.picks = []; VOZ.state = 'idle'; VOZ.ask = null;
+  const errs = [];
+  pr.forEach(p => {
+    if (p.res.err) errs.push(p.res.err);
+    else if (p.res.opts.length === 1) VOZ.items.push({ o: p.res.opts[0], kind: p.res.kind });
+    else VOZ.picks.push(p);
+  });
+  if (errs.length) vozSay(errs.join(' '), '', 'err');
+  vozNext();
 }
-function vozCloseConfirm() { document.getElementById('voz-modal').classList.remove('open'); }
+function vozNext() {
+  if (VOZ.picks.length) {
+    const p = VOZ.picks[0];
+    VOZ.state = 'pick'; VOZ.ask = 'pick';
+    vozSay('Encontré ' + p.res.opts.length + ' posibilidades. ¿Cuál es? Dime «primera», «segunda»… o la hora de la salida.',
+      p.res.opts.map((o, i) => '<div class="voz-opt" onclick="vozTapPick(' + i + ')"><b>' + (i + 1) + '</b><span>' + vozEsc(o.label) + '</span></div>').join(''));
+    return;
+  }
+  if (VOZ.items.length) {
+    const n = VOZ.items.length;
+    VOZ.state = 'confirm'; VOZ.ask = 'confirm';
+    vozSay(n === 1 ? (VOZ.items[0].o.card ? 'Ok, esta es la nueva asignación de predicación que corresponde al cambio. Avísame si lo confirmas o no.' : 'Ok, así quedaría el cambio. Avísame si lo confirmas o no.')
+      : 'Ok, estos son los ' + n + ' cambios. Avísame si los confirmas o no.', VOZ.items.map(vozPrevHtml).join(''));
+    if (!VOZ.on && !VOZ.manual) vozListen();
+    return;
+  }
+  VOZ.state = 'idle'; VOZ.ask = null;
+}
+function vozTapPick(i) { if (VOZ.state !== 'pick') return; vozUser('La opción ' + (i + 1)); vozResolve([i]); }
+function vozResolve(idx) {
+  const p = VOZ.picks.shift();
+  idx.forEach(i => VOZ.items.push({ o: p.res.opts[i], kind: p.res.kind }));
+  VOZ.state = 'idle'; vozNext();
+}
+function vozPickIdx(n, opts) {
+  if (/\b(todas|todos|ambas|ambos)\b/.test(n)) return opts.map((_, i) => i);
+  const asg = o => VOZ.data.asg.find(x => x.id === o.id);
+  const tm = n.match(new RegExp('\\b(?:a|de) las? ' + VOZ_TP)) || n.match(/\b(\d{1,2}:\d{2})\b/);
+  if (tm) {
+    const x = vozTime(tm[1]);
+    if (x) {
+      const hit = [];
+      opts.forEach((o, i) => { const a = asg(o); if (!a) return; const [h, m] = vozHM(a.time).split(':').map(Number); if (m === x.M && (h === x.H || (x.assumed && h === (x.H + 12) % 24))) hit.push(i); });
+      if (hit.length === 1) return hit;
+    }
+  }
+  const gm = n.match(/\bgrupo (\d+)/);
+  if (gm) { const g = VOZ.data.gru.find(x => String(x.numero) === gm[1]); const hit = []; opts.forEach((o, i) => { const a = asg(o); if (g && a && a.grupo_id === g.id) hit.push(i); }); if (hit.length === 1) return hit; }
+  const ord = [/\b(primera|primero|primer|1)\b/, /\b(segunda|segundo|2)\b/, /\b(tercera|tercero|tercer|3)\b/, /\b(cuarta|cuarto|4)\b/, /\b(quinta|quinto|5)\b/, /\b(sexta|sexto|6)\b/];
+  for (let i = 0; i < ord.length && i < opts.length; i++) if (ord[i].test(n)) return [i];
+  if (/\b(ultima|ultimo)\b/.test(n)) return [opts.length - 1];
+  return null;
+}
 
-async function vozApply() {
-  const btn = document.getElementById('voz-go'); btn.disabled = true; btn.textContent = 'Aplicando…';
+// ── Preview ──
+const VOZ_CLOCK = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
+function vozAsgCard(a) {
+  const D = VOZ.data; let house = '';
+  try { const c = (typeof casas !== 'undefined' ? casas : []).find(x => x.id === a.casa_id); house = typeof casaHouseLabel === 'function' ? casaHouseLabel(c && c.tipo, a.house) : ''; } catch (e) {}
+  const ters = [a.territory_id, a.territory_id_2, a.territory_id_3].filter(Boolean).map(id => D.ter.find(t => t.id === id)).filter(Boolean);
+  const badge = ters.length && typeof renderVisitaTerBadges === 'function' ? renderVisitaTerBadges(ters) : '';
+  return '<div class="assignment-card"><div class="card-main"><div class="card-address">' + vozEsc(a.address || 'Sin dirección') + '</div>'
+    + (house ? '<div class="card-house">' + vozEsc(house) + '</div>' : '')
+    + '<div class="card-meta"><span class="card-time-chip">' + VOZ_CLOCK + vozHM(a.time) + 'hrs</span><span class="card-conductor">' + vozEsc(a.conductor || 'Sin conductor') + '</span></div></div>' + badge + '</div>';
+}
+function vozPrevHtml(it) {
+  const o = it.o, warn = o.warn.map(w => '<div class="voz-warn">⚠ ' + vozEsc(w) + '</div>').join('');
+  if (o.card) return '<div class="voz-prev"><div class="voz-cap">' + vozEsc(vozFmtDate(o.card.date)) + '</div>' + vozAsgCard(o.card) + warn + '</div>';
+  return '<div class="voz-prev"><div class="voz-cap">' + vozEsc(o.label) + '</div><div class="voz-mp">'
+    + o.rows.map(r => '<div class="voz-diff"><b>' + vozEsc(r[0]) + '</b><s>' + vozEsc(r[1]) + '</s><span>→</span><em>' + vozEsc(r[2]) + '</em></div>').join('') + '</div>' + warn + '</div>';
+}
+
+// ── Aplicar (verificado) y deshacer ──
+async function vozApplyOpts(chosen) {
   const groups = {};
-  vozChosen().forEach(o => { (groups[o.table + ':' + o.id] = groups[o.table + ':' + o.id] || []).push(o); });
-  const done = [], fails = [], undo = [];
+  chosen.forEach(o => { (groups[o.table + ':' + o.id] = groups[o.table + ':' + o.id] || []).push(o); });
+  const said = [], fails = [], undo = [];
   for (const key of Object.keys(groups)) {
     const opts = groups[key], { table, id } = opts[0];
     try {
@@ -10615,11 +10890,11 @@ async function vozApply() {
       const patch = {}; let partsOps = [];
       for (const o of opts) {
         if (o.partOp) { partsOps.push(o.partOp); continue; }
-        for (const k of Object.keys(o.patch)) { if (!vozSameKey(k, fresh[k], o.prev[k])) throw new Error('cambió mientras revisabas (' + k + '); vuelve a pedirlo'); patch[k] = o.patch[k]; }
+        for (const k of Object.keys(o.patch)) { if (!vozSameKey(k, fresh[k], o.prev[k])) throw new Error('cambió mientras lo revisabas (' + k + '); vuelve a pedirlo'); patch[k] = o.patch[k]; }
       }
       if (partsOps.length) {
         const parts = vozPartsOf(fresh).map(p => ({ ...p }));
-        for (const op of partsOps) { if ((parts[op.idx] || {})[op.k] !== op.was && (parts[op.idx] || {})[op.k] != null && (op.was || '') !== (parts[op.idx][op.k] || '')) throw new Error('la parte cambió mientras revisabas'); parts[op.idx][op.k] = op.val; }
+        for (const op of partsOps) { if ((parts[op.idx] || {})[op.k] !== op.was && (parts[op.idx] || {})[op.k] != null && (op.was || '') !== (parts[op.idx][op.k] || '')) throw new Error('la parte cambió mientras lo revisabas'); parts[op.idx][op.k] = op.val; }
         patch.parts = parts;
       }
       const prevFull = Object.fromEntries(Object.keys(patch).map(k => [k, fresh[k]]));
@@ -10627,34 +10902,46 @@ async function vozApply() {
       if (e2) throw new Error(e2.message);
       const { data: chk } = await sb.from(table).select('*').eq('id', id).single();
       if (!chk || Object.keys(patch).some(k => !vozSameKey(k, chk[k], patch[k]))) throw new Error('no se pudo verificar el guardado');
-      undo.push({ table, id, prev: prevFull }); done.push(opts.map(o => o.label).join(' / '));
+      undo.push({ table, id, prev: prevFull }); opts.forEach(o => said.push(o.say || ('quedó guardado: ' + o.label + '.')));
       if (table === 'vmc_weeks' && typeof vmcNotifyNewAssignments === 'function') { try { await vmcNotifyNewAssignments({ ...fresh, ...patch }, fresh, vmcFormatRange(fresh)); } catch (e) { console.warn(e.message); } }
       if (table === 'fs_weeks' && typeof fsNotifyNewAssignments === 'function') { try { await fsNotifyNewAssignments({ ...fresh, ...patch }, fresh, fsFormatRange(fresh)); } catch (e) { console.warn(e.message); } }
-    } catch (e) { fails.push(opts[0].label + ': ' + e.message); }
+    } catch (e) { fails.push(opts[0].label + ': ' + e.message + '.'); }
   }
-  vozCloseConfirm();
-  if (undo.length) VOZ.undo = undo;
-  trackEvent('voz_apply', { ok: done.length, fail: fails.length });
-  await vozRefreshApp(); VOZ.queue = []; await vozLoad().catch(() => {}); vozRenderQueue(); vozRenderUndo();
-  showToast(fails.length ? `Aplicados ${done.length}, con errores: ${fails.length}` : `✓ ${done.length} cambio(s) aplicados y verificados`, fails.length ? 'error' : 'success');
-  if (fails.length) alert('No se aplicaron:\n\n' + fails.join('\n'));
+  return { said, fails, undo };
+}
+async function vozCommit() {
+  const items = VOZ.items.slice(); VOZ.items = []; VOZ.state = 'idle'; VOZ.ask = null;
+  vozThink(true);
+  let r;
+  try { r = await vozApplyOpts(items.map(i => i.o)); } catch (e) { vozThink(false); return vozSay('No pude guardar los cambios: ' + e.message, '', 'err'); }
+  if (r.undo.length) VOZ.undo = r.undo;
+  try { trackEvent('voz_apply', { ok: r.said.length, fail: r.fails.length }); } catch (e) {}
+  try { await vozRefreshApp(); await vozLoad(); } catch (e) {}
+  vozThink(false);
+  if (r.said.length) vozSay('Listo, ' + r.said.map((x, i) => i ? 'además, ' + x : x).join(' '));
+  if (r.fails.length) vozSay('No pude aplicar: ' + r.fails.join(' '), '', 'err');
 }
 async function vozRefreshApp() {
   try { if (typeof loadSchedule === 'function') await loadSchedule(); if (typeof renderAdminAssignments === 'function') renderAdminAssignments(); } catch (e) {}
   try { await loadVmcWeeks(); renderAdminVmc(); renderVmcUserView(); } catch (e) {}
   try { await loadFsWeeks(); renderAdminFs(); renderFsUserView(); } catch (e) {}
+  try { if (typeof renderHome === 'function') await renderHome(); } catch (e) {}
 }
-function vozRenderUndo() {
-  const el = document.getElementById('voz-undo');
-  el.style.display = VOZ.undo ? '' : 'none';
-  el.innerHTML = VOZ.undo ? `<span>Último lote: ${VOZ.undo.length} registro(s) modificados.</span><button class="btn-secondary" onclick="vozUndo()">Deshacer</button>` : '';
+function vozAskUndo() {
+  if (!VOZ.undo) return vozSay('No tengo ningún cambio reciente para deshacer.');
+  VOZ.state = 'undo'; VOZ.ask = 'undo';
+  vozSay('¿Quieres que deshaga el último cambio que hice? Dime sí o no.');
+  if (!VOZ.on && !VOZ.manual) vozListen();
 }
-async function vozUndo() {
-  if (!VOZ.undo || !confirm('¿Deshacer el último lote de cambios del asistente de voz?')) return;
+async function vozDoUndo() {
+  const u = VOZ.undo; VOZ.state = 'idle'; VOZ.ask = null; if (!u) return;
+  vozThink(true);
   let ok = 0;
-  for (const u of VOZ.undo) { const { error } = await sb.from(u.table).update(u.prev).eq('id', u.id); if (!error) ok++; }
-  showToast(ok === VOZ.undo.length ? 'Cambios deshechos ✓' : 'Algunos cambios no se pudieron deshacer', ok === VOZ.undo.length ? 'success' : 'error');
-  VOZ.undo = null; await vozRefreshApp(); await vozLoad().catch(() => {}); vozRenderUndo();
+  for (const x of u) { const { error } = await sb.from(x.table).update(x.prev).eq('id', x.id); if (!error) ok++; }
+  VOZ.undo = null;
+  try { await vozRefreshApp(); await vozLoad(); } catch (e) {}
+  vozThink(false);
+  if (ok === u.length) vozSay('Listo, deshice el último cambio.'); else vozSay('No pude deshacer todo: ' + ok + ' de ' + u.length + ' cambios revertidos.', '', 'err');
 }
 
 // Solo DEV: elegir qué Admins pueden usar el asistente
@@ -32017,6 +32304,18 @@ function shareCasaEnCasaAssignment() {
 <div class="ct-form-overlay" id="cartFormOverlay" role="dialog" aria-modal="true">
   <div class="ct-form-sheet" id="cartFormSheet"></div>
 </div>
-<div id="voz-modal" onclick="if(event.target===this)vozCloseConfirm()"></div>
+<!-- Voz (v1.57.0-beta): los dos botones inferiores reemplazan momentáneamente a la NavBar -->
+<div id="voz-layer" role="dialog" aria-label="Voz">
+  <div class="voz-backdrop"></div>
+  <div class="voz-stream" id="voz-stream" aria-live="polite"></div>
+  <div class="voz-textrow" id="voz-textrow">
+    <input id="voz-text" type="text" placeholder="Escribe tu comando…" autocomplete="off" onkeydown="if(event.key==='Enter')vozSendText()">
+    <button type="button" onclick="vozSendText()" aria-label="Enviar">→</button>
+  </div>
+  <div class="voz-dock">
+    <button class="voz-btn" id="voz-x-btn" onclick="vozClose()" aria-label="Cerrar Voz"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    <button class="voz-btn" id="voz-mic-btn" onclick="vozMicTap()" aria-label="Voz"><svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg></button>
+  </div>
+</div>
 </body>
 </html>
