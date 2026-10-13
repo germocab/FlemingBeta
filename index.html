@@ -6124,12 +6124,16 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
   .home-voz-btn svg,.voz-btn svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
   html.voz-avail .home-voz-btn{display:flex;animation:vozPop .34s var(--ease-ultra,ease)}
   html.voz-open .home-bn-icon,html.voz-open .home-bn-pill{transition:opacity .22s ease}
-  html.voz-avail .home-bn-btn{padding:9px 12px}
+  html.inicio-mode .home-bn-btn{padding:9px 12px}
+  /* v1.51.0-alpha: sin permiso de Voz, el botón de Voz se reemplaza por "Más Opciones" */
+  html:not(.voz-avail) .home-more-btn{display:flex}
+  html.voz-avail .home-more-btn{display:none}
   /* v1.50.0-beta: botón Home de la NavBar (activo = blanco con ícono oscuro) */
   .home-bn-icon{flex-shrink:0;width:48px;height:48px;padding:0;border-radius:50%;border:1px solid var(--border);background:var(--nav-bg);color:var(--text);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:var(--shadow-lg);backdrop-filter:blur(var(--ui-blur,34px)) saturate(180%);-webkit-backdrop-filter:blur(var(--ui-blur,34px)) saturate(180%);-webkit-tap-highlight-color:transparent;transition:transform .15s,background .22s,color .22s}
   .home-bn-icon:active{transform:scale(.92)}
   .home-bn-icon svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-  .home-bn-icon.active{background:var(--text);color:var(--bg);border-color:transparent}
+  /* v1.51.0-alpha: activo = azul, igual que Predicación/Reuniones */
+  .home-bn-icon.active{background:var(--accent);color:#fff;border-color:transparent;box-shadow:0 2px 12px rgba(0,122,255,0.35)}
   html.voz-open .home-bn-icon{opacity:0;pointer-events:none}
   @keyframes vozPop{from{opacity:0;transform:scale(.5)}}
   html.voz-open .home-bn-pill{opacity:0;transform:scale(.9);pointer-events:none}
@@ -6199,6 +6203,8 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
   /* v1.50.0-beta: en Predicación/Reuniones (con Inicio activo) no se ve la foto de perfil: vuelve el botón de tres puntos */
   html.inicio-mode:not(.home-tab-inicio) .nav-avatar-btn { display: none !important; }
   html.inicio-mode:not(.home-tab-inicio) #nav-options-dots-btn { display: flex !important; }
+  /* v1.51.0-alpha: Notificaciones solo se muestra en Inicio (UI Beta); en Predicación/Reuniones se oculta */
+  html.inicio-mode:not(.home-tab-inicio) #nav-bell-wrap { display: none !important; }
   html.inicio-mode .main-content { padding-bottom: 6.5rem; }
   html.inicio-mode .home-bottom-nav {
     display: flex; align-items: center; gap: 10px; position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(14px + env(safe-area-inset-bottom, 0px));
@@ -7098,6 +7104,8 @@ function homeResetLayout() { setHomeTextoTop(false); saveHomeLayout(HOME_DEFAULT
       <button class="home-bn-btn" data-tab="reuniones" onclick="homeNavGo('reuniones')">Reuniones</button>
     </div>
     <!-- v1.50.0-beta: Voz — visible en toda la NavBar, solo para quienes tengan acceso (Administración → FlemingApp → Voz) -->
+    <!-- v1.51.0-alpha: si el usuario no puede usar Voz, aparece "Más Opciones" en su lugar -->
+    <button class="home-voz-btn home-more-btn" id="home-more-btn" onclick="event.stopPropagation();toggleOptionsMenu()" aria-label="Más Opciones" title="Más Opciones"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.2" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="12" cy="19" r="1.2" fill="currentColor" stroke="none"/></svg></button>
     <button class="home-voz-btn" id="home-voz-btn" onclick="vozOpen()" aria-label="Voz" title="Voz"><svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg></button>
   </nav>
   <!-- Personalizar Inicio -->
@@ -11644,7 +11652,6 @@ const I18N = {
   'notifcat.grupo':              { es: 'Grupo de Servicio',           en: 'Service Group',            nl: 'Dienstgroep' },
   'notifcat.live':                { es: 'Notificaciones Live',          en: 'Live Notifications',       nl: 'Live-meldingen' },
   'notifcat.carritos':          { es: 'Carritos',                     en: 'Carts',                     nl: 'Karretjes' },
-  'notifcat.mapas-actualizacion': { es: 'Actualización de Mapas',     en: 'Map Updates',               nl: 'Kaartupdates' },
   'notifcat.vida-ministerio':   { es: 'Vida y Ministerio',           en: 'Christian Life and Ministry', nl: 'Leven en Bediening' },
   'notifcat.fin-semana':        { es: 'Pública',                     en: 'Public Meeting',            nl: 'Openbare vergadering' },
   'notifcat.aseo':               { es: 'Aseo del Salón',               en: 'Hall Cleaning',             nl: 'Schoonmaak van de Zaal' },
@@ -25551,13 +25558,7 @@ async function handleFullMapUpload(event) {
     await updateFullMapUI(dataUri);
     showToast('Mapa completo guardado ✓', 'success');
 
-    // Notifica a quienes tengan activo el Toggle "Actualización de Mapas".
-    await sb.from('notifications').insert({
-      title: 'Mapa de la congregación actualizado',
-      body: 'Se subió una nueva versión del mapa completo de la congregación (PDF).',
-      notif_category: 'mapas-actualizacion',
-    });
-    await notifyUsersPush('mapas-actualizacion', { title: 'Mapa de la congregación actualizado', body: 'Hay una nueva versión disponible para descargar.' });
+    // v1.51.0-alpha: ya no se envía notificación al subir el mapa (categoría eliminada).
   };
   reader.onerror = () => {
     showToast('No se pudo leer el archivo', 'error');
@@ -25832,12 +25833,6 @@ const NOTIF_GROUPS = {
     bg: 'rgba(243,97,0,0.12)',
     icon: '<svg viewBox="0 0 24 24"><circle cx="8" cy="19" r="1.8"/><circle cx="17" cy="19" r="1.8"/><path d="M2 3h2l2.4 12.2a2 2 0 0 0 2 1.8h7.2a2 2 0 0 0 2-1.6L20 8H6"/></svg>',
   },
-  mapas: {
-    label: 'notifcat.mapas-actualizacion',
-    color: '#5856d6',
-    bg: 'rgba(88,86,214,0.12)',
-    icon: '<svg viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>',
-  },
   tips: {
     label: 'notif.group.tips',
     color: '#ffcc00',
@@ -25866,7 +25861,7 @@ const NOTIF_LEVEL_INFO = {
 // Nivel por defecto de cada categoría antes de cualquier personalización.
 const NOTIF_LEVEL_DEFAULTS = {
   'casa': 'normal', 'grupo': 'normal', 'live': 'top', 'carritos': 'normal',
-  'mapas-actualizacion': 'silencio', 'vida-ministerio': 'top', 'fin-semana': 'top',
+  'vida-ministerio': 'top', 'fin-semana': 'top',
   'aseo': 'normal', 'hospitalidad': 'normal', 'responsabilidades': 'top',
   'sistema': 'top', 'solicitud-cuenta': 'top', 'reporte-territorio': 'normal',
   'tips': 'normal',
@@ -25954,7 +25949,6 @@ const NOTIF_CATEGORIES = [
   { id: 'grupo',             label: 'notifcat.grupo', mandatory: false, group: 'grupos',   section: 'predicacion' },
   { id: 'live',              label: 'notifcat.live', mandatory: false, group: 'live',     section: 'predicacion' },
   { id: 'carritos',          label: 'notifcat.carritos', mandatory: false, group: 'carritos', section: 'predicacion' },
-  { id: 'mapas-actualizacion', label: 'notifcat.mapas-actualizacion', mandatory: false, group: 'mapas', section: 'predicacion' },
   { id: 'vida-ministerio',   label: 'notifcat.vida-ministerio', mandatory: true,  group: 'reuniones', section: 'reuniones' },
   { id: 'fin-semana',        label: 'notifcat.fin-semana', mandatory: true,  group: 'reuniones', section: 'reuniones' },
   { id: 'aseo',              label: 'notifcat.aseo', mandatory: false, group: 'reuniones', section: 'reuniones' },
@@ -26243,8 +26237,8 @@ async function resetCategoryLabelFromUI(catId) {
 
 function defaultNotifPrefs() {
   const prefs = {};
-  // v1.21.0-beta: "Actualización de Mapas" viene desactivada por defecto.
-  NOTIF_CATEGORIES.forEach(c => { prefs[c.id] = c.id !== 'mapas-actualizacion'; });
+  // v1.51.0-alpha: se eliminó la categoría "Actualización de Mapas"; todas las demás vienen activadas.
+  NOTIF_CATEGORIES.forEach(c => { prefs[c.id] = true; });
   return prefs;
 }
 // Las prefs viven en platform_users.notif_prefs (jsonb) y se cachean en
