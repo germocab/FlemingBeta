@@ -9,8 +9,26 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png">
 <link rel="manifest" href="site.webmanifest">
-<meta name="theme-color" content="#007AFF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<script>
+/* v1.51.0-alpha: la barra bajo la barra de estado toma siempre el color de fondo de la app (sin azul). */
+(function(){
+  function sync(){
+    try {
+      var c = getComputedStyle(document.body || document.documentElement).backgroundColor;
+      if (!c || c === 'rgba(0, 0, 0, 0)' || c === 'transparent') c = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
+      if (!c) return;
+      document.querySelectorAll('meta[name="theme-color"]').forEach(function(m){ m.setAttribute('content', c); });
+    } catch(e) {}
+  }
+  document.addEventListener('DOMContentLoaded', function(){
+    sync();
+    new MutationObserver(sync).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme','style','class'] });
+    if (window.matchMedia) { try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', sync); } catch(e) {} }
+  });
+})();
+</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Fleming">
@@ -6528,7 +6546,7 @@ async function renderHome() {
   // v1.52.1-beta: tarjetas que el usuario quitó (mantener presionado) no se muestran.
   para.forEach(c => { c.pkey = _homeParaKey(c); });
   const _hid = _homeHiddenLoad();
-  const paraShown = para.filter(c => !_hid[c.pkey]);
+  const paraShown = para.filter(c => !_hid[c.pkey]).slice(0, 3); // v1.51.0-alpha: máximo 3 tarjetas
   let html = (textoTop ? '<div class="home-section" id="home-texto"></div>' : '') + _homeSection('Para tí', paraShown.length
     ? '<div class="home-card-list" id="home-para-list">' + paraShown.map(_homeCard).join('') + '</div>'
     : '<div class="home-empty" id="home-para-list">Estás al día. Aquí verás tus recordatorios y novedades.</div>');
@@ -9149,7 +9167,7 @@ function homeResetLayout() { setHomeTextoTop(false); saveHomeLayout(HOME_DEFAULT
           <div class="profile-row-label" data-i18n="settings.version">Versión de la plataforma</div>
           <div class="profile-row-value" id="pref-version-value">—</div>
         </div>
-        <span class="pref-alpha-badge" id="pref-alpha-badge">BETA</span>
+        <span class="pref-alpha-badge" id="pref-alpha-badge">ALPHA</span>
         <!-- Hold progress ring -->
         <svg id="ver-hold-ring" viewBox="0 0 36 36" style="position:absolute;right:12px;width:28px;height:28px;opacity:0;transition:opacity 0.2s;pointer-events:none">
           <circle cx="18" cy="18" r="15" fill="none" stroke="var(--surface3)" stroke-width="3"/>
@@ -10271,7 +10289,7 @@ function homeResetLayout() { setHomeTextoTop(false); saveHomeLayout(HOME_DEFAULT
 // usar Voz se define en Administración → FlemingApp → Voz.
 // v1.57.1-beta: Voz junta todo lo que dices en una misma frase (espera una breve pausa de silencio) en vez de crear
 // un cuadro y una respuesta por cada trozo; así se genera un solo preview por comando.
-const APP_VERSION = '1.50.0-beta';
+const APP_VERSION = '1.51.0-alpha';
 // ═════════════════════════════════════════════════════════════════════════
 // v1.50.0-beta: (1) Voz crea asignaciones de predicación nuevas ("Crea una asignación para el lunes a las 10, asigna el
 // Territorio 17"), reconoce Grupos de Servicio y es mucho más flexible: nunca termina en "no entendí"/"no se encontró",
@@ -18834,7 +18852,7 @@ async function openManzanaPicker(n) {
   if (!svg) {
     wrap.innerHTML = '<div style="font-size:0.8rem;color:var(--text3)">No se pudo leer el SVG de este territorio.</div>';
   } else {
-    svg.removeAttribute('width'); svg.removeAttribute('height');
+    trepNormalizeSvgSize(svg);
     svg.style.width = '100%'; svg.style.maxHeight = '360px'; svg.style.cursor = 'pointer';
     const matched = trepMatchManzanaElements(svg, _manzanaPickerAllLetters);
     // Normaliza letra -> letra "real" (con mayúsculas tal como viene del territorio)
@@ -19812,9 +19830,19 @@ async function saveWeekBuilder() {
   renderAdminAssignments();
 }
 
+let _terOrig = null; // valores de mapas/SVG tal como están en la base al abrir el modal
 async function openTerritoryModal(t) {
   if (!['dev','admin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   await ensureTerritoryMapsLoaded();
+  // v1.51.0-alpha: la fila en memoria no trae svg_data/manzanas (y puede no traer los mapas);
+  // se leen completas desde la base para no sobrescribirlas con null al guardar.
+  _terOrig = null;
+  if (t && t.id) {
+    try {
+      const { data: full, error: fullErr } = await sb.from('territories').select('id, map_data, map_data_dark, svg_data, manzanas').eq('id', t.id).single();
+      if (!fullErr && full) { t = { ...t, ...full }; _terOrig = { map_data: full.map_data || null, map_data_dark: full.map_data_dark || null, svg_data: full.svg_data || null }; }
+    } catch (e) { console.warn('openTerritoryModal (fila completa):', e); }
+  }
   editingTerritoryId = t ? t.id : null;
   document.getElementById('ter-modal-title').textContent = t ? 'Editar Territorio' : 'Nuevo Territorio';
   document.getElementById('ter-num').value = t?.number || '';
@@ -20051,7 +20079,21 @@ async function saveTerritory() {
   btn.disabled = true; btn.textContent = 'Guardando...';
   const color = document.getElementById('ter-color-value').value || null;
   const manzanas = (document.getElementById('ter-manzanas').value || '').split(',').map(s => s.trim()).filter(Boolean);
-  const payload = { number, color, no_pasar, map_data: pendingMapBase64 || null, map_data_dark: pendingMapDarkBase64 !== undefined ? pendingMapDarkBase64 : null, svg_data: pendingSvgData || null, manzanas };
+  const payload = { number, color, no_pasar, manzanas };
+  const _nMap = pendingMapBase64 || null, _nDark = pendingMapDarkBase64 || null, _nSvg = pendingSvgData || null;
+  if (editingTerritoryId && _terOrig) {
+    // v1.51.0-alpha: solo se tocan las columnas que el usuario cambió (subir SVG ya no borra los mapas Claro/Oscuro).
+    if (_nMap !== _terOrig.map_data) payload.map_data = _nMap;
+    if (_nDark !== _terOrig.map_data_dark) payload.map_data_dark = _nDark;
+    if (_nSvg !== _terOrig.svg_data) payload.svg_data = _nSvg;
+  } else if (editingTerritoryId) {
+    // No se pudo leer la fila original: nunca se envían mapas vacíos por accidente.
+    if (_nMap) payload.map_data = _nMap;
+    if (_nDark) payload.map_data_dark = _nDark;
+    if (_nSvg) payload.svg_data = _nSvg;
+  } else {
+    payload.map_data = _nMap; payload.map_data_dark = _nDark; payload.svg_data = _nSvg;
+  }
   let error, savedRow;
   if (editingTerritoryId) { ({ data: savedRow, error } = await sb.from('territories').update(payload).eq('id',editingTerritoryId).select('id, number, color, no_pasar').single()); }
   else { ({ data: savedRow, error } = await sb.from('territories').insert(payload).select('id, number, color, no_pasar').single()); }
@@ -20063,7 +20105,8 @@ async function saveTerritory() {
   // we already have the saved row's light columns (savedRow) and the map data
   // we just uploaded (pendingMapBase64 / pendingMapDarkBase64), so no extra
   // network round-trip is needed to keep the admin grid showing the new map.
-  const fullRow = { ...savedRow, map_data: pendingMapBase64 || null, map_data_dark: pendingMapDarkBase64 !== undefined ? pendingMapDarkBase64 : null };
+  const fullRow = { ...savedRow, map_data: _nMap, map_data_dark: _nDark, svg_data: _nSvg, manzanas };
+  delete _territorySvgInfoCache[fullRow.id]; // el selector de manzanas debe ver el SVG nuevo
   const idx = territories.findIndex(t => t.id === fullRow.id);
   if (idx >= 0) territories[idx] = fullRow; else territories.push(fullRow);
   territories.sort((a,b) => a.number - b.number);
@@ -31206,7 +31249,7 @@ function trepBuildPreviewSvg(svgData, allManzanas, doneManzanas, allDone, maxHei
     const doc = parser.parseFromString(svgData, 'image/svg+xml');
     const svg = doc.querySelector('svg');
     if (!svg) return '';
-    svg.removeAttribute('width'); svg.removeAttribute('height');
+    trepNormalizeSvgSize(svg);
     svg.style.width = '100%'; svg.style.maxHeight = (maxHeight || '150px'); svg.style.pointerEvents = 'none';
     const manzanaSet = new Set((allManzanas||[]).map(m => m.toLowerCase()));
     const matched = new Map();
@@ -31246,7 +31289,49 @@ function trepBuildPreviewBars(allManzanas, doneManzanas, allDone) {
   }).join('');
   return `<div class="trep-bar-map">${bars}</div>`;
 }
+// v1.51.0-alpha: si el SVG no trae viewBox, se crea a partir de width/height antes de quitarlos
+// (si no, el mapa se renderiza en 0px y "no se ve").
+function trepNormalizeSvgSize(svg) {
+  if (!svg) return;
+  if (!svg.getAttribute('viewBox')) {
+    const w = parseFloat(svg.getAttribute('width')), h = parseFloat(svg.getAttribute('height'));
+    if (w > 0 && h > 0) svg.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+    else { try { const bb = svg.getBBox(); if (bb && bb.width > 0) svg.setAttribute('viewBox', [bb.x, bb.y, bb.width, bb.height].join(' ')); } catch (e) {} }
+  }
+  svg.removeAttribute('width'); svg.removeAttribute('height');
+  if (!svg.getAttribute('preserveAspectRatio')) svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+}
+// Normaliza ids: "Manzana A", "mz-a", "A_1_" -> "a"
+function _trepNormId(raw) {
+  let v = String(raw || '').trim().toLowerCase();
+  v = v.replace(/^(manzana|mz|mza|block|bloque)[\s_\-]*/, '');
+  v = v.replace(/_x[0-9a-f]+_/g, '_');
+  return v;
+}
 function trepMatchManzanaElements(svg, manzanas) {
+  const m0 = new Map();
+  const set = new Set(manzanas.map(m => String(m).trim().toLowerCase()));
+  const labelOf = (el) => el.getAttribute('id') || el.getAttribute('data-name') || el.getAttribute('inkscape:label') || '';
+  // 1) coincidencia exacta (grupo primero)
+  svg.querySelectorAll('g[id], g[data-name], g[inkscape\\:label]').forEach(g => {
+    const k = _trepNormId(labelOf(g));
+    if (set.has(k) && !m0.has(k)) m0.set(k, g);
+  });
+  // 2) cualquier otro elemento con id exacto
+  svg.querySelectorAll('path, polygon, rect, polyline, circle, ellipse').forEach(el => {
+    const k = _trepNormId(labelOf(el));
+    if (set.has(k) && !m0.has(k)) m0.set(k, el);
+  });
+  // 3) prefijos: "a_2", "a-1", "a_1_"
+  if (m0.size < set.size) {
+    svg.querySelectorAll('g[id], path[id], polygon[id], rect[id]').forEach(el => {
+      const k = _trepNormId(el.getAttribute('id'));
+      set.forEach(ml => { if (!m0.has(ml) && (k.startsWith(ml + '_') || k.startsWith(ml + '-'))) m0.set(ml, el); });
+    });
+  }
+  return m0;
+}
+function _trepMatchManzanaElementsLegacy(svg, manzanas) {
   const manzanaSet = new Set(manzanas.map(m => m.toLowerCase()));
   const matched = new Map();
   svg.querySelectorAll('g[id]').forEach(g => {
@@ -31755,7 +31840,7 @@ function trepPubRenderMap(t) {
   const doc = parser.parseFromString(t.svg_data, 'image/svg+xml');
   const svg = doc.querySelector('svg');
   if (!svg) { container.innerHTML = ''; return; }
-  svg.removeAttribute('width'); svg.removeAttribute('height');
+  trepNormalizeSvgSize(svg);
   svg.style.width = '100%'; svg.style.maxHeight = '260px';
   // Refuerzo inline: algunos WebView de Android ignoran el CSS externo la
   // primera vez que el SVG se pinta, así que se fija también aquí.
