@@ -6165,6 +6165,11 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
   .voz-prev .assignment-card{margin:0;cursor:default;background:var(--surface2);box-shadow:none}
   .voz-prev .assignment-card:hover,.voz-prev .assignment-card:active{transform:none;box-shadow:none}
   .voz-prev+.voz-prev{margin-top:12px}
+  .voz-gm{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:6px;padding:9px 12px;border-radius:16px;background:var(--surface2);border:1px solid var(--border);font-size:.84rem;font-weight:600;color:var(--text)}
+  .voz-gm span:first-child{min-width:0;overflow-wrap:anywhere}
+  .voz-gm .r{flex-shrink:0;font-size:.68rem;font-weight:700;letter-spacing:.03em;padding:3px 9px;border-radius:999px;background:var(--surface3);color:var(--text2)}
+  .voz-gm .r.s{background:var(--accent);color:#fff}
+  .voz-gm .r.a{background:var(--green-light);color:var(--green)}
   .voz-mp{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:10px 14px}
   .voz-diff{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:.86rem;padding:3px 0}
   .voz-diff b{color:var(--text2);min-width:92px}.voz-diff s{color:var(--text3)}.voz-diff em{font-style:normal;font-weight:700;color:var(--green)}
@@ -6219,6 +6224,9 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 }
 .home-bn-btn.active { background: var(--accent); color: #fff; box-shadow: 0 2px 12px rgba(0,122,255,0.35); }
 #home-content { padding: 0.25rem 0 1rem; }
+.home-custom-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; margin: 0.4rem 0 0.4rem; padding: 0.85rem 1.1rem; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--accent); font-family: var(--font); font-size: 0.9rem; font-weight: 700; cursor: pointer; box-shadow: var(--shadow); transition: transform 0.15s; -webkit-tap-highlight-color: transparent; }
+.home-custom-btn:active { transform: scale(0.98); }
+.home-custom-btn svg { width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
 .home-section { margin-bottom: 1.6rem; }
 .home-section-title { font-size: 1.02rem; font-weight: 800; color: var(--text); margin: 0 0 0.7rem 0.1rem; letter-spacing: -0.01em; }
 .home-card-list { display: flex; flex-direction: column; gap: 10px; }
@@ -6573,6 +6581,8 @@ async function renderHome() {
     if (!cards.length) { html += _homeSection(HOME_SECTIONS[k].title, '<div class="home-empty">Nada por ahora.</div>'); return; }
     html += _homeSection(HOME_SECTIONS[k].title, '<div class="home-card-list">' + cards.map(_homeCard).join('') + '</div>');
   });
+  // v1.51.0.7-alpha: "Personalizar Inicio" vive al final de Inicio (ya no está en el menú Más Opciones).
+  html += '<button type="button" class="home-custom-btn" onclick="openHomeCustomize()"><svg viewBox="0 0 24 24"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="14" y2="12"/><line x1="4" y1="18" x2="10" y2="18"/><circle cx="18" cy="16" r="3"/></svg>Personalizar Inicio</button>';
   wrap.innerHTML = html;
   wrap.dataset.ready = '1';
   if (layout.includes('hoy')) renderHomeHoy();
@@ -7240,10 +7250,6 @@ function homeResetLayout() { setHomeTextoTop(false); saveHomeLayout(HOME_DEFAULT
             </button>
           </div>
           <div class="dropdown-divider"></div>
-          <button class="dropdown-item home-only" id="options-dropdown-home-item" onclick="openHomeCustomize();closeOptionsMenu()">
-            <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="14" y2="12"/><line x1="4" y1="18" x2="10" y2="18"/><circle cx="18" cy="16" r="3"/></svg>
-            Personalizar Inicio
-          </button>
           <button class="dropdown-item" id="admin-dropdown-btn" onclick="showPage('admin');closeOptionsMenu()" style="display:none">
             <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
             Administración
@@ -9683,7 +9689,7 @@ function homeResetLayout() { setHomeTextoTop(false); saveHomeLayout(HOME_DEFAULT
           <div id="home-exp-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
         </div>
       </div>
-      <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4">Función experimental (UI Beta), disponible solo en teléfonos móviles. Al activarla, el menú Más opciones suma "Personalizar Inicio" (solo en Inicio). No está disponible junto al Modo Sencillo.</div>
+      <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4">Función experimental (UI Beta), disponible solo en teléfonos móviles. Al activarla, Inicio muestra al final el botón "Personalizar Inicio". No está disponible junto al Modo Sencillo.</div>
     </div>
 
   </div>
@@ -10295,9 +10301,12 @@ function homeResetLayout() { setHomeTextoTop(false); saveHomeLayout(HOME_DEFAULT
 // (3) Comandos nuevos: agregar territorios ("agrega el territorio 5 y 6 al miércoles") y comandos compuestos
 // ("cambia al encargado del viernes a las 6 de la tarde por Ramón, y asígnale el territorio 22"). (4) Quién puede
 // usar Voz se define en Administración → FlemingApp → Voz.
+// v1.51.0.7-alpha: (1) Voz ahora responde consultas sobre los Grupos de Servicio: "¿De qué grupo de servicio es Nancy
+// Manriquez?", "¿Cuántas personas hay en el Grupo 8?", "¿Quién es el Auxiliar del Grupo 4?". (2) "Personalizar Inicio" ya
+// no está en el menú "Más Opciones": ahora es un botón alargado de bordes redondeados al final de Inicio.
 // v1.57.1-beta: Voz junta todo lo que dices en una misma frase (espera una breve pausa de silencio) en vez de crear
 // un cuadro y una respuesta por cada trozo; así se genera un solo preview por comando.
-const APP_VERSION = '1.51.0-alpha';
+const APP_VERSION = '1.51.0.7-alpha';
 // ═════════════════════════════════════════════════════════════════════════
 // v1.50.0-beta: (1) Voz crea asignaciones de predicación nuevas ("Crea una asignación para el lunes a las 10, asigna el
 // Territorio 17"), reconoce Grupos de Servicio y es mucho más flexible: nunca termina en "no entendí"/"no se encontró",
@@ -10888,6 +10897,97 @@ function vozRescue(t, res) {
   }
   return { err: msg, sugg: sug.slice(0, 5), unk: res.unk, nf: res.nf };
 }
+// ═══ Voz (v1.51.0.7-alpha): consultas sobre Grupos de Servicio ═══════════════════
+// «¿De qué grupo de servicio es Nancy Manriquez?» · «¿Cuántas personas hay en el Grupo 8?» · «¿Quién es el Auxiliar del Grupo 4?»
+// Solo lectura: responde al instante, sin preview ni confirmación (usa los datos de Grupos de Servicio de la plataforma).
+const vozPl = (n, one, many) => n + ' ' + (n === 1 ? one : many);
+const vozJoinNames = a => a.length < 2 ? (a[0] || '') : a.slice(0, -1).join(', ') + ' y ' + a[a.length - 1];
+const vozMemRank = m => m.rol === 'superintendente' ? 0 : m.rol === 'auxiliar' ? 1 : m.precursor ? 2 : 3;
+function vozMemTag(m) {
+  if (m.rol === 'superintendente') return { t: 'Superintendente', c: 's' };
+  if (m.rol === 'auxiliar') return { t: 'Auxiliar', c: 'a' };
+  if (m.precursor) return { t: 'Precursor', c: '' };
+  return null;
+}
+function vozMemRows(list, withGroup) {
+  const D = VOZ.data;
+  return list.map(m => {
+    const tag = vozMemTag(m), g = withGroup && D.gru.find(x => x.id === m.grupo_id);
+    return '<div class="voz-gm"><span>' + vozEsc(m.nombre) + (g ? ' · Grupo ' + vozEsc(g.numero) : '') + '</span>' + (tag ? '<span class="r ' + tag.c + '">' + tag.t + '</span>' : '') + '</div>';
+  }).join('');
+}
+function vozMemSort(list) { return list.slice().sort((a, b) => vozMemRank(a) - vozMemRank(b) || String(a.nombre).localeCompare(String(b.nombre), 'es')); }
+function vozGrupoQuery(t) {
+  const D = VOZ.data; if (!D || !D.mie) return null;
+  t = t.replace(/\b(por favor|porfa|gracias)\b/g, ' ').replace(/\s+/g, ' ').trim();
+  if (VOZ_CREATE_V.test(t) || VOZ_EDIT_V.test(t) || VOZ_ASSIGN_V.test(t)) return null;
+  const NOT_NAME = /\b(lunes|martes|miercoles|jueves|viernes|sabado|domingo|hoy|manana|semana|territorios?|asignacion|salida|reunion|hora)\b/;
+
+  // 1) ¿De qué grupo es <persona>?
+  let nm = null, m;
+  if ((m = t.match(/\bque grupo(?: de servicio)?\s+(?:es|esta|pertenece|va|sale|queda|participa|sirve|predica|tiene)\s+(.+)$/))) nm = m[1];
+  else if ((m = t.match(/^(?:y |dime |sabes )?(.+?)\s+(?:de|en|a) que grupo(?: de servicio)?(?: es| esta| pertenece| va)?$/))) nm = m[1];
+  else if ((m = t.match(/^(?:cual es|dime|dame|quiero saber|sabes|me dices)\b.*?\bgrupo(?: de servicio)? (?:de|del|de la) ((?!\d).+)$/))) nm = m[1];
+  if (nm) {
+    nm = nm.replace(/^(?:el|la|los|las)\s+(?:hermano|hermana|hno|hna)\s+/, '').trim();
+    if (!nm || NOT_NAME.test(nm) || /\bgrupo\b/.test(nm)) return null;
+    const hits = vozPeople(nm, D.mie, x => x.nombre);
+    if (!hits.length) {
+      const seen = new Set(), near = vozNear(nm, D.mie, x => x.nombre, 6).filter(x => { const k = vozNorm(x.p.nombre); if (seen.has(k)) return false; seen.add(k); return true; }).slice(0, 3);
+      return { err: near.length ? 'No encontré a «' + nm + '» en los Grupos de Servicio, pero hay nombres parecidos. ¿Cuál es?' : 'No encontré a «' + nm + '» en ningún Grupo de Servicio.',
+        sugg: near.map(x => ({ label: '¿Quisiste decir ' + x.p.nombre + '?', cmd: 'de que grupo es ' + vozNorm(x.p.nombre) })), soft: !near.length };
+    }
+    const byName = new Map();
+    hits.forEach(h => { const k = vozNorm(h.p.nombre); if (!byName.has(k)) byName.set(k, []); byName.get(k).push(h.p); });
+    const people = [...byName.values()];
+    const gtxt = rows => { const ns = [...new Set(rows.map(r => { const g = D.gru.find(x => x.id === r.grupo_id); return g ? g.numero : null; }).filter(x => x != null))]; return ns.length ? (ns.length === 1 ? 'del Grupo ' + ns[0] : 'de los Grupos ' + vozJoinNames(ns)) : null; };
+    if (people.length === 1) {
+      const rows = people[0], g = gtxt(rows), tag = vozMemTag(rows[0]);
+      if (!g) return { say: rows[0].nombre + ' no tiene un Grupo de Servicio asignado.', html: '' };
+      return { say: rows[0].nombre + ' es ' + g + (tag ? ' (' + tag.t + ')' : '') + '.', html: '<div class="voz-prev">' + vozMemRows(rows, true) + '</div>' };
+    }
+    return { say: 'Encontré ' + people.length + ' personas con ese nombre:', html: '<div class="voz-prev">' + vozMemRows(people.map(r => r[0]), true) + '</div>' };
+  }
+
+  // 2) Consultas sobre un grupo concreto (cuántos / quién es el Auxiliar / quiénes son)
+  const gm = t.match(/\bgrupo (\d+)\b/); if (!gm) return null;
+  const num = parseInt(gm[1], 10);
+  const isCount = /\b(cuantos|cuantas|cantidad)\b/.test(t);
+  const roleM = t.match(/\b(superintendente|encargado|auxiliar|ayudante|precursor|precursores|precursora|precursoras)\b/);
+  const interrog = /\b(quien|quienes|cual|cuales)\b|^(dime|dame|muestrame|muestra|lista|listame)\b/.test(t);
+  const isList = interrog && /\b(integrantes|miembros|personas|hermanos|publicadores|integran|forman|componen|conforman|son|estan|hay)\b/.test(t);
+  if (!isCount && !(interrog && (roleM || isList))) return null;
+  const g = D.gru.find(x => Number(x.numero) === num);
+  if (!g) return { err: 'No existe el grupo ' + num + '.' };
+  const mem = vozMemSort(D.mie.filter(x => x.grupo_id === g.id)), tit = 'Grupo ' + g.numero;
+
+  if (isCount) {
+    if (!mem.length) return { say: 'El ' + tit + ' no tiene personas registradas.', html: '' };
+    const sup = mem.filter(x => x.rol === 'superintendente').length, aux = mem.filter(x => x.rol === 'auxiliar').length, pre = mem.filter(x => x.rol !== 'superintendente' && x.rol !== 'auxiliar' && x.precursor).length;
+    const cap = [sup && vozPl(sup, 'Superintendente', 'Superintendentes'), aux && vozPl(aux, 'Auxiliar', 'Auxiliares'), pre && vozPl(pre, 'Precursor', 'Precursores')].filter(Boolean).join(' · ');
+    return { say: 'El ' + tit + ' tiene ' + vozPl(mem.length, 'persona', 'personas') + '.', html: '<div class="voz-prev">' + (cap ? '<div class="voz-cap">' + vozEsc(cap) + '</div>' : '') + vozMemRows(mem) + '</div>' };
+  }
+  if (roleM) {
+    const r = roleM[1], isSup = /^(superintendente|encargado)$/.test(r), isAux = /^(auxiliar|ayudante)$/.test(r);
+    const sel = mem.filter(x => isSup ? x.rol === 'superintendente' : isAux ? x.rol === 'auxiliar' : (x.precursor && x.rol !== 'superintendente' && x.rol !== 'auxiliar'));
+    const one = isSup ? 'Superintendente' : isAux ? 'Auxiliar' : 'Precursor', many = isSup ? 'Superintendentes' : isAux ? 'Auxiliares' : 'Precursores';
+    if (!sel.length) return { say: 'El ' + tit + ' no tiene ' + (isSup || isAux ? one : 'Precursores') + ' asignado' + (sel.length === 1 || isSup || isAux ? '' : 's') + '.', html: '' };
+    const names = sel.map(x => x.nombre);
+    return { say: (sel.length === 1 ? 'El ' + one + ' del ' + tit + ' es ' + names[0] + '.' : 'Los ' + many + ' del ' + tit + ' son ' + vozJoinNames(names) + '.'), html: '<div class="voz-prev">' + vozMemRows(sel) + '</div>' };
+  }
+  if (!mem.length) return { say: 'El ' + tit + ' no tiene personas registradas.', html: '' };
+  return { say: 'Estas son las ' + mem.length + ' personas del ' + tit + ':', html: '<div class="voz-prev">' + vozMemRows(mem) + '</div>' };
+}
+function vozGrupoAnswer(q, n) {
+  const pending = !!(VOZ.items.length || VOZ.picks.length);
+  if (q.err) {
+    const res = q.sugg !== undefined ? q : vozRescue(n, q);
+    if (pending) return vozSay(res.err, '', res.soft ? '' : 'err');
+    vozSayErr(res); vozNext(); return;
+  }
+  if (!pending) { VOZ.state = 'idle'; VOZ.ask = null; VOZ.sugg = []; }
+  vozSay(q.say, q.html || '');
+}
 function vozSayErr(e) {
   if (e.sugg && e.sugg.length) {
     VOZ._ss = VOZ._ss || {}; const id = ++VOZ.n; VOZ._ss[id] = e.sugg; VOZ.sugg = e.sugg;
@@ -10920,10 +11020,10 @@ const vozYesNo = n => VOZ_NO.test(n) ? 'no' : (VOZ_YES.test(n) ? 'yes' : null);
 async function vozLoad() {
   const today = vozISO(new Date());
   const q = (t, f) => sb.from(t).select(f || '*');
-  const [a, t, g, c, v, f, p, h] = await Promise.all([
+  const [a, t, g, c, v, f, p, h, mm] = await Promise.all([
     q('assignments').gte('date', vozAdd(today, -1)).order('date').order('time'), q('territories', 'id,number,color'), q('grupos', 'id,numero'),
-    q('conductores'), q('vmc_weeks').order('date_start'), q('fs_weeks').order('date_start'), q('vmc_people'), q('casas').order('direccion')]);
-  VOZ.data = { asg: a.data || [], ter: t.data || [], gru: g.data || [], con: c.data || [], vmc: v.data || [], fs: f.data || [], ppl: p.data || [], casas: h.data || [] };
+    q('conductores'), q('vmc_weeks').order('date_start'), q('fs_weeks').order('date_start'), q('vmc_people'), q('casas').order('direccion'), q('grupo_miembros').order('nombre')]);
+  VOZ.data = { asg: a.data || [], ter: t.data || [], gru: g.data || [], con: c.data || [], vmc: v.data || [], fs: f.data || [], ppl: p.data || [], casas: h.data || [], mie: mm.data || [] };
 }
 async function vozOnOpen() { if (currentRole === 'dev') vozLoadAccess(); }
 
@@ -10967,7 +11067,7 @@ function vozOpen() {
   requestAnimationFrame(() => layer.classList.add('show'));
   VOZ.loadErr = null;
   VOZ.loading = vozLoad().catch(e => { VOZ.loadErr = e; });
-  vozSay(SR ? 'Te escucho. Dime qué quieres cambiar.' : 'Este navegador no soporta dictado por voz. Escribe tu comando.', '<div class="voz-ex">“Crea una asignación para el lunes a las 10, Territorio 17”<br>“Asigna el Territorio 20 al Grupo 7 este sábado a las 10”<br>“Cambia el territorio del jueves al 12”</div>', 'hint');
+  vozSay(SR ? 'Te escucho. Dime qué quieres cambiar o consultar.' : 'Este navegador no soporta dictado por voz. Escribe tu comando.', '<div class="voz-ex">“Crea una asignación para el lunes a las 10, Territorio 17”<br>“Asigna el Territorio 20 al Grupo 7 este sábado a las 10”<br>“Cambia el territorio del jueves al 12”<br>“¿Quién es el Auxiliar del Grupo 4?”</div>', 'hint');
   if (SR) vozListen(); else setTimeout(() => { const i = vozById('voz-text'); if (i) i.focus(); }, 350);
   try { trackEvent('voz_open', {}); } catch (e) {}
 }
@@ -11057,6 +11157,8 @@ async function vozHandle(text) {
     return vozSay('¿Deshago el último cambio? Dime sí o no.');
   }
   if (/\b(deshacer|deshaz|deshago|revertir|revierte)\b/.test(n)) return vozAskUndo();
+  // v1.51.0.7-alpha: consultas sobre Grupos de Servicio (solo lectura; no tocan lo que esté pendiente de confirmar)
+  { let gq = null; try { gq = vozGrupoQuery(n); } catch (e) { console.warn('Voz (grupos):', e); } if (gq) return vozGrupoAnswer(gq, n); }
   if (st === 'confirm') {
     // Corregir lo que se está por crear: «mejor a las 11», «que sea el sábado», «con el hermano Pedro», «en la casa de López»…
     const cr = VOZ.items.find(i => i.o.create);
