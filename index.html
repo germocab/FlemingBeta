@@ -6209,7 +6209,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
   /* v1.50.0-beta: en Predicación/Reuniones (con Inicio activo) no se ve la foto de perfil: vuelve el botón de tres puntos */
   html.inicio-mode:not(.home-tab-inicio) .nav-avatar-btn { display: none !important; }
   html.inicio-mode:not(.home-tab-inicio) #nav-options-dots-btn { display: flex !important; }
-  /* v1.51.0-alpha: Notificaciones solo se muestra en Inicio (UI Beta); en Predicación/Reuniones se oculta */
+  /* v1.51.0-alpha: Notificaciones solo se muestra en Inicio; en Predicación/Reuniones se oculta */
   html.inicio-mode:not(.home-tab-inicio) #nav-bell-wrap { display: none !important; }
   html.inicio-mode .main-content { padding-bottom: 6.5rem; }
   html.inicio-mode .home-bottom-nav {
@@ -6364,7 +6364,10 @@ const HOME_SECTIONS = {
 };
 const HOME_DEFAULT_LAYOUT = ['hoy', 'vmc', 'fs', 'resp'];
 
-function isInicioExpEnabled() { return localStorage.getItem('fleming_inicio_exp') === 'true'; }
+// v1.51.0.10-alpha: la UI con Inicio (antes "UI Beta") ahora es la predeterminada. Quien prefiera el diseño anterior
+// (sin Inicio) activa "UI Classic" en Configuración → Experimentos. Clave nueva para que todos partan con la UI nueva.
+function isUiClassic() { return localStorage.getItem('fleming_ui_classic') === 'true'; }
+function isInicioExpEnabled() { return !isUiClassic(); }
 function isInicioActive() {
   return isInicioExpEnabled() && window.innerWidth < 640 &&
     !(typeof isModoSencilloActive === 'function' && isModoSencilloActive());
@@ -6372,21 +6375,20 @@ function isInicioActive() {
 function updateHomeExpToggleUI() {
   const t = document.getElementById('home-exp-toggle'), th = document.getElementById('home-exp-thumb');
   if (!t || !th) return;
-  const on = isInicioExpEnabled();
+  const on = isUiClassic();
   t.style.background = on ? 'var(--accent)' : 'var(--surface3)';
   th.style.left = on ? '21px' : '3px';
 }
 function toggleInicioExpPref() {
-  const next = !isInicioExpEnabled();
-  if (next && typeof isModoSencilloActive === 'function' && isModoSencilloActive()) {
-    showToast('UI Beta no está disponible mientras el Modo Sencillo está activo.', 'error');
+  const nextClassic = !isUiClassic();
+  if (!nextClassic && typeof isModoSencilloActive === 'function' && isModoSencilloActive()) {
+    showToast('La UI con Inicio no está disponible mientras el Modo Sencillo está activo.', 'error');
     return;
   }
-  localStorage.setItem('fleming_inicio_exp', next ? 'true' : 'false');
+  localStorage.setItem('fleming_ui_classic', nextClassic ? 'true' : 'false');
   updateHomeExpToggleUI();
   applyInicioUI();
-  if (next && window.innerWidth >= 640) showToast('UI Beta activada. Solo se ve en un teléfono móvil.', 'success');
-  else showToast(next ? 'UI Beta activada' : 'UI Beta desactivada', next ? 'success' : '');
+  showToast(nextClassic ? 'UI Classic activada' : 'UI Classic desactivada', nextClassic ? 'success' : '');
 }
 
 // Aplica/retira el modo Inicio (clase en <html>, título y barra inferior).
@@ -9681,20 +9683,20 @@ function homeResetLayout() { setHomeTextoTop(false); saveHomeLayout(HOME_DEFAULT
     <!-- Inicio (Experimento, v1.50.0-sb): pantalla de inicio personalizable + NavBar inferior.
          Exclusivo de teléfonos móviles. -->
     <div class="profile-section">
-      <div class="profile-section-title">UI Beta</div>
+      <div class="profile-section-title">UI Classic</div>
       <div class="profile-row" style="cursor:pointer" onclick="toggleInicioExpPref()">
         <div class="profile-row-icon" style="background:var(--accent-light);color:var(--accent)">
           <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         </div>
         <div class="profile-row-content">
-          <div class="profile-row-label">Activar UI Beta</div>
-          <div class="profile-row-value" style="font-size:0.8rem">Una pantalla de Inicio personalizable con tus recordatorios y asignaciones, y una nueva barra de navegación inferior (Home, Predicación, Reuniones y Voz).</div>
+          <div class="profile-row-label">Activar UI Classic</div>
+          <div class="profile-row-value" style="font-size:0.8rem">Vuelve al diseño anterior, sin la pantalla de Inicio ni la barra de navegación inferior (Home, Predicación, Reuniones y Voz).</div>
         </div>
         <div id="home-exp-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
           <div id="home-exp-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
         </div>
       </div>
-      <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4">Función experimental (UI Beta), disponible solo en teléfonos móviles. Al activarla, Inicio muestra al final el botón "Personalizar Inicio". No está disponible junto al Modo Sencillo.</div>
+      <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4">La interfaz con Inicio ya es la predeterminada en teléfonos móviles. Actívala solo si prefieres el diseño anterior. En computador y tablet siempre se usa el diseño clásico.</div>
     </div>
 
   </div>
@@ -10313,9 +10315,11 @@ function homeResetLayout() { setHomeTextoTop(false); saveHomeLayout(HOME_DEFAULT
 // circular con ícono, al lado de "Más Opciones", en el lugar que antes ocupaba Notificaciones en Predicación y
 // Reuniones (ahora solo Inicio tiene Notificaciones). (2) Solo se ve dentro de la Sub-sección a la que el Administrador
 // tiene acceso de edición; no aparece en Inicio ni en Predicación/Reuniones en general (el DEV lo ve en todas).
+// v1.51.0.10-alpha: (1) La interfaz con Inicio (antes "UI Beta") pasa a ser la predeterminada: Inicio está disponible desde el
+// principio en teléfonos móviles. (2) El diseño anterior (sin Inicio) se recupera en Configuración → Experimentos → "UI Classic".
 // v1.57.1-beta: Voz junta todo lo que dices en una misma frase (espera una breve pausa de silencio) en vez de crear
 // un cuadro y una respuesta por cada trozo; así se genera un solo preview por comando.
-const APP_VERSION = '1.51.0.9-alpha';
+const APP_VERSION = '1.51.0.10-alpha';
 // ═════════════════════════════════════════════════════════════════════════
 // v1.50.0-beta: (1) Voz crea asignaciones de predicación nuevas ("Crea una asignación para el lunes a las 10, asigna el
 // Territorio 17"), reconoce Grupos de Servicio y es mucho más flexible: nunca termina en "no entendí"/"no se encontró",
