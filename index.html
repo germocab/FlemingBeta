@@ -2809,6 +2809,17 @@
   .toast { padding: 0.65rem 1.1rem; background: var(--surface3); border: 1px solid var(--border-active); border-radius: 30px; font-size: 0.84rem; font-weight: 600; color: var(--text); box-shadow: var(--shadow); animation: toastIn 0.25s cubic-bezier(0.16,1,0.3,1); white-space: nowrap; }
   .toast.success { color: var(--green); background: var(--green-light); border-color: rgba(52,199,89,0.3); }
   .toast.error { color: var(--red); background: rgba(255,59,48,0.08); border-color: rgba(255,59,48,0.25); }
+  /* v1.51.0.11-alpha: el saludo al iniciar sesión baja desde la parte superior, en color sólido neutro
+     (blanco en modo claro, negro en modo oscuro) en vez de verde. */
+  .toast-wrap-top { position: fixed; top: calc(env(safe-area-inset-top, 0px) + 0.75rem); left: 50%; transform: translateX(-50%); z-index: 1000; display: flex; flex-direction: column; align-items: center; gap: 8px; pointer-events: none; max-width: calc(100vw - 1.5rem); }
+  .toast.greeting { background: #ffffff; color: #000000; border: 1px solid rgba(0,0,0,0.12); box-shadow: 0 6px 24px rgba(0,0,0,0.18); animation: toastInTop 0.35s cubic-bezier(0.16,1,0.3,1); overflow: hidden; text-overflow: ellipsis; }
+  .toast.greeting.leaving { animation: toastOutTop 0.25s ease-in forwards; }
+  :root[data-theme="dark"] .toast.greeting { background: #000000; color: #ffffff; border-color: rgba(255,255,255,0.22); box-shadow: 0 6px 24px rgba(0,0,0,0.6); }
+  @media (prefers-color-scheme: dark) {
+    :root[data-theme="auto"] .toast.greeting { background: #000000; color: #ffffff; border-color: rgba(255,255,255,0.22); box-shadow: 0 6px 24px rgba(0,0,0,0.6); }
+  }
+  @keyframes toastInTop { from{opacity:0;transform:translateY(-24px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes toastOutTop { from{opacity:1;transform:translateY(0)} to{opacity:0;transform:translateY(-24px)} }
   @keyframes toastIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
 
   .coming-soon-panel {
@@ -10319,7 +10330,9 @@ function homeResetLayout() { setHomeTextoTop(false); saveHomeLayout(HOME_DEFAULT
 // principio en teléfonos móviles. (2) El diseño anterior (sin Inicio) se recupera en Configuración → Experimentos → "UI Classic".
 // v1.57.1-beta: Voz junta todo lo que dices en una misma frase (espera una breve pausa de silencio) en vez de crear
 // un cuadro y una respuesta por cada trozo; así se genera un solo preview por comando.
-const APP_VERSION = '1.51.0.10-alpha';
+// v1.51.0.11-alpha: El mensaje que saluda al usuario al iniciar sesión ahora sale desde la parte superior de la pantalla
+// y ya no es verde: es de color sólido neutro (blanco en modo claro, negro en modo oscuro).
+const APP_VERSION = '1.51.0.11-alpha';
 // ═════════════════════════════════════════════════════════════════════════
 // v1.50.0-beta: (1) Voz crea asignaciones de predicación nuevas ("Crea una asignación para el lunes a las 10, asigna el
 // Territorio 17"), reconoce Grupos de Servicio y es mucho más flexible: nunca termina en "no entendí"/"no se encontró",
@@ -14993,7 +15006,7 @@ async function enterApp() {
   const taskEl = document.getElementById('dropdown-task');
   if (taskEl) taskEl.style.display = 'none';
 
-  showToast(`¡Hola, ${currentUser.name}!`, 'success');
+  showToast(`¡Hola, ${currentUser.name}!`, 'greeting');
   startNotifPolling();
   scheduleMidnightRefresh();
   await subscribeToPush();
@@ -23562,6 +23575,21 @@ function escapeHtml(str) {
   return String(str ?? '').replace(/[&<>"']/g, ch => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[ch]));
 }
 function showToast(msg, type='') {
+  // v1.51.0.11-alpha: type 'greeting' (saludo de inicio de sesión) sale desde arriba, en color neutro.
+  if (type === 'greeting') {
+    let topWrap = document.getElementById('toast-wrap-top');
+    if (!topWrap) {
+      topWrap = document.createElement('div');
+      topWrap.className = 'toast-wrap-top'; topWrap.id = 'toast-wrap-top';
+      document.body.appendChild(topWrap);
+    }
+    const g = document.createElement('div');
+    g.className = 'toast greeting'; g.textContent = msg;
+    topWrap.appendChild(g);
+    setTimeout(() => g.classList.add('leaving'), 2950);
+    setTimeout(() => g.remove(), 3200);
+    return;
+  }
   const wrap = document.getElementById('toast-wrap');
   const t = document.createElement('div');
   t.className = 'toast ' + type; t.textContent = msg;
