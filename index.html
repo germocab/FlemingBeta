@@ -9144,7 +9144,7 @@ function homeResetLayout() { setHomeTextoTop(false); saveHomeLayout(HOME_DEFAULT
         </div>
         <div class="profile-row-content">
           <div class="profile-row-label" data-i18n="settings.experimentos">Experimentos</div>
-          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="settings.experimentos.desc">Color de acento, animaciones y blur</div>
+          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="settings.experimentos.desc">Transparencia y blur</div>
         </div>
         <svg class="profile-row-chevron" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
@@ -9317,6 +9317,50 @@ function homeResetLayout() { setHomeTextoTop(false); saveHomeLayout(HOME_DEFAULT
       <!-- v1.36.7-beta: el toggle "Mostrar ícono en vez de tu foto de perfil"
            se movió a Experimentos (ver page-pref-experimentos). -->
     </div>
+    <!-- v1.51.0.15-alpha: Color de acento (antes en Experimentos). -->
+    <div class="profile-section" id="pref-accent-restricted">
+      <div id="pref-accent-section">
+        <div style="padding:0.75rem 1rem 0.2rem;display:flex;align-items:center;gap:7px">
+          <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--text3);fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <span style="font-size:0.72rem;font-weight:600;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase" data-i18n="exp.coloracento">Color de acento</span>
+        </div>
+        <div style="padding:0.4rem 1rem 1rem;display:flex;gap:14px;align-items:center">
+          <button class="accent-swatch" id="accent-sw-blue"   onclick="setAccentColor('blue')"   style="--sw:#007AFF" title="Sky"></button>
+          <button class="accent-swatch" id="accent-sw-green"  onclick="setAccentColor('green')"  style="--sw:#30c97a" title="Forest"></button>
+          <button class="accent-swatch" id="accent-sw-pink"   onclick="setAccentColor('pink')"   style="--sw:#e040a0" title="Ribbon"></button>
+          <button class="accent-swatch" id="accent-sw-yellow" onclick="setAccentColor('yellow')" style="--sw:#f5a623" title="Desert"></button>
+          <button class="accent-swatch" id="accent-sw-purple" onclick="setAccentColor('purple')" style="--sw:#a855f7" title="Lavender"></button>
+        </div>
+        <!-- Vista previa en vivo (v1.42.0-stable_beta): usa var(--accent) /
+             var(--accent-light) directamente, igual que el resto de la
+             plataforma, así que refleja el color elegido al instante. Muestra
+             una versión reducida de la pantalla de Inicio (Predicación de
+             Casa en Casa) para que se aprecie el color aplicado a botones,
+             íconos y elementos activos. ── -->
+        <div style="padding:0 1rem 1rem">
+          <div style="font-size:0.72rem;font-weight:600;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:0.5rem" data-i18n="exp.vistaprevia">Vista previa</div>
+          <div style="border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;background:var(--bg)">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:0.6rem 0.85rem;background:var(--nav-bg);border-bottom:1px solid var(--border)">
+              <span style="font-size:0.82rem;font-weight:700;color:var(--text)">Inicio</span>
+              <span style="display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--accent);color:#fff;font-size:0.65rem;font-weight:800">1</span>
+            </div>
+            <div style="padding:0.75rem 0.85rem">
+              <div style="font-size:0.68rem;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:var(--text3);margin-bottom:0.5rem">Casa en Casa</div>
+              <div style="display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm,10px);padding:0.65rem 0.75rem;box-shadow:var(--shadow)">
+                <div style="flex-shrink:0;width:34px;height:34px;border-radius:10px;background:var(--accent-light);color:var(--accent);display:flex;align-items:center;justify-content:center">
+                  <svg viewBox="0 0 24 24" style="width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                </div>
+                <div style="flex:1;min-width:0">
+                  <div style="font-weight:700;font-size:0.82rem;color:var(--text)">Asignación de predicación</div>
+                  <div style="font-size:0.72rem;color:var(--text3);margin-top:1px">Hoy • 15:30</div>
+                </div>
+                <button style="flex-shrink:0;border:none;border-radius:20px;background:var(--accent);color:#fff;font-family:var(--font);font-size:0.68rem;font-weight:700;padding:5px 11px;cursor:default">Ver</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
     <!-- Tamaño de la interfaz: debajo de Apariencia -->
     <div class="profile-section">
       <div class="profile-section-title" data-i18n="pref.uisize">Tamaño de la interfaz</div>
@@ -9380,6 +9424,24 @@ function homeResetLayout() { setHomeTextoTop(false); saveHomeLayout(HOME_DEFAULT
         </div>
       </div>
       <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="exp.modosencillo.help">Pensado para quienes tienen dificultad para usar la versión por defecto. Notificaciones y Live siguen activas, accesibles desde el menú.</div>
+    </div>
+
+    <!-- v1.51.0.15-alpha: UI Classic (antes en Experimentos). Vuelve al diseño anterior, sin Inicio ni NavBar inferior. -->
+    <div class="profile-section">
+      <div class="profile-section-title">UI Classic</div>
+      <div class="profile-row" style="cursor:pointer" onclick="toggleInicioExpPref()">
+        <div class="profile-row-icon" style="background:var(--accent-light);color:var(--accent)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label">Activar UI Classic</div>
+          <div class="profile-row-value" style="font-size:0.8rem">Vuelve al diseño anterior, sin la pantalla de Inicio ni la barra de navegación inferior (Home, Predicación, Reuniones y Voz).</div>
+        </div>
+        <div id="home-exp-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
+          <div id="home-exp-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
+        </div>
+      </div>
+      <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4">La interfaz con Inicio ya es la predeterminada en teléfonos móviles. Actívala solo si prefieres el diseño anterior. En computador y tablet siempre se usa el diseño clásico.</div>
     </div>
 
     <!-- Vista de Contenido (ajuste de presentación en Tablet/Escritorio) -->
@@ -9564,30 +9626,17 @@ function homeResetLayout() { setHomeTextoTop(false); saveHomeLayout(HOME_DEFAULT
           <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
         </div>
         <div class="profile-row-content">
-          <div class="profile-row-label" data-i18n="exp.restricted.title">Blur y color de acento</div>
+          <div class="profile-row-label" data-i18n="exp.restricted.title">Transparencia y blur</div>
           <div class="profile-row-value" style="font-size:0.8rem" data-i18n="exp.restricted.desc">No están disponibles mientras la Versión Simplificada está activa</div>
         </div>
       </div>
     </div>
     <div class="profile-section" id="exp-appearance-restricted">
-      <!-- Toggle: transparencias / blur (ahora vive en Experimentos, ON por defecto) -->
-      <div class="profile-row" style="cursor:pointer" onclick="toggleTransparencyPref()">
-        <div class="profile-row-icon" style="background:var(--ter-3-bg);color:var(--ter-3)">
-          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" opacity="0.5"/></svg>
-        </div>
-        <div class="profile-row-content">
-          <div class="profile-row-label" data-i18n="exp.blur.title">Activa el efecto blur</div>
-          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="exp.blur.desc">Muestra los paneles y encabezados con transparencia y desenfoque</div>
-        </div>
-        <div id="pref-transparency-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--accent);position:relative;transition:background 0.2s;cursor:pointer">
-          <div id="pref-transparency-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
-        </div>
-      </div>
       <!-- v1.29.10-beta: dos sliders independientes de 7 niveles — uno controla
            la Transparencia (opacidad de paneles/encabezados) y el otro el
            Blur/Frosted (intensidad del desenfoque). Comparten los mismos
            nombres de nivel, pero cada uno controla una variable distinta. -->
-      <div id="pref-blur-level-wrap" style="border-top:1px solid var(--border);padding:0.85rem 1rem 1rem">
+      <div id="pref-blur-level-wrap" style="padding:0.85rem 1rem 1rem">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem">
           <span style="font-size:0.72rem;font-weight:600;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase" data-i18n="exp.transparencia">Transparencia</span>
           <span id="pref-transparency-level-label" style="font-size:0.78rem;font-weight:700;color:var(--accent)">Clásico</span>
@@ -9635,79 +9684,6 @@ function homeResetLayout() { setHomeTextoTop(false); saveHomeLayout(HOME_DEFAULT
         </div>
         <div style="padding:0.55rem 0.1rem 0;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="exp.vistaprevia.desc">Así se verán los encabezados y paneles flotantes de la plataforma con estos niveles.</div>
       </div>
-      <!-- Accent color -->
-      <div id="pref-accent-section" style="border-top:1px solid var(--border)">
-        <div style="padding:0.75rem 1rem 0.2rem;display:flex;align-items:center;gap:7px">
-          <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--text3);fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-          <span style="font-size:0.72rem;font-weight:600;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase" data-i18n="exp.coloracento">Color de acento</span>
-        </div>
-        <div style="padding:0.4rem 1rem 1rem;display:flex;gap:14px;align-items:center">
-          <button class="accent-swatch" id="accent-sw-blue"   onclick="setAccentColor('blue')"   style="--sw:#007AFF" title="Sky"></button>
-          <button class="accent-swatch" id="accent-sw-green"  onclick="setAccentColor('green')"  style="--sw:#30c97a" title="Forest"></button>
-          <button class="accent-swatch" id="accent-sw-pink"   onclick="setAccentColor('pink')"   style="--sw:#e040a0" title="Ribbon"></button>
-          <button class="accent-swatch" id="accent-sw-yellow" onclick="setAccentColor('yellow')" style="--sw:#f5a623" title="Desert"></button>
-          <button class="accent-swatch" id="accent-sw-purple" onclick="setAccentColor('purple')" style="--sw:#a855f7" title="Lavender"></button>
-        </div>
-        <!-- Vista previa en vivo (v1.42.0-stable_beta): usa var(--accent) /
-             var(--accent-light) directamente, igual que el resto de la
-             plataforma, así que refleja el color elegido al instante. Muestra
-             una versión reducida de la pantalla de Inicio (Predicación de
-             Casa en Casa) para que se aprecie el color aplicado a botones,
-             íconos y elementos activos. ── -->
-        <div style="padding:0 1rem 1rem">
-          <div style="font-size:0.72rem;font-weight:600;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:0.5rem" data-i18n="exp.vistaprevia">Vista previa</div>
-          <div style="border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;background:var(--bg)">
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:0.6rem 0.85rem;background:var(--nav-bg);border-bottom:1px solid var(--border)">
-              <span style="font-size:0.82rem;font-weight:700;color:var(--text)">Inicio</span>
-              <span style="display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--accent);color:#fff;font-size:0.65rem;font-weight:800">1</span>
-            </div>
-            <div style="padding:0.75rem 0.85rem">
-              <div style="font-size:0.68rem;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:var(--text3);margin-bottom:0.5rem">Casa en Casa</div>
-              <div style="display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm,10px);padding:0.65rem 0.75rem;box-shadow:var(--shadow)">
-                <div style="flex-shrink:0;width:34px;height:34px;border-radius:10px;background:var(--accent-light);color:var(--accent);display:flex;align-items:center;justify-content:center">
-                  <svg viewBox="0 0 24 24" style="width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                </div>
-                <div style="flex:1;min-width:0">
-                  <div style="font-weight:700;font-size:0.82rem;color:var(--text)">Asignación de predicación</div>
-                  <div style="font-size:0.72rem;color:var(--text3);margin-top:1px">Hoy • 15:30</div>
-                </div>
-                <button style="flex-shrink:0;border:none;border-radius:20px;background:var(--accent);color:#fff;font-family:var(--font);font-size:0.68rem;font-weight:700;padding:5px 11px;cursor:default">Ver</button>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="profile-row" style="cursor:pointer;border-top:1px solid var(--border)" onclick="toggleAccentBgPref()">
-          <div class="profile-row-icon" style="background:var(--ter-3-bg);color:var(--ter-3)">
-            <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 2v20M2 12h20" opacity="0.4"/><circle cx="12" cy="12" r="9"/></svg>
-          </div>
-          <div class="profile-row-content">
-            <div class="profile-row-label" data-i18n="exp.fondoacento.title">Ajusta el color de fondo</div>
-            <div class="profile-row-value" style="font-size:0.8rem" data-i18n="exp.fondoacento.desc">El fondo de la plataforma toma el tono del color de acento.</div>
-          </div>
-          <div id="accent-bg-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
-            <div id="accent-bg-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Inicio (Experimento, v1.50.0-sb): pantalla de inicio personalizable + NavBar inferior.
-         Exclusivo de teléfonos móviles. -->
-    <div class="profile-section">
-      <div class="profile-section-title">UI Classic</div>
-      <div class="profile-row" style="cursor:pointer" onclick="toggleInicioExpPref()">
-        <div class="profile-row-icon" style="background:var(--accent-light);color:var(--accent)">
-          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-        </div>
-        <div class="profile-row-content">
-          <div class="profile-row-label">Activar UI Classic</div>
-          <div class="profile-row-value" style="font-size:0.8rem">Vuelve al diseño anterior, sin la pantalla de Inicio ni la barra de navegación inferior (Home, Predicación, Reuniones y Voz).</div>
-        </div>
-        <div id="home-exp-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
-          <div id="home-exp-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
-        </div>
-      </div>
-      <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4">La interfaz con Inicio ya es la predeterminada en teléfonos móviles. Actívala solo si prefieres el diseño anterior. En computador y tablet siempre se usa el diseño clásico.</div>
     </div>
 
   </div>
@@ -10332,7 +10308,10 @@ function homeResetLayout() { setHomeTextoTop(false); saveHomeLayout(HOME_DEFAULT
 // un cuadro y una respuesta por cada trozo; así se genera un solo preview por comando.
 // v1.51.0.11-alpha: El mensaje que saluda al usuario al iniciar sesión ahora sale desde la parte superior de la pantalla
 // y ya no es verde: es de color sólido neutro (blanco en modo claro, negro en modo oscuro).
-const APP_VERSION = '1.51.0.11-alpha';
+// v1.51.0.15-alpha: (1) "Color de Acento" y "UI Classic" pasan de Experimentos a Preferencias. (2) Se retira el toggle "Activa el
+// efecto blur": ahora solo están los sliders de Transparencia y Blur / Frosted. (3) Se retira el toggle "Ajustar el fondo al color
+// de acento".
+const APP_VERSION = '1.51.0.15-alpha';
 // ═════════════════════════════════════════════════════════════════════════
 // v1.50.0-beta: (1) Voz crea asignaciones de predicación nuevas ("Crea una asignación para el lunes a las 10, asigna el
 // Territorio 17"), reconoce Grupos de Servicio y es mucho más flexible: nunca termina en "no entendí"/"no se encontró",
@@ -11643,7 +11622,7 @@ const I18N = {
   'settings.notificaciones':    { es: 'Notificaciones',           en: 'Notifications', nl: 'Meldingen' },
   'settings.notificaciones.desc': { es: 'Avisos de la plataforma', en: 'Platform alerts', nl: 'Platformmeldingen' },
   'settings.experimentos':      { es: 'Experimentos',             en: 'Experiments', nl: 'Experimenten' },
-  'settings.experimentos.desc': { es: 'Color de acento, animaciones y blur', en: 'Accent color, animations and blur', nl: 'Accentkleur, animaties en blur' },
+  'settings.experimentos.desc': { es: 'Transparencia y blur', en: 'Transparency and blur', nl: 'Transparantie en blur' },
   'settings.ayuda':             { es: 'Ayuda',                    en: 'Help',   nl: 'Help' },
   'settings.ayuda.desc':        { es: 'Tutoriales y Tips', en: 'Tutorials and Tips', nl: 'Tutorials en Tips' },
   'settings.tutoriales':        { es: 'Tutoriales',               en: 'Tutorials', nl: 'Tutorials' },
@@ -11697,10 +11676,8 @@ const I18N = {
   'func.live':             { es: 'Función Live',            en: 'Live Feature', nl: 'Live-functie' },
   'func.live.desc':        { es: 'Detección de calles y avisos de No Pasar en tiempo real', en: 'Real-time street detection and Do-Not-Pass alerts', nl: 'Realtime straatdetectie en Niet-Bezoeken-meldingen' },
   // ── Experimentos ──
-  'exp.restricted.title':  { es: 'Blur, color de acento y animaciones', en: 'Blur, accent color and animations', nl: 'Blur, accentkleur en animaties' },
+  'exp.restricted.title':  { es: 'Transparencia y blur', en: 'Transparency and blur', nl: 'Transparantie en blur' },
   'exp.restricted.desc':   { es: 'No están disponibles mientras la Versión Simplificada está activa', en: 'Not available while Simplified Mode is active', nl: 'Niet beschikbaar terwijl de Vereenvoudigde Versie actief is' },
-  'exp.blur.title':        { es: 'Activa el efecto blur',   en: 'Enable blur effect', nl: 'Blur-effect inschakelen' },
-  'exp.blur.desc':         { es: 'Muestra los paneles y encabezados con transparencia y desenfoque', en: 'Shows panels and headers with transparency and blur', nl: 'Toont panelen en koppen met transparantie en blur' },
   'exp.intensidad':        { es: 'Intensidad',              en: 'Intensity', nl: 'Intensiteit' },
   'exp.transparencia':     { es: 'Transparencia',           en: 'Transparency', nl: 'Transparantie' },
   'exp.blurfrosted':       { es: 'Blur / Frosted',          en: 'Blur / Frosted', nl: 'Blur / Frosted' },
@@ -11714,8 +11691,6 @@ const I18N = {
   'exp.vistaprevia':       { es: 'Vista previa',            en: 'Preview', nl: 'Voorbeeld' },
   'exp.vistaprevia.desc':  { es: 'Así se verán los encabezados y paneles flotantes de la plataforma con este nivel.', en: 'This is how the platform\u2019s headers and floating panels will look with this level.', nl: 'Zo zien de koppen en zwevende panelen van het platform eruit met dit niveau.' },
   'exp.coloracento':       { es: 'Color de acento',         en: 'Accent color', nl: 'Accentkleur' },
-  'exp.fondoacento.title': { es: 'Ajustar el fondo al color de acento', en: 'Match background to accent color', nl: 'Achtergrond aanpassen aan accentkleur' },
-  'exp.fondoacento.desc':  { es: 'El fondo de la plataforma toma un tono derivado del color de acento elegido', en: 'The platform background takes on a tone derived from the chosen accent color', nl: 'De achtergrond van het platform krijgt een tint afgeleid van de gekozen accentkleur' },
   'exp.layout':            { es: 'Layout',                  en: 'Layout', nl: 'Lay-out' },
   'exp.simplificada.section':{ es: 'Versión Simplificada', en: 'Simplified Mode', nl: 'Vereenvoudigde versie' },
   'exp.simplificada.title':{ es: 'Versión Simplificada',    en: 'Simplified Mode', nl: 'Vereenvoudigde versie' },
@@ -23751,8 +23726,8 @@ function openPrefScreen(name) {
   if (name === 'funciones') { updateH2HViewModeUI(); if (typeof updateLiveAlwaysOnToggleUI === 'function') updateLiveAlwaysOnToggleUI(); if (typeof updatePinFeatureToggleUI === 'function') updatePinFeatureToggleUI(); }
   if (name === 'notificaciones') renderPrefNotifList();
   if (name === 'ayuda') renderAyudaTipsList();
-  if (name === 'preferencias') { updateAnimationsEnabledToggleUI(); updateWeatherToggleUI(); if (typeof updateModoSencilloToggleUI === 'function') updateModoSencilloToggleUI(); }
-  if (name === 'experimentos') { updateAccentSwatchesUI(); updateTransparencyToggleUI(); updateSimplifiedModeToggleUI(); updateAccentBgToggleUI(); updateNavbarBtnSizeUI(); if (typeof updateHomeExpToggleUI === 'function') updateHomeExpToggleUI(); }
+  if (name === 'preferencias') { updateAnimationsEnabledToggleUI(); updateWeatherToggleUI(); if (typeof updateModoSencilloToggleUI === 'function') updateModoSencilloToggleUI(); updateAccentSwatchesUI(); if (typeof updateHomeExpToggleUI === 'function') updateHomeExpToggleUI(); }
+  if (name === 'experimentos') { updateTransparencyToggleUI(); updateSimplifiedModeToggleUI(); updateNavbarBtnSizeUI(); }
   if (name === 'legal-terms') renderPrefLegalTerms();
   if (name === 'legal-privacy') renderPrefLegalPrivacy();
   if (name === 'version') {
@@ -23891,9 +23866,10 @@ function isGroupMinicardsEnabled() {
 // nivel (Mínimo…Extremo) pero cada uno controla una variable distinta.
 const TRANSPARENCY_ALPHA_LEVELS = [0.86, 0.70, 0.58, 0.50, 0.34, 0.20, 0.10];
 const BLUR_PX_LEVELS = [10, 18, 26, 34, 46, 60, 76];
-function isTransparencyEnabled() {
-  return localStorage.getItem('fleming_transparency') !== 'false'; // default true
-}
+// v1.51.0.15-alpha: el toggle "Activa el efecto blur" fue retirado; la transparencia/blur siempre está activa y se
+// regula solo con los sliders de Transparencia y Blur / Frosted.
+function isTransparencyEnabled() { return true; }
+try { localStorage.removeItem('fleming_transparency'); } catch {} // limpia la preferencia antigua
 function getTransparencyLevel() {
   const v = parseInt(localStorage.getItem('fleming_transparency_level') || '4', 10);
   return Math.min(7, Math.max(1, isNaN(v) ? 4 : v));
@@ -23956,15 +23932,6 @@ function updateNavbarBtnSizeUI() {
   if (label) label.textContent = pct + '%';
 }
 function updateTransparencyToggleUI() {
-  const enabled = isTransparencyEnabled();
-  const toggle = document.getElementById('pref-transparency-toggle');
-  const thumb  = document.getElementById('pref-transparency-thumb');
-  if (toggle && thumb) {
-    toggle.style.background = enabled ? 'var(--accent)' : 'var(--surface3)';
-    thumb.style.left = enabled ? '21px' : '3px';
-  }
-  const sliderWrap = document.getElementById('pref-blur-level-wrap');
-  if (sliderWrap) sliderWrap.style.display = enabled ? '' : 'none';
   const labels = [t('exp.blur.nivel.1'), t('exp.blur.nivel.2'), t('exp.blur.nivel.3'), t('exp.blur.nivel.4'), t('exp.blur.nivel.5'), t('exp.blur.nivel.6'), t('exp.blur.nivel.7')];
 
   const transparencySlider = document.getElementById('pref-transparency-level-slider');
@@ -23986,12 +23953,6 @@ function updateTransparencyToggleUI() {
   }
   const blurLabel = document.getElementById('pref-blur-level-label');
   if (blurLabel) blurLabel.textContent = labels[blurLevel - 1];
-}
-function toggleTransparencyPref() {
-  const current = isTransparencyEnabled();
-  localStorage.setItem('fleming_transparency', current ? 'false' : 'true');
-  applyTransparencyPref();
-  updateTransparencyToggleUI();
 }
 
 // ── Tamaño de la Interfaz: 3 niveles (Pequeño, Normal, Grande) ──────────────
@@ -24278,9 +24239,6 @@ function triggerEggUnlock() {
   if (alreadyUnlocked) {
     // Toggle off — let them relive the surprise next time
     localStorage.removeItem('fleming_egg_unlocked');
-    localStorage.removeItem('fleming_accent');
-    localStorage.removeItem('fleming_accent_bg');
-    applyAccentColor('blue');
     localStorage.removeItem('fleming_navbar_options_avatar');
     applyNavbarAvatarUI();
     updateExperimentosNavVisibility();
@@ -24425,12 +24383,12 @@ function applyAccentColor(name) {
 }
 
 function initAccentColor() {
+  try { localStorage.removeItem('fleming_accent_bg'); } catch {} // v1.51.0.15-alpha: preferencia retirada
   const saved = localStorage.getItem('fleming_accent') || 'blue';
   applyAccentColor(saved);
   if (localStorage.getItem('fleming_egg_unlocked') === '1') {
     revealAccentSection();
   }
-  updateAccentBgToggleUI();
   updateExperimentosNavVisibility();
 }
 
@@ -24441,25 +24399,9 @@ function updateAccentSwatchesUI() {
   });
 }
 
-// ── Toggle: "Ajustar el fondo al color de acento" ───────────────────────────
-function isAccentBgSelected() {
-  return localStorage.getItem('fleming_accent_bg') === 'true';
-}
-function toggleAccentBgPref() {
-  const next = !isAccentBgSelected();
-  localStorage.setItem('fleming_accent_bg', next ? 'true' : 'false');
-  updateAccentBgToggleUI();
-  applyAccentColor(localStorage.getItem('fleming_accent') || 'blue');
-  showToast(next ? 'Fondo ajustado al color de acento' : 'Fondo restaurado al valor por defecto', next ? 'success' : '');
-}
-function updateAccentBgToggleUI() {
-  const toggle = document.getElementById('accent-bg-toggle');
-  const thumb  = document.getElementById('accent-bg-thumb');
-  if (!toggle || !thumb) return;
-  const on = isAccentBgSelected();
-  toggle.style.background = on ? 'var(--accent)' : 'var(--surface3)';
-  thumb.style.left = on ? '21px' : '3px';
-}
+// v1.51.0.15-alpha: el toggle "Ajustar el fondo al color de acento" fue retirado. El fondo ya no se tiñe con el
+// acento (siempre usa el valor por defecto). Se conserva isAccentBgSelected() para applyAccentColor().
+function isAccentBgSelected() { return false; }
 
 // ── Animaciones (función oficial, antes en Experimentos): fluidas por defecto ──
 // v1.33.0-beta: se agrega el modo "ultra" (Ultra Fluida), junto a "fluid" y
@@ -26763,11 +26705,13 @@ function applySimplifiedModeUI() {
   const tutorialH2HRow = document.getElementById('pref-tutorial-h2h-row');
   if (tutorialH2HRow) tutorialH2HRow.style.display = active ? 'none' : '';
 
-  // Experimentos: ocultar blur / color de acento / animaciones
+  // Experimentos (transparencia / blur) y Preferencias (color de acento): ocultar en Simplificada
   const expBlock  = document.getElementById('exp-appearance-restricted');
   const expNotice = document.getElementById('exp-appearance-restricted-notice');
+  const accBlock  = document.getElementById('pref-accent-restricted');
   if (expBlock)  expBlock.style.display  = active ? 'none' : '';
   if (expNotice) expNotice.style.display = active ? '' : 'none';
+  if (accBlock)  accBlock.style.display  = active ? 'none' : '';
 
   // Notificaciones: cortar el polling y ocultar el badge
   if (active) {
