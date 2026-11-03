@@ -16,15 +16,19 @@
 (function(){
   function sync(){
     try {
-      var c = getComputedStyle(document.body || document.documentElement).backgroundColor;
-      if (!c || c === 'rgba(0, 0, 0, 0)' || c === 'transparent') c = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
-      if (!c) return;
+      /* v1.53.0-beta: se lee la variable --bg (valor final, sin la transición de 0.3s del <body>), que es el fondo plano de
+         la plataforma en Claro/Oscuro. Antes se leía el color animado del body y podía quedar a medio camino o desfasado. */
+      var c = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
+      if (!c || c.indexOf('var(') === 0) c = getComputedStyle(document.body || document.documentElement).backgroundColor;
+      if (!c || c === 'rgba(0, 0, 0, 0)' || c === 'transparent') return;
       document.querySelectorAll('meta[name="theme-color"]').forEach(function(m){ m.setAttribute('content', c); });
     } catch(e) {}
   }
   document.addEventListener('DOMContentLoaded', function(){
     sync();
-    new MutationObserver(sync).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme','style','class'] });
+    new MutationObserver(function(){ sync(); setTimeout(sync, 350); }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme','style','class'] });
+    try { new MutationObserver(function(){ sync(); }).observe(document.head, { childList: true, subtree: true, characterData: true }); } catch(e) {}
+    window.addEventListener('focus', sync); document.addEventListener('visibilitychange', sync);
     if (window.matchMedia) { try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', sync); } catch(e) {} }
   });
 })();
@@ -322,7 +326,7 @@
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html { font-size: 16px; overflow-x: clip; max-width: 100vw; }
+  html { font-size: 16px; overflow-x: clip; max-width: 100vw; background: var(--bg); } /* v1.53.0-beta: fondo plano bajo la barra del sistema */
   body {
     font-family: var(--font);
     background: var(--bg);
@@ -668,6 +672,12 @@
   html.navbar-avatar-mode #nav-options-dots-btn { display: none !important; }
   html.navbar-avatar-mode .nav-avatar-btn { display: flex; }
   #options-dropdown-notif-item { display: none; }
+  /* v1.53.0-beta: en UI Classic y pantallas pequeñas, "Administrar" sale de la barra superior y vive en Más Opciones. */
+  #options-dropdown-admin-item { display: none; }
+  @media (max-width: 639px) {
+    html:not(.inicio-mode) #nav-admin-btn { display: none !important; }
+    html:not(.inicio-mode) #options-dropdown-admin-item.has-admin { display: flex; }
+  }
 
   .dropdown-item {
     display: flex; align-items: center; gap: 10px;
@@ -2667,6 +2677,7 @@
     transform: scale(var(--aseo-tv-scale));
     transform-origin: center top;
     transition: transform 0.2s ease;
+    position: relative; z-index: 1;
   }
   .aseo-tv-title {
     font-size: clamp(3.1rem, 1.8vw, 1.6rem);
@@ -2682,29 +2693,30 @@
     gap: clamp(1.5rem, 3vw, 3.25rem);
   }
   .aseo-tv-block {
-    flex: 1 1 380px; max-width: 620px;
+    flex: 1 1 460px; max-width: 760px;
     background: var(--surface2); border: 1px solid var(--border-active);
-    border-radius: 36px; padding: clamp(2.5rem, 4.5vh, 4rem) clamp(2rem, 3.5vw, 3.5rem);
-    display: flex; flex-direction: column; align-items: center; gap: 1.1rem;
+    border-radius: 40px; padding: clamp(3rem, 6vh, 5rem) clamp(2rem, 3.5vw, 3.5rem);
+    display: flex; flex-direction: column; align-items: center; gap: 1.4rem;
     box-shadow: var(--shadow-lg);
   }
   .aseo-tv-block-icon {
-    width: clamp(70px, 7.5vw, 100px); height: clamp(70px, 7.5vw, 100px);
+    width: clamp(84px, 9vw, 124px); height: clamp(84px, 9vw, 124px);
     border-radius: 50%; background: var(--surface3); color: var(--text3);
     display: flex; align-items: center; justify-content: center; flex-shrink: 0;
   }
   .aseo-tv-block.is-encargado .aseo-tv-block-icon { background: var(--accent); color: #fff; }
   .aseo-tv-block-icon svg { width: 46%; height: 46%; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
   .aseo-tv-block-label {
-    font-size: clamp(1.1rem, 1.4vw, 1.4rem); font-weight: 700;
+    font-size: clamp(1.3rem, 1.8vw, 1.8rem); font-weight: 700;
     color: var(--text3); text-transform: uppercase; letter-spacing: 0.07em;
   }
   .aseo-tv-block-value {
-    font-size: clamp(2.2rem, 4.2vw, 3.8rem); font-weight: 800;
-    line-height: 1.15; word-break: break-word;
+    font-size: clamp(3.2rem, 7vw, 6.5rem); font-weight: 800;
+    line-height: 1.1; word-break: break-word;
   }
-  .aseo-tv-block-value.is-empty { font-weight: 500; font-style: italic; color: var(--text3); font-size: clamp(1.5rem, 2.6vw, 2.2rem); }
+  .aseo-tv-block-value.is-empty { font-weight: 500; font-style: italic; color: var(--text3); font-size: clamp(1.8rem, 3vw, 2.6rem); }
   .aseo-tv-close {
+    z-index: 30; /* v1.53.0-beta: por encima de la tarjeta (que tiene transform y tapaba los botones) */
     position: fixed; top: clamp(1.25rem, 2.5vw, 2.25rem); right: clamp(1.25rem, 2.5vw, 2.25rem);
     width: clamp(48px, 4vw, 60px); height: clamp(48px, 4vw, 60px); border-radius: 50%;
     background: var(--surface2); border: 1px solid var(--border-active);
@@ -2716,6 +2728,7 @@
   .aseo-tv-close svg { width: 44%; height: 44%; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; }
 
   .aseo-tv-more-wrap {
+    z-index: 30; /* v1.53.0-beta: antes quedaba debajo de la tarjeta escalada y los botones del menú no recibían clics */
     position: fixed; top: clamp(1.25rem, 2.5vw, 2.25rem); right: calc(clamp(48px, 4vw, 60px) + clamp(1.25rem, 2.5vw, 2.25rem) + 0.75rem);
   }
   .aseo-tv-more-btn {
@@ -2733,7 +2746,7 @@
     background: var(--surface); border: 1px solid var(--border-active);
     border-radius: 16px; padding: 0.6rem;
     min-width: 240px; box-shadow: var(--shadow-lg);
-    display: none; z-index: 10;
+    display: none; z-index: 40; opacity: 1;
   }
   .aseo-tv-more-menu.open { display: block; animation: menuMorphIn 0.32s var(--ease-fluid-snappy); }
   .aseo-tv-more-section-label {
@@ -4387,6 +4400,10 @@
     padding: 6px 10px; cursor: pointer;
   }
 
+  @keyframes grupoSlideFromRight { from { opacity: 0; transform: translateX(42px); } to { opacity: 1; transform: translateX(0); } }
+  @keyframes grupoSlideFromLeft  { from { opacity: 0; transform: translateX(-42px); } to { opacity: 1; transform: translateX(0); } }
+  .grupo-slide-from-right { animation: grupoSlideFromRight 0.28s var(--ease-fluid-soft) both; }
+  .grupo-slide-from-left  { animation: grupoSlideFromLeft  0.28s var(--ease-fluid-soft) both; }
   .grupo-detail-hero {
     display: flex; flex-direction: column; align-items: center;
     padding: 1.5rem 1.25rem 1.25rem; text-align: center;
@@ -6138,8 +6155,12 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
   html.voz-open .home-bn-icon,html.voz-open .home-bn-pill{transition:opacity .22s ease}
   html.inicio-mode .home-bn-btn{padding:9px 12px}
   /* v1.51.0-alpha: sin permiso de Voz, el botón de Voz se reemplaza por "Más Opciones" */
-  html:not(.voz-avail) .home-more-btn{display:flex}
-  html.voz-avail .home-more-btn{display:none}
+  /* v1.55.90-beta: "Más Opciones" abajo solo para Visitantes; Administradores/DEV ven Voz en su lugar */
+  html.inicio-viewer .home-more-btn{display:flex}
+  html:not(.inicio-viewer) .home-more-btn{display:none !important}
+  /* v1.55.90-beta: el menú se abre desde abajo (Visitantes con Inicio) */
+  .options-dropdown.from-bottom{position:fixed;top:auto;left:auto;right:12px;bottom:calc(80px + env(safe-area-inset-bottom,0px));transform-origin:bottom right;z-index:10050;max-height:calc(100vh - 140px);overflow-y:auto}
+  .options-dropdown.from-bottom.open{animation:menuMorphInUp .32s var(--ease-fluid-snappy)}
   /* v1.50.0-beta: botón Home de la NavBar (activo = blanco con ícono oscuro) */
   .home-bn-icon{flex-shrink:0;width:48px;height:48px;padding:0;border-radius:50%;border:1px solid var(--border);background:var(--nav-bg);color:var(--text);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:var(--shadow-lg);backdrop-filter:blur(var(--ui-blur,34px)) saturate(180%);-webkit-backdrop-filter:blur(var(--ui-blur,34px)) saturate(180%);-webkit-tap-highlight-color:transparent;transition:transform .15s,background .22s,color .22s}
   .home-bn-icon:active{transform:scale(.92)}
@@ -6220,6 +6241,9 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
   /* v1.50.0-beta: en Predicación/Reuniones (con Inicio activo) no se ve la foto de perfil: vuelve el botón de tres puntos */
   html.inicio-mode:not(.home-tab-inicio) .nav-avatar-btn { display: none !important; }
   html.inicio-mode:not(.home-tab-inicio) #nav-options-dots-btn { display: flex !important; }
+  /* v1.55.90-beta: Visitantes — el perfil queda arriba a la derecha en todas las secciones y no hay menú arriba */
+  html.inicio-mode.inicio-viewer .nav-avatar-btn { display: flex !important; }
+  html.inicio-mode.inicio-viewer #nav-options-dots-btn { display: none !important; }
   /* v1.51.0-alpha: Notificaciones solo se muestra en Inicio; en Predicación/Reuniones se oculta */
   html.inicio-mode:not(.home-tab-inicio) #nav-bell-wrap { display: none !important; }
   html.inicio-mode .main-content { padding-bottom: 6.5rem; }
@@ -6254,7 +6278,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 .home-card-title { font-size: 0.9rem; font-weight: 700; color: var(--text); line-height: 1.3; }
 .home-card-sub { font-size: 0.85rem; color: var(--text2); margin-top: 2px; line-height: 1.3; }
 .home-card-meta { font-size: 0.68rem; color: var(--text3); margin-top: 3px; font-weight: 500; }
-.home-card.is-reminder { border-left: 3px solid var(--red); }
+/* v1.54.5-beta: la tarjeta de recordatorio de reporte ya no lleva borde rojo; se ve como las demás. */
 .home-empty { text-align: center; color: var(--text3); font-size: 0.85rem; line-height: 1.45; padding: 1.1rem 1rem; border: 1px dashed var(--border); border-radius: 16px; }
 .home-custom-overlay { position: fixed; inset: 0; z-index: 250; background: var(--bg); flex-direction: column; overflow: hidden; }
 .home-custom-top { padding-top: calc(0.85rem + env(safe-area-inset-top, 0px)); border-bottom: 1px solid var(--border); position: relative; }
@@ -6373,12 +6397,14 @@ const HOME_SECTIONS = {
   tips:     { title: 'Tips', icon: 'bulb', col: 'yellow' },
   texto:    { title: 'Texto Diario', icon: 'book', col: 'orange' },
 };
-const HOME_DEFAULT_LAYOUT = ['hoy', 'vmc', 'fs', 'resp'];
+const HOME_DEFAULT_LAYOUT = ['hoy', 'resp', 'texto']; // v1.55.90-beta: Predicación de hoy, Mis responsabilidades y Texto Diario
 
-// v1.51.0.10-alpha: la UI con Inicio (antes "UI Beta") ahora es la predeterminada. Quien prefiera el diseño anterior
-// (sin Inicio) activa "UI Classic" en Configuración → Experimentos. Clave nueva para que todos partan con la UI nueva.
-function isUiClassic() { return localStorage.getItem('fleming_ui_classic') === 'true'; }
-function isInicioExpEnabled() { return !isUiClassic(); }
+// v1.52.0: UI Classic vuelve a ser la vista por defecto. Inicio (Para ti, Mis asignaciones, Texto Diario, NavBar inferior)
+// se activa desde Configuración → Preferencias → "Activar Inicio". Clave nueva (fleming_inicio_enabled) para que todos
+// partan con UI Classic, sin importar lo que tuvieran guardado en 'fleming_ui_classic'.
+function isInicioPrefOn() { try { return localStorage.getItem('fleming_inicio_enabled') === 'true'; } catch { return false; } }
+function isUiClassic() { return !isInicioPrefOn(); }
+function isInicioExpEnabled() { return isInicioPrefOn(); }
 function isInicioActive() {
   return isInicioExpEnabled() && window.innerWidth < 640 &&
     !(typeof isModoSencilloActive === 'function' && isModoSencilloActive());
@@ -6386,20 +6412,20 @@ function isInicioActive() {
 function updateHomeExpToggleUI() {
   const t = document.getElementById('home-exp-toggle'), th = document.getElementById('home-exp-thumb');
   if (!t || !th) return;
-  const on = isUiClassic();
+  const on = isInicioPrefOn();
   t.style.background = on ? 'var(--accent)' : 'var(--surface3)';
   th.style.left = on ? '21px' : '3px';
 }
 function toggleInicioExpPref() {
-  const nextClassic = !isUiClassic();
-  if (!nextClassic && typeof isModoSencilloActive === 'function' && isModoSencilloActive()) {
-    showToast('La UI con Inicio no está disponible mientras el Modo Sencillo está activo.', 'error');
+  const nextOn = !isInicioPrefOn();
+  if (nextOn && typeof isModoSencilloActive === 'function' && isModoSencilloActive()) {
+    showToast('Inicio no está disponible mientras el Modo Sencillo está activo.', 'error');
     return;
   }
-  localStorage.setItem('fleming_ui_classic', nextClassic ? 'true' : 'false');
+  localStorage.setItem('fleming_inicio_enabled', nextOn ? 'true' : 'false');
   updateHomeExpToggleUI();
   applyInicioUI();
-  showToast(nextClassic ? 'UI Classic activada' : 'UI Classic desactivada', nextClassic ? 'success' : '');
+  showToast(nextOn ? 'Inicio activado' : 'Inicio desactivado (UI Classic)', nextOn ? 'success' : '');
 }
 
 // Aplica/retira el modo Inicio (clase en <html>, título y barra inferior).
@@ -6437,6 +6463,10 @@ function applyInicioChrome() {
     document.documentElement.classList.toggle('home-tab-inicio', active && currentMainTab === 'inicio');
   // v1.50.0-beta: Voz está en la NavBar de las 3 secciones, solo para quien tenga acceso.
   document.documentElement.classList.toggle('voz-avail', active && _vozAllowed());
+  // v1.55.90-beta: Visitante con Inicio activo (móvil) → "Más opciones" abajo junto a la NavBar; arriba solo queda el perfil.
+  const isViewerInicio = active && !!currentUser && currentRole !== 'dev' && currentRole !== 'admin';
+  document.documentElement.classList.toggle('inicio-viewer', isViewerInicio);
+  if (!isViewerInicio) _optionsMenuRestoreHome();
   document.querySelectorAll('#home-bottom-nav [data-tab]').forEach(b => b.classList.toggle('active', b.dataset.tab === currentMainTab));
 }
 function _vozAllowed() { try { return typeof canUseVoz === 'function' && !!canUseVoz(); } catch (e) { return false; } }
@@ -6456,6 +6486,18 @@ function getHomeLayout() {
     if (Array.isArray(raw)) return raw.filter((k, i) => HOME_SECTIONS[k] && raw.indexOf(k) === i);
   } catch {}
   return HOME_DEFAULT_LAYOUT.slice();
+}
+// v1.55.90-beta: cantidad de tarjetas en "Para tí" (mínimo 2, máximo 5; por defecto 3), elegible en Personalizar Inicio.
+const HOME_PARA_MIN = 2, HOME_PARA_MAX = 5, HOME_PARA_DEFAULT = 3;
+function _homeParaKey() { return 'fleming_home_paracount:' + ((typeof currentUser !== 'undefined' && currentUser && currentUser.name) || '').trim().toLowerCase(); }
+function getHomeParaCount() {
+  try { const n = parseInt(localStorage.getItem(_homeParaKey()), 10); if (n >= HOME_PARA_MIN && n <= HOME_PARA_MAX) return n; } catch (e) {}
+  return HOME_PARA_DEFAULT;
+}
+function setHomeParaCount(n) {
+  n = Math.max(HOME_PARA_MIN, Math.min(HOME_PARA_MAX, n | 0));
+  try { localStorage.setItem(_homeParaKey(), String(n)); } catch (e) {}
+  renderHomeCustomize();
 }
 function saveHomeLayout(arr) { try { localStorage.setItem(_homeLayoutKey(), JSON.stringify(arr)); } catch {} }
 
@@ -6489,7 +6531,7 @@ function homeAct(i) { const f = _homeActions[i]; if (typeof f === 'function') f(
 function _homeCard(c) {
   const idx = _homeActions.push(c.onClick || null) - 1;
   const pk = c.pkey ? ' data-pk="' + (_homeParaKeys.push(c.pkey) - 1) + '"' : '';
-  return '<div class="home-card' + (c.reminder ? ' is-reminder' : '') + (c.cls ? ' ' + c.cls : '') + '"' + pk + (c.onClick ? ' onclick="homeAct(' + idx + ')"' : '') + '>' +
+  return '<div class="home-card' + (c.cls ? ' ' + c.cls : '') + '"' + pk + (c.onClick ? ' onclick="homeAct(' + idx + ')"' : '') + '>' +
     (c.icon ? _homeIcoBox(c.icon, c.col, '', c.img) : '') +
     '<div class="home-card-body"><div class="home-card-title">' + escapeHtml(c.title || '') + '</div>' +
     (c.sub ? '<div class="home-card-sub">' + escapeHtml(c.sub) + '</div>' : '') +
@@ -6519,7 +6561,7 @@ async function renderHome() {
   // ── Para tí: recordatorios + próximas partes de reunión + novedades ──
   const para = [];
   (sec('recordatorios')?.items || []).forEach(it => para.push({
-    reminder: true, icon: 'doc', col: 'red', title: 'Recuerda realizar tu reporte de territorio',
+    reminder: true, icon: 'doc', col: 'blue', title: 'Recuerda realizar tu reporte de territorio',
     sub: it.ter ? 'Territorio ' + it.ter : it.label, meta: it.dateRaw ? _homeShortDate(it.dateRaw) : '', onClick: it.onClick }));
   const meet = [];
   [['vmc', typeof MEETING_DAY_VMC !== 'undefined' ? MEETING_DAY_VMC : 4, 'Asignación para la reunión', 'book', 'blue'],
@@ -6574,10 +6616,11 @@ async function renderHome() {
   // v1.52.1-beta: tarjetas que el usuario quitó (mantener presionado) no se muestran.
   para.forEach(c => { c.pkey = _homeParaKey(c); });
   const _hid = _homeHiddenLoad();
-  const paraShown = para.filter(c => !_hid[c.pkey]).slice(0, 3); // v1.51.0-alpha: máximo 3 tarjetas
-  let html = (textoTop ? '<div class="home-section" id="home-texto"></div>' : '') + _homeSection('Para tí', paraShown.length
-    ? '<div class="home-card-list" id="home-para-list">' + paraShown.map(_homeCard).join('') + '</div>'
-    : '<div class="home-empty" id="home-para-list">Estás al día. Aquí verás tus recordatorios y novedades.</div>');
+  const paraShown = para.filter(c => !_hid[c.pkey]).slice(0, getHomeParaCount()); // v1.55.90-beta: de 2 a 5 tarjetas (elegible)
+  // v1.55.90-beta: un usuario nuevo no ve nada en "Para tí" hasta que empiece a usar la app (la sección aparece sola cuando hay tarjetas).
+  let html = (textoTop ? '<div class="home-section" id="home-texto"></div>' : '') + (paraShown.length
+    ? _homeSection('Para tí', '<div class="home-card-list" id="home-para-list">' + paraShown.map(_homeCard).join('') + '</div>')
+    : '');
 
   // ── Apartados elegidos, en el orden elegido ──
   layout.forEach(k => {
@@ -6797,6 +6840,11 @@ function renderHomeCustomize() {
       _homeIco('up', '', '', true) + _homeIco('down', '', 'homeTextoDown()') + _homeIco('x', 'del', 'homeTextoRemove()') + '</div>';
   }
   h += '<div class="home-custom-row locked">' + _homeIcoBox('star', 'blue', 'home-custom-ico') + '<div class="home-custom-name">Para tí<div class="home-custom-note">Se puede quitar tarjeta por tarjeta (mantén presionada)</div></div>' + _homeIco('lock', '', '', true) + '</div>';
+  h += '<div class="home-custom-row locked"><div class="home-custom-name">Tarjetas en "Para tí"<div class="home-custom-note">Entre ' + HOME_PARA_MIN + ' y ' + HOME_PARA_MAX + '</div></div>' +
+    '<div style="display:flex;align-items:center;gap:12px;flex-shrink:0">' +
+    '<button type="button" onclick="setHomeParaCount(' + (getHomeParaCount() - 1) + ')"' + (getHomeParaCount() <= HOME_PARA_MIN ? ' disabled style="opacity:.35"' : '') + ' aria-label="Menos" style="width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:1.1rem;font-weight:700;cursor:pointer">−</button>' +
+    '<span style="min-width:1.2em;text-align:center;font-weight:800;color:var(--text)">' + getHomeParaCount() + '</span>' +
+    '<button type="button" onclick="setHomeParaCount(' + (getHomeParaCount() + 1) + ')"' + (getHomeParaCount() >= HOME_PARA_MAX ? ' disabled style="opacity:.35"' : '') + ' aria-label="Más" style="width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:1.1rem;font-weight:700;cursor:pointer">+</button></div></div>';
   h += '<div class="home-custom-h">Tus apartados</div>';
   if (!layout.length) h += '<div class="home-empty">No tienes apartados. Agrega alguno abajo.</div>';
   layout.forEach((k, i) => {
@@ -6826,7 +6874,7 @@ function homeTextoDown() { const l = getHomeLayout().filter(x => x !== 'texto');
 function homeTextoRemove() { setHomeTextoTop(false); renderHomeCustomize(); }
 function homeRemove(k) { saveHomeLayout(getHomeLayout().filter(x => x !== k)); renderHomeCustomize(); }
 function homeAdd(k) { const l = getHomeLayout(); if (!l.includes(k)) l.push(k); saveHomeLayout(l); renderHomeCustomize(); }
-function homeResetLayout() { setHomeTextoTop(false); saveHomeLayout(HOME_DEFAULT_LAYOUT.slice()); renderHomeCustomize(); }
+function homeResetLayout() { try { localStorage.removeItem(_homeParaKey()); } catch (e) {} setHomeTextoTop(false); saveHomeLayout(HOME_DEFAULT_LAYOUT.slice()); renderHomeCustomize(); }
 </script>
 
 </head>
@@ -7021,13 +7069,20 @@ function homeResetLayout() { setHomeTextoTop(false); saveHomeLayout(HOME_DEFAULT
     </div>
     <h2 class="auth-title" id="auth-title-text">Bienvenido</h2>
     <p class="auth-sub" id="auth-sub-text">Ingresa tus datos para continuar.</p>
-    <div class="form-group">
-      <label class="form-label">Nombre</label>
-      <input type="text" class="form-input" id="auth-first" placeholder="Tu nombre">
+    <div id="auth-name-group">
+      <div class="form-group">
+        <label class="form-label">Nombre</label>
+        <input type="text" class="form-input" id="auth-first" placeholder="Tu nombre">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Apellido</label>
+        <input type="text" class="form-input" id="auth-last" placeholder="Tu apellido">
+      </div>
     </div>
-    <div class="form-group">
-      <label class="form-label">Apellido</label>
-      <input type="text" class="form-input" id="auth-last" placeholder="Tu apellido">
+    <!-- v1.54.0: UserID — desde el segundo inicio de sesión se entra con el UserID -->
+    <div class="form-group" id="auth-userid-group" style="display:none">
+      <label class="form-label">UserID</label>
+      <input type="text" class="form-input" id="auth-userid" placeholder="tu-userid" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false">
     </div>
     <div class="form-group" id="auth-pass-group">
       <label class="form-label">Contraseña</label>
@@ -7041,6 +7096,7 @@ function homeResetLayout() { setHomeTextoTop(false); saveHomeLayout(HOME_DEFAULT
     </div>
     <button class="btn-primary" onclick="doAccess()" id="access-btn">Ingresar</button>
     <div class="auth-error" id="auth-error"></div>
+    <button type="button" id="auth-mode-toggle" onclick="toggleAuthMode()" style="display:block;margin:0.9rem auto 0;background:none;border:none;color:var(--accent);font-family:var(--font);font-size:0.82rem;font-weight:600;cursor:pointer;padding:4px 8px"></button>
   </div>
 </div>
 
@@ -7228,7 +7284,7 @@ function homeResetLayout() { setHomeTextoTop(false); saveHomeLayout(HOME_DEFAULT
         <button class="nav-icon-btn" id="nav-options-dots-btn" title="Opciones" onclick="toggleOptionsMenu()">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.2" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="12" cy="19" r="1.2" fill="currentColor" stroke="none"/></svg>
         </button>
-        <button class="nav-avatar-btn" id="nav-avatar-btn" title="Opciones" onclick="toggleOptionsMenu()">
+        <button class="nav-avatar-btn" id="nav-avatar-btn" title="Opciones" onclick="navAvatarClick()">
           <div class="nav-avatar-btn-img" id="user-avatar-navbtn">?</div>
         </button>
         <div class="options-dropdown" id="options-dropdown">
@@ -7244,6 +7300,10 @@ function homeResetLayout() { setHomeTextoTop(false); saveHomeLayout(HOME_DEFAULT
             <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
             <span data-i18n="notif.title">Notificaciones</span>
             <span id="notif-badge-menu" style="display:none;width:8px;height:8px;border-radius:50%;background:var(--red);margin-left:auto;flex-shrink:0"></span>
+          </button>
+          <button class="dropdown-item" id="options-dropdown-admin-item" onclick="closeOptionsMenu();goAdminShortcut(this.dataset.adminTab)">
+            <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Administrar
           </button>
           <button class="dropdown-item appearance-trigger" id="appearance-trigger-main" onclick="toggleAppearanceSubmenu('main')">
             <svg class="sub-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
@@ -7887,6 +7947,11 @@ function homeResetLayout() { setHomeTextoTop(false); saveHomeLayout(HOME_DEFAULT
           <span id="meeting-day-select-fs-wrap"></span>
         </div>
         <div id="admin-fs-list"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Servicio de Campo</div></div></div>
+        <!-- v1.52.0: Conferencias salientes -->
+        <div style="display:flex;align-items:center;margin:1.6rem 0 0.8rem">
+          <span style="flex:1;font-size:0.95rem;font-weight:700">Conferencias salientes</span>
+        </div>
+        <div id="admin-fs-out-list"></div>
       </div>
 
       <div class="admin-section" id="admin-usuarios">
@@ -8995,6 +9060,7 @@ function homeResetLayout() { setHomeTextoTop(false); saveHomeLayout(HOME_DEFAULT
       <div class="uprofile-avatar" id="uprofile-avatar">—</div>
     </div>
     <div class="uprofile-name" id="uprofile-name">—</div>
+    <div class="uprofile-userid" id="uprofile-userid" style="display:none;font-size:0.8rem;font-weight:600;opacity:0.8;margin:2px 0 6px"></div>
     <div class="uprofile-role-badge" id="uprofile-role-badge">—</div>
     <div class="uprofile-status" id="uprofile-status">
       <span class="uprofile-status-dot" id="uprofile-status-dot"></span>
@@ -9321,7 +9387,7 @@ function homeResetLayout() { setHomeTextoTop(false); saveHomeLayout(HOME_DEFAULT
     <div class="profile-section" id="pref-accent-restricted">
       <div id="pref-accent-section">
         <div style="padding:0.75rem 1rem 0.2rem;display:flex;align-items:center;gap:7px">
-          <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--text3);fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          
           <span style="font-size:0.72rem;font-weight:600;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase" data-i18n="exp.coloracento">Color de acento</span>
         </div>
         <div style="padding:0.4rem 1rem 1rem;display:flex;gap:14px;align-items:center">
@@ -9331,35 +9397,7 @@ function homeResetLayout() { setHomeTextoTop(false); saveHomeLayout(HOME_DEFAULT
           <button class="accent-swatch" id="accent-sw-yellow" onclick="setAccentColor('yellow')" style="--sw:#f5a623" title="Desert"></button>
           <button class="accent-swatch" id="accent-sw-purple" onclick="setAccentColor('purple')" style="--sw:#a855f7" title="Lavender"></button>
         </div>
-        <!-- Vista previa en vivo (v1.42.0-stable_beta): usa var(--accent) /
-             var(--accent-light) directamente, igual que el resto de la
-             plataforma, así que refleja el color elegido al instante. Muestra
-             una versión reducida de la pantalla de Inicio (Predicación de
-             Casa en Casa) para que se aprecie el color aplicado a botones,
-             íconos y elementos activos. ── -->
-        <div style="padding:0 1rem 1rem">
-          <div style="font-size:0.72rem;font-weight:600;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:0.5rem" data-i18n="exp.vistaprevia">Vista previa</div>
-          <div style="border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;background:var(--bg)">
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:0.6rem 0.85rem;background:var(--nav-bg);border-bottom:1px solid var(--border)">
-              <span style="font-size:0.82rem;font-weight:700;color:var(--text)">Inicio</span>
-              <span style="display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--accent);color:#fff;font-size:0.65rem;font-weight:800">1</span>
-            </div>
-            <div style="padding:0.75rem 0.85rem">
-              <div style="font-size:0.68rem;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:var(--text3);margin-bottom:0.5rem">Casa en Casa</div>
-              <div style="display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm,10px);padding:0.65rem 0.75rem;box-shadow:var(--shadow)">
-                <div style="flex-shrink:0;width:34px;height:34px;border-radius:10px;background:var(--accent-light);color:var(--accent);display:flex;align-items:center;justify-content:center">
-                  <svg viewBox="0 0 24 24" style="width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                </div>
-                <div style="flex:1;min-width:0">
-                  <div style="font-weight:700;font-size:0.82rem;color:var(--text)">Asignación de predicación</div>
-                  <div style="font-size:0.72rem;color:var(--text3);margin-top:1px">Hoy • 15:30</div>
-                </div>
-                <button style="flex-shrink:0;border:none;border-radius:20px;background:var(--accent);color:#fff;font-family:var(--font);font-size:0.68rem;font-weight:700;padding:5px 11px;cursor:default">Ver</button>
               </div>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
     <!-- Tamaño de la interfaz: debajo de Apariencia -->
     <div class="profile-section">
@@ -9426,22 +9464,22 @@ function homeResetLayout() { setHomeTextoTop(false); saveHomeLayout(HOME_DEFAULT
       <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="exp.modosencillo.help">Pensado para quienes tienen dificultad para usar la versión por defecto. Notificaciones y Live siguen activas, accesibles desde el menú.</div>
     </div>
 
-    <!-- v1.51.0.15-alpha: UI Classic (antes en Experimentos). Vuelve al diseño anterior, sin Inicio ni NavBar inferior. -->
+    <!-- v1.52.0: Inicio (opcional). UI Classic es la vista por defecto; aquí se activa Inicio y la NavBar inferior. -->
     <div class="profile-section">
-      <div class="profile-section-title">UI Classic</div>
+      <div class="profile-section-title">Inicio</div>
       <div class="profile-row" style="cursor:pointer" onclick="toggleInicioExpPref()">
         <div class="profile-row-icon" style="background:var(--accent-light);color:var(--accent)">
           <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         </div>
         <div class="profile-row-content">
-          <div class="profile-row-label">Activar UI Classic</div>
-          <div class="profile-row-value" style="font-size:0.8rem">Vuelve al diseño anterior, sin la pantalla de Inicio ni la barra de navegación inferior (Home, Predicación, Reuniones y Voz).</div>
+          <div class="profile-row-label">Activar Inicio</div>
+          <div class="profile-row-value" style="font-size:0.8rem">Muestra la pantalla de Inicio (Para ti, Mis asignaciones, Texto Diario y Predicación del día) y la barra de navegación inferior (Home, Predicación, Reuniones y Voz).</div>
         </div>
         <div id="home-exp-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
           <div id="home-exp-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
         </div>
       </div>
-      <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4">La interfaz con Inicio ya es la predeterminada en teléfonos móviles. Actívala solo si prefieres el diseño anterior. En computador y tablet siempre se usa el diseño clásico.</div>
+      <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4">Por defecto se usa UI Classic. Inicio solo está disponible en teléfonos móviles; en computador y tablet siempre se usa el diseño clásico.</div>
     </div>
 
     <!-- Vista de Contenido (ajuste de presentación en Tablet/Escritorio) -->
@@ -10311,7 +10349,127 @@ function homeResetLayout() { setHomeTextoTop(false); saveHomeLayout(HOME_DEFAULT
 // v1.51.0.15-alpha: (1) "Color de Acento" y "UI Classic" pasan de Experimentos a Preferencias. (2) Se retira el toggle "Activa el
 // efecto blur": ahora solo están los sliders de Transparencia y Blur / Frosted. (3) Se retira el toggle "Ajustar el fondo al color
 // de acento".
-const APP_VERSION = '1.51.0.15-alpha';
+// v1.52.0: (1) UI Classic vuelve a ser la vista por defecto de la aplicación. (2) Inicio (Para ti, Mis asignaciones, Texto Diario,
+// Predicación del día y la NavBar inferior) pasa a ser opcional: se activa desde Configuración → Preferencias → "Activar Inicio".
+// (3) Reunión Pública: nuevo apartado "Conferencias salientes" (conferenciante, tema, congregación de destino y fecha). Se crea desde
+// "+ Nueva semana" con el toggle Reunión Local / Conferencia Saliente; el conferenciante recibe una notificación. Requiere la tabla
+// fs_outgoing_talks (ver supabase_conferencias_salientes.sql).
+// v1.53.0-beta: (1) Aseo del Salón: Full Screen toma el tema (claro/oscuro) de la plataforma, el menú Más opciones vuelve a ser
+// utilizable, el PopUp recupera sus colores/tamaño/ícono y los bloques de Grupos asignados y Encargado son mucho más grandes.
+// (2) Detalle de Grupo de Servicio: el swipe izquierda/derecha entre grupos ahora funciona (con animación). (3) La barra del
+// sistema/WebApp toma el color plano del fondo de la plataforma (Claro/Oscuro). (4) UI Classic en móvil: "Administrar" pasa al
+// menú Más Opciones.
+
+// ═══ v1.54.0: UserIDs ═══════════════════════════════════════════════════════
+// Cada usuario registrado recibe un UserID sencillo, único e impredecible (ej. "javier-contreras", "claudiaibanez").
+// Solo minúsculas, números, guiones, guiones bajos y puntos. No se puede cambiar ni compartir; solo el DEV puede editarlo
+// o dar acceso a quien no lo recuerde. Requiere en Supabase las columnas user_id y userid_recovery (ver supabase_userids.sql).
+let _authMode = 'name';
+function applyAuthMode(mode) {
+  _authMode = mode === 'userid' ? 'userid' : 'name';
+  const ng = document.getElementById('auth-name-group'), ug = document.getElementById('auth-userid-group');
+  const sub = document.getElementById('auth-sub-text'), tg = document.getElementById('auth-mode-toggle');
+  if (ng) ng.style.display = _authMode === 'name' ? '' : 'none';
+  if (ug) ug.style.display = _authMode === 'userid' ? '' : 'none';
+  let _inv = false; try { _inv = _inviteLoginMode; } catch (e) {}
+  if (sub && !_inv) sub.textContent = _authMode === 'userid' ? 'Ingresa tu UserID para continuar.' : 'Ingresa tus datos para continuar.';
+  if (tg) tg.textContent = _authMode === 'userid' ? 'Primera vez o sin UserID: entrar con nombre y apellido' : 'Ya tengo un UserID';
+  const er = document.getElementById('auth-error'); if (er) er.style.display = 'none';
+}
+function toggleAuthMode() { applyAuthMode(_authMode === 'userid' ? 'name' : 'userid'); }
+try { applyAuthMode(localStorage.getItem('fleming_has_account') === '1' ? 'userid' : 'name'); } catch (e) {}
+
+const USERID_RE = /^[a-z0-9._-]{3,40}$/;
+function _uidSlug(str) {
+  return String(str || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/ñ/g, 'n').replace(/[^a-z0-9]/g, '');
+}
+function _uidCandidate(fullName, attempt) {
+  const parts = String(fullName || '').trim().split(/\s+/);
+  const first = _uidSlug(parts[0]) || 'user';
+  const last = _uidSlug(parts.slice(1).join('')) || '';
+  const seps = ['-', '_', '.', ''];
+  const sep = seps[Math.floor(Math.random() * seps.length)];
+  const useInitial = attempt > 1 && Math.random() < 0.4 && last;
+  let base = last ? (useInitial ? first[0] + sep + last : first + sep + last) : first;
+  if (attempt > 0 || Math.random() < 0.35) base += (sep === '' ? '' : sep === '.' ? '' : '') + String(Math.floor(Math.random() * (attempt > 3 ? 9999 : 99)) + 1);
+  return base.slice(0, 40);
+}
+async function _uidInsertNotice(name, uid) {
+  try {
+    await sb.from('notifications').insert({
+      title: 'Tu UserID',
+      body: 'Tu UserID es "' + uid + '". Úsalo para iniciar sesión la próxima vez. Es personal: no lo compartas. Siempre puedes verlo en tu perfil, debajo de tu nombre.',
+      target_names: [String(name).toLowerCase()],
+      notif_category: 'sistema'
+    });
+  } catch (e) {}
+}
+async function ensureUserId() {
+  if (!currentUser || currentRole === 'dev' || currentRole === 'pending') return;
+  try { localStorage.setItem('fleming_has_account', '1'); } catch (e) {}
+  try {
+    const { data: row, error } = await sb.from('platform_users').select('id, name, user_id, userid_recovery').ilike('name', currentUser.name).maybeSingle();
+    if (error || !row) return; // columna aún no creada o sin registro: no se interrumpe nada
+    if (row.user_id) {
+      if (row.userid_recovery) {
+        await sb.from('platform_users').update({ userid_recovery: false }).eq('id', row.id);
+        await _uidInsertNotice(row.name, row.user_id);
+      }
+      return;
+    }
+    for (let i = 0; i < 14; i++) {
+      const cand = _uidCandidate(row.name, i);
+      if (!USERID_RE.test(cand)) continue;
+      const { data: taken } = await sb.from('platform_users').select('id').eq('user_id', cand).maybeSingle();
+      if (taken) continue;
+      const { error: upErr } = await sb.from('platform_users').update({ user_id: cand }).eq('id', row.id);
+      if (upErr) continue;
+      await _uidInsertNotice(row.name, cand);
+      return;
+    }
+  } catch (e) { console.warn('ensureUserId:', e.message); }
+}
+async function loadOwnUserIdDisplay() {
+  const el = document.getElementById('profile-userid-display');
+  if (!el || !currentUser) return;
+  el.style.display = 'none';
+  if (currentRole === 'dev') return;
+  try {
+    const { data } = await sb.from('platform_users').select('user_id').ilike('name', currentUser.name).maybeSingle();
+    if (data && data.user_id) { el.textContent = data.user_id; el.style.display = ''; }
+  } catch (e) {}
+}
+async function devSaveUserId(rowId) {
+  if (currentRole !== 'dev') return;
+  const input = document.getElementById('uprof-userid-input');
+  const v = (input.value || '').trim().toLowerCase();
+  if (!USERID_RE.test(v)) { showToast('UserID inválido: usa 3–40 caracteres entre minúsculas, números, guiones, guiones bajos y puntos.', 'error'); return; }
+  const { data: taken } = await sb.from('platform_users').select('id').eq('user_id', v).neq('id', rowId).maybeSingle();
+  if (taken) { showToast('Ese UserID ya está en uso.', 'error'); return; }
+  const { error } = await sb.from('platform_users').update({ user_id: v }).eq('id', rowId);
+  if (error) { showToast('No se pudo guardar: ' + error.message, 'error'); return; }
+  const u = activeUsers.find(x => x.id === rowId); if (u) u.user_id = v;
+  showToast('UserID actualizado', 'success');
+  openUserProfilePage(rowId);
+}
+async function devSetUserIdRecovery(rowId, on) {
+  if (currentRole !== 'dev') return;
+  const { error } = await sb.from('platform_users').update({ userid_recovery: !!on }).eq('id', rowId);
+  if (error) { showToast('No se pudo actualizar: ' + error.message, 'error'); return; }
+  const u = activeUsers.find(x => x.id === rowId); if (u) u.userid_recovery = !!on;
+  showToast(on ? 'Acceso concedido: puede entrar una vez con nombre y contraseña' : 'Acceso retirado', 'success');
+  openUserProfilePage(rowId);
+}
+
+// v1.54.0: (1) Nuevo "UserID": identificador privado, sencillo e impredecible que se asigna solo a cada usuario y se usa para iniciar sesión desde la segunda vez.
+// (2) Se avisa con una notificación sutil (no Push) dentro de FlemingApp; se ve en el perfil bajo el nombre. (3) Solo el DEV puede editarlo o dar acceso a quien no lo recuerde.
+// (4) Preferencias: se retiran el ícono de "Color de acento" y su "Vista previa".
+// v1.54.5-beta: La tarjeta de recordatorio para enviar el Reporte de Territorio (Inicio → Para tí) ahora se ve como las demás tarjetas, sin borde rojo.
+// v1.55.0-beta: Live y No Pasar con 2 o más territorios en una asignación: Live revisa los No Pasar de todos los territorios (no solo uno), se mantiene activo al cambiar de pestaña, resalta la lista del territorio visible y avisa de los otros territorios con No Pasar en la misma calle.
+// v1.55.90-beta: (1) Inicio por defecto: Predicación de hoy, Mis responsabilidades y Texto Diario. (2) Personalizar Inicio: de 2 a 5 tarjetas en "Para tí"; un usuario nuevo no ve nada en "Para tí" hasta que use la app.
+// (3) Visitantes con Inicio (móvil): "Más opciones" junto a la NavBar, el menú se abre desde abajo y el botón de arriba a la derecha abre el perfil. Administradores/DEV: Voz ocupa ese lugar.
+// (4) El botón "Administración" ahora es solo para el usuario DEV; los administradores usan "Administrar" en las secciones que tienen permitidas.
+const APP_VERSION = '1.55.90-beta';
 // ═════════════════════════════════════════════════════════════════════════
 // v1.50.0-beta: (1) Voz crea asignaciones de predicación nuevas ("Crea una asignación para el lunes a las 10, asigna el
 // Territorio 17"), reconoce Grupos de Servicio y es mucho más flexible: nunca termina en "no entendí"/"no se encontró",
@@ -12792,32 +12950,53 @@ function _grupoSwipeNavigate(direction) {
   const nextIdx = idx + direction;
   if (nextIdx < 0 || nextIdx >= grupos.length) return; // ya está en el primer/último grupo
   openGrupoDetailPage(grupos[nextIdx].id);
+  // v1.53.0-beta: animación de deslizamiento (siguiente entra por la derecha, anterior por la izquierda)
+  const page = document.getElementById('page-grupo');
+  const targets = page ? page.querySelectorAll('.grupo-detail-hero, .grupo-detail-body') : [];
+  const cls = direction > 0 ? 'grupo-slide-from-right' : 'grupo-slide-from-left';
+  targets.forEach(el => { el.classList.remove('grupo-slide-from-right', 'grupo-slide-from-left'); void el.offsetWidth; el.classList.add(cls); });
 }
 
+// v1.53.0-beta: antes este bloque buscaba #page-grupo al cargar el script, pero ese elemento se define más abajo en el HTML,
+// así que getElementById devolvía null y el swipe nunca se activaba. Ahora los listeners viven en document y se filtran
+// por "el detalle de Grupo está abierto".
 (function initGrupoSwipeNav() {
-  const page = document.getElementById('page-grupo');
-  if (!page) return;
-  let touchStartX = 0, touchStartY = 0, touchActive = false;
-  const SWIPE_THRESHOLD = 60;   // px mínimos horizontales para considerar swipe
-  const SWIPE_MAX_VERTICAL = 60; // tolerancia vertical, para no interferir con el scroll
+  let startX = 0, startY = 0, active = false;
+  const SWIPE_THRESHOLD = 60;    // px mínimos horizontales para considerar swipe
+  const SWIPE_MAX_VERTICAL = 80; // tolerancia vertical, para no interferir con el scroll
+  const BLOCK = 'input, textarea, select, [data-no-swipe], .full-map-lightbox, .img-lightbox, .modal-overlay.open';
 
-  page.addEventListener('touchstart', (e) => {
-    if (e.touches.length !== 1) return;
-    touchStartX = e.touches[0].clientX;
-    touchStartY = e.touches[0].clientY;
-    touchActive = true;
+  function grupoOpen() { const pg = document.getElementById('page-grupo'); return !!pg && pg.classList.contains('open'); }
+
+  document.addEventListener('touchstart', (e) => {
+    active = false;
+    if (!grupoOpen() || e.touches.length !== 1) return;
+    const pg = document.getElementById('page-grupo');
+    if (!pg.contains(e.target) || e.target.closest(BLOCK)) return;
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+    active = true;
   }, { passive: true });
 
-  page.addEventListener('touchend', (e) => {
-    if (!touchActive) return;
-    touchActive = false;
-    const touch = e.changedTouches[0];
-    const dx = touch.clientX - touchStartX;
-    const dy = touch.clientY - touchStartY;
-    if (Math.abs(dx) < SWIPE_THRESHOLD || Math.abs(dy) > SWIPE_MAX_VERTICAL) return;
-    // dx > 0: dedo se movió a la derecha → grupo anterior. dx < 0 → grupo siguiente.
+  document.addEventListener('touchend', (e) => {
+    if (!active) return;
+    active = false;
+    if (!grupoOpen()) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - startX, dy = t.clientY - startY;
+    if (Math.abs(dx) < SWIPE_THRESHOLD || Math.abs(dy) > SWIPE_MAX_VERTICAL || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+    // dedo a la izquierda (dx < 0) → grupo siguiente; a la derecha (dx > 0) → grupo anterior.
     _grupoSwipeNavigate(dx > 0 ? -1 : 1);
   }, { passive: true });
+
+  // Desktop: flechas del teclado.
+  document.addEventListener('keydown', (e) => {
+    if (!grupoOpen() || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.target && e.target.closest && e.target.closest('input, textarea, select, [contenteditable]')) return;
+    if (document.querySelector('.full-map-lightbox.open')) return;
+    if (e.key === 'ArrowLeft') _grupoSwipeNavigate(-1);
+    else if (e.key === 'ArrowRight') _grupoSwipeNavigate(1);
+  });
 })();
 
 function getApellido(nombreCompleto) {
@@ -13547,6 +13726,7 @@ async function renderProfilePage() {
 
   // Name
   document.getElementById('profile-name-display').textContent = currentUser.name;
+  loadOwnUserIdDisplay(); // v1.54.0
 
   // Role badge
   const roleBadgeEl = document.getElementById('profile-role-badge');
@@ -13910,6 +14090,21 @@ async function collectInicioSections(opts) {
         items: items.slice(0, 5),
       });
     }
+    // v1.52.0: conferencias salientes del usuario (próximas)
+    try {
+      const { data: outs } = await sb.from('fs_outgoing_talks').select('*').gte('talk_date', today).order('talk_date');
+      const mine = (outs || []).filter(t => (t.speaker_name || '').trim().toLowerCase() === myName);
+      if (mine.length) {
+        let sec = sections.find(x => x.key === 'fs');
+        if (!sec) {
+          sec = { key: 'fs', title: 'Reunión Pública', color: '#34c759', bg: 'rgba(52,199,89,0.12)',
+            icon: '<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>', items: [] };
+          sections.push(sec);
+        }
+        for (const t of mine) sec.items.push({ label: 'Conferencia saliente: ' + t.talk_title, sub: t.destination_cong + ' · ' + fsFormatOutDate(t.talk_date), sortKey: _inicioSortKey(t.talk_date, null), weekStart: t.talk_date, onClick: () => inicioGoTo('reuniones', 'fin-semana') });
+        sec.items = sec.items.slice(0, 5);
+      }
+    } catch (e) { /* tabla aún no creada */ }
   } catch (e) { console.warn('Inicio (FS):', e); }
 
   // ── Responsabilidades: próximos cargos (Audio/Video, Micrófonos, Plataforma, Acomodadores, etc.) ──
@@ -14727,7 +14922,7 @@ async function acceptInviteAndGoToLogin() {
   }
   _pendingInviteToken = null;
   document.getElementById('invite-screen').style.display = 'none';
-  _inviteLoginMode = true;
+  _inviteLoginMode = true; try { applyAuthMode('name'); } catch (e) {}
   const authTitleEl = document.getElementById('auth-title-text');
   const authSubEl   = document.getElementById('auth-sub-text');
   const passGroup   = document.getElementById('auth-pass-group');
@@ -14746,6 +14941,7 @@ function resetAuthScreenToNormal() {
   const passGroup = document.getElementById('auth-pass-group');
   if (titleEl) titleEl.textContent = 'Bienvenido';
   if (subEl) subEl.textContent = 'Ingresa tus datos para continuar.';
+  try { applyAuthMode(localStorage.getItem('fleming_has_account') === '1' ? 'userid' : 'name'); } catch (e) {}
   if (passGroup) passGroup.style.display = '';
   const passInput = document.getElementById('auth-pass');
   if (passInput) passInput.value = '';
@@ -14847,6 +15043,7 @@ async function enterApp() {
     showPendingScreen();
     return;
   }
+  ensureUserId(); // v1.54.0: asigna el UserID si aún no tiene (sin bloquear la entrada)
 
   // Modo Mantenimiento (v1.37.0-beta): última verificación justo antes de
   // mostrar la app, por si se activó en el instante mismo del login.
@@ -14897,7 +15094,7 @@ async function enterApp() {
   roleEl.style.color = currentRole === 'dev' ? 'var(--orange)' : currentRole === 'admin' ? 'var(--accent)' : '';
 
   const adminBtn = document.getElementById('admin-dropdown-btn');
-  adminBtn.style.display = ['dev','admin'].includes(currentRole) ? '' : 'none';
+  adminBtn.style.display = currentRole === 'dev' ? '' : 'none'; // v1.55.90-beta: solo el DEV ve "Administración"
   updateAdminSectionTabsVisibility();
   const notifAdminTab = document.getElementById('admin-tab-notificaciones');
   if (notifAdminTab) notifAdminTab.style.display = (currentRole === 'dev' || (currentRole === 'admin' && canAccessModule(_currentUserPermsCache, 'notificaciones'))) ? '' : 'none';
@@ -15933,13 +16130,28 @@ async function handlePinSetupStep2Input() {
 let _inviteLoginMode = false;
 
 async function doAccess() {
-  const first = document.getElementById('auth-first').value.trim();
-  const last  = document.getElementById('auth-last').value.trim();
+  let first = document.getElementById('auth-first').value.trim();
+  let last  = document.getElementById('auth-last').value.trim();
   const pass  = document.getElementById('auth-pass').value;
   const errEl = document.getElementById('auth-error');
   const btn   = document.querySelector('#auth-screen .btn-primary');
   errEl.style.display = 'none';
-  if (!first || !last) { errEl.style.display='block'; errEl.textContent='Ingresa tu nombre y apellido.'; return; }
+  let _viaUserId = false, _wasInvite = _inviteLoginMode;
+  if (_authMode === 'userid' && !_inviteLoginMode) {
+    // v1.54.0: inicio de sesión con UserID (nombre y apellido se obtienen de la cuenta)
+    const uid = (document.getElementById('auth-userid').value || '').trim().toLowerCase();
+    if (!uid) { errEl.style.display='block'; errEl.textContent='Ingresa tu UserID.'; return; }
+    if (!pass) { errEl.style.display='block'; errEl.textContent='Ingresa la contraseña.'; return; }
+    let acc = null;
+    try {
+      const r = await sb.from('platform_users').select('name').eq('user_id', uid).maybeSingle();
+      acc = r.data;
+    } catch (e) {}
+    if (!acc || !acc.name) { errEl.style.display='block'; errEl.textContent='UserID no encontrado. Si no lo recuerdas, pide a un encargado que te dé acceso.'; return; }
+    const parts = acc.name.trim().split(/\s+/);
+    first = parts[0]; last = parts.slice(1).join(' ') || parts[0];
+    _viaUserId = true;
+  } else if (!first || !last) { errEl.style.display='block'; errEl.textContent='Ingresa tu nombre y apellido.'; return; }
 
   let baseRole;
   if (_inviteLoginMode) {
@@ -15956,6 +16168,17 @@ async function doAccess() {
     // El usuario DEV solo puede iniciar sesión con nombre "DEV" y apellido "Tester"
     if (baseRole === 'dev' && (first !== 'DEV' || last !== 'Tester')) {
       errEl.style.display='block'; errEl.textContent='Contraseña incorrecta.'; return;
+    }
+    // v1.54.0: una cuenta que ya tiene UserID entra con su UserID (salvo que el DEV le haya dado acceso de recuperación).
+    if (baseRole !== 'dev' && !_viaUserId && !_wasInvite) {
+      try {
+        const r = await sb.from('platform_users').select('user_id, userid_recovery').ilike('name', first + ' ' + last).maybeSingle();
+        if (r.data && r.data.user_id && !r.data.userid_recovery) {
+          errEl.style.display='block';
+          errEl.textContent='Esta cuenta ya tiene un UserID. Inicia sesión con tu UserID; si no lo recuerdas, pide acceso a un encargado.';
+          return;
+        }
+      } catch (e) {}
     }
   }
 
@@ -16441,7 +16664,8 @@ async function updateAdminShortcuts() {
     if (el) { el.style.display = 'none'; el.innerHTML = ''; }
   });
   if (!btn) return;
-  const hideBtn = () => { btn.style.display = 'none'; delete btn.dataset.adminTab; };
+  const adminItem = document.getElementById('options-dropdown-admin-item');
+  const hideBtn = () => { btn.style.display = 'none'; delete btn.dataset.adminTab; if (adminItem) { adminItem.classList.remove('has-admin'); delete adminItem.dataset.adminTab; } };
 
   const simplified = typeof isSimplifiedModeActive === 'function' && isSimplifiedModeActive();
   const sub = currentSubTab;
@@ -16477,6 +16701,7 @@ async function updateAdminShortcuts() {
 
   btn.dataset.adminTab = adminTab;
   btn.style.display = '';
+  if (adminItem) { adminItem.dataset.adminTab = adminTab; adminItem.classList.add('has-admin'); }
 }
 
 async function goAdminShortcut(adminTab) {
@@ -17668,6 +17893,8 @@ async function viewAssignment(id) {
   // resto de modalidades. No aplica a "Evento".
   const activeTer = isVisita ? (panel._visitaOpenIdx != null ? visitaTers[panel._visitaOpenIdx] : null) : ter;
 
+  // v1.55.0-beta: Live considera TODOS los territorios de la asignación (no solo el de la pestaña visible).
+  panel._liveTers = isEspecial ? [] : (isVisita ? (visitaTers || []).filter(Boolean) : [ter, ter2, ter3].filter(Boolean));
   // "No pasar" no depende del mapa, se pinta de inmediato (no aplica a "Evento")
   _renderDetailNoPasar(isEspecial ? null : activeTer);
   // Oculta el mapa mientras se resuelve en segundo plano, para no mostrar por
@@ -17779,7 +18006,11 @@ function _renderDetailNoPasar(ter) {
   noPasarSec.dataset.territoryId   = ter ? ter.id     : '';
   noPasarSec.dataset.territoryName = ter ? terLabel(ter.number) : '';
   // Live Mode: mostrar/ocultar botón según si hay entradas
-  setTimeout(_liveUpdateBtnVisibility, 0);
+  setTimeout(() => {
+    _liveUpdateBtnVisibility();
+    // v1.55.0-beta: al cambiar de territorio, se vuelve a resaltar según la calle actual de Live.
+    if (_liveActive && _liveLastRoad) _liveHighlight(_liveLastRoad);
+  }, 0);
 }
 
 function _renderDetailManzanas(manzanasList) {
@@ -18099,6 +18330,17 @@ function _liveMatchAddr(detectedRoad, addr) {
   const matchCount = roadTokens.filter(t => a.includes(t)).length;
   return matchCount / roadTokens.length >= 0.6;
 }
+// v1.55.0-beta: territorios de la asignación abierta y sus No Pasar que coinciden con la calle detectada.
+function _liveSessionTers() {
+  const p = document.getElementById('detail-panel');
+  return (p && Array.isArray(p._liveTers)) ? p._liveTers : [];
+}
+function _liveMatchesByTer(road) {
+  return _liveSessionTers().map(t => {
+    let entries = []; try { entries = parseNoPasar(t.no_pasar); } catch (e) {}
+    return { ter: t, count: entries.filter(e => _liveMatchAddr(road, e.addr)).length };
+  }).filter(x => x.count > 0);
+}
 function _liveHighlight(detectedRoad) {
   const items = document.querySelectorAll('#detail-no-pasar-list .no-pasar-item');
   if (!_liveActive || !detectedRoad) {
@@ -18139,6 +18381,13 @@ function _liveHighlight(detectedRoad) {
     sub.textContent = matchCount > 0
       ? matchCount + ' direcci\u00f3n' + (matchCount > 1 ? 'es' : '') + ' No Pasar en esta calle'
       : 'Sin No Pasar registradas en esta calle';
+    // v1.55.0-beta: si hay más territorios en la asignación, avisa de los No Pasar de esa calle en los otros.
+    const _secEl = document.getElementById('detail-no-pasar-section');
+    const _activeId = _secEl ? _secEl.dataset.territoryId : '';
+    const _others = _liveMatchesByTer(detectedRoad).filter(x => String(x.ter.id) !== String(_activeId));
+    if (_others.length) {
+      sub.textContent += ' \u00b7 Tambi\u00e9n en ' + _others.map(x => terLabel(x.ter.number) + ' (' + x.count + ')').join(', ');
+    }
   }
 }
 async function _liveReverseGeocode(lat, lng) {
@@ -18169,7 +18418,14 @@ async function _liveOnPosition(pos) {
     _liveUpdateNotifPanelBanner();
     // Count matches and fire notifications if there are No Pasar in this street
     var matchedItems = document.querySelectorAll('#detail-no-pasar-list .no-pasar-item.live-match');
-    if (matchedItems.length > 0) {
+    // v1.55.0-beta: se avisa por cada territorio de la asignación que tenga No Pasar en esta calle.
+    var _byTer = _liveMatchesByTer(road);
+    if (_byTer.length) {
+      _byTer.forEach(function (x) {
+        _liveSendBrowserNotif(road, x.count, x.ter.number);
+        _liveSendInternalNotif(road, x.count, x.ter.number);
+      });
+    } else if (matchedItems.length > 0) {
       // v1.30.9-beta: el badge superior ahora puede mostrar varios círculos
       // superpuestos (uno por territorio) en vez de un solo número, así que
       // el número de territorio activo se toma de la pestaña seleccionada.
@@ -18294,8 +18550,9 @@ function _liveUpdateBtnVisibility() {
   const wrap = document.getElementById('live-btn-wrap');
   if (wrap) wrap.style.display = 'none'; // el botón manual ya no se muestra
   const sec = document.getElementById('detail-no-pasar-section');
+  const _anyTerNp = _liveSessionTers().some(t => { try { return parseNoPasar(t.no_pasar).length > 0; } catch (e) { return false; } });
   const hasEntries = sec && sec.style.display !== 'none'
-    && document.querySelectorAll('#detail-no-pasar-list .no-pasar-item').length > 0;
+    && (document.querySelectorAll('#detail-no-pasar-list .no-pasar-item').length > 0 || _anyTerNp);
   if (isLiveFeatureEnabled() && hasEntries) {
     if (!_liveActive) startLiveMode();
   } else if (_liveActive) {
@@ -21440,10 +21697,18 @@ function buildAseoTvCardHTML(row) {
   `;
 }
 
+// v1.53.0-beta: ¿la plataforma está actualmente en Modo Oscuro? (respeta Claro / Oscuro / Automático)
+function aseoGlobalIsDark() {
+  const theme = document.documentElement.getAttribute('data-theme') || 'auto';
+  return theme === 'dark' || (theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+}
+
 function openAseoTvMode(idx) {
   const row = _aseoUserRows[idx];
   if (!row) return;
   _aseoCurrentIdx = idx;
+  // v1.53.0-beta: el Full Screen arrancaba siempre en oscuro; ahora parte con el tema de la plataforma.
+  _aseoTvLocalTheme = aseoGlobalIsDark() ? 'dark' : 'light';
 
   document.getElementById('aseo-tv-card').innerHTML = buildAseoTvCardHTML(row);
 
@@ -21584,11 +21849,7 @@ async function openAseoPopupMode(idx) {
   if (!win) { showToast('El navegador bloqueó la ventana emergente. Permite ventanas emergentes para usar este modo.', 'error'); return; }
   window._aseoPopupWin = win;
 
-  const isDarkGlobal = (() => {
-    const theme = document.documentElement.getAttribute('data-theme') || 'auto';
-    return theme === 'dark' || (theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-  })();
-  _aseoTvLocalTheme = isDarkGlobal ? 'dark' : 'light';
+  _aseoTvLocalTheme = aseoGlobalIsDark() ? 'dark' : 'light';
 
   const scale = ASEO_TV_SCALE_STEPS[_aseoTvScaleIdx];
 
@@ -21667,27 +21928,27 @@ async function openAseoPopupMode(idx) {
 function getAseoPopupCSS() {
   const rootVars = getComputedStyle(document.documentElement);
   const varsToCopy = ['--bg','--surface','--surface2','--surface3','--text','--text2','--text3','--border','--border-active','--accent','--accent-light','--shadow-lg','--font'];
-  const rootCss = `:root[data-theme] { ${varsToCopy.map(v => `${v}: ${rootVars.getPropertyValue(v) || ''};`).join(' ')} }`;
+  const rootCss = `:root { ${varsToCopy.map(v => `${v}: ${rootVars.getPropertyValue(v) || ''};`).join(' ')} }`;
   return `
     ${rootCss}
     * { box-sizing: border-box; }
     body { margin: 0; font-family: var(--font, -apple-system, sans-serif); background: var(--bg); }
     .aseo-tv-overlay { display:flex; min-height:100vh; align-items:center; justify-content:center; padding:3vh 4vw; background: var(--bg); color: var(--text); }
-    .aseo-tv-card { width:100%; max-width:1480px; margin:auto; display:flex; flex-direction:column; align-items:center; text-align:center; gap:clamp(2.5rem,6vh,4.5rem); transform-origin:center top; transition:transform 0.2s ease; }
+    .aseo-tv-card { width:100%; max-width:1480px; margin:auto; display:flex; flex-direction:column; align-items:center; text-align:center; gap:clamp(2rem,5vh,4rem); transform:scale(var(--aseo-tv-scale,1)); transform-origin:center top; transition:transform 0.2s ease; position:relative; z-index:1; }
     .aseo-tv-title { font-size:clamp(1.1rem,1.8vw,1.6rem); font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:0.06em; }
     .aseo-tv-day { font-size:clamp(2.6rem,6vw,4.5rem); font-weight:800; letter-spacing:-0.02em; line-height:1.05; }
     .aseo-tv-grid { width:100%; display:flex; flex-wrap:wrap; justify-content:center; gap:clamp(1.5rem,3vw,3.25rem); }
-    .aseo-tv-block { flex:1 1 320px; max-width:560px; background:var(--surface2); border:1px solid var(--border-active); border-radius:32px; padding:clamp(2rem,4vh,3rem) clamp(1.5rem,3vw,2.5rem); display:flex; flex-direction:column; align-items:center; gap:1rem; box-shadow:var(--shadow-lg); }
-    .aseo-tv-block-icon { width:clamp(56px,6vw,80px); height:clamp(56px,6vw,80px); border-radius:50%; background:var(--surface3); color:var(--text3); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .aseo-tv-block { flex:1 1 400px; max-width:720px; background:var(--surface2); border:1px solid var(--border-active); border-radius:36px; padding:clamp(2.5rem,5vh,4rem) clamp(1.5rem,3vw,2.5rem); display:flex; flex-direction:column; align-items:center; gap:1.2rem; box-shadow:var(--shadow-lg); }
+    .aseo-tv-block-icon { width:clamp(72px,8vw,110px); height:clamp(72px,8vw,110px); border-radius:50%; background:var(--surface3); color:var(--text3); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
     .aseo-tv-block.is-encargado .aseo-tv-block-icon { background:var(--accent); color:#fff; }
     .aseo-tv-block-icon svg { width:46%; height:46%; stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
-    .aseo-tv-block-label { font-size:clamp(0.95rem,1.2vw,1.2rem); font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:0.07em; }
-    .aseo-tv-block-value { font-size:clamp(1.8rem,3.4vw,3rem); font-weight:800; line-height:1.15; word-break:break-word; }
+    .aseo-tv-block-label { font-size:clamp(1.15rem,1.7vw,1.6rem); font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:0.07em; }
+    .aseo-tv-block-value { font-size:clamp(3rem,6.2vw,5.8rem); font-weight:800; line-height:1.1; word-break:break-word; }
     .aseo-tv-block-value.is-empty { font-weight:500; font-style:italic; color:var(--text3); font-size:clamp(1.2rem,2vw,1.7rem); }
-    .aseo-tv-more-wrap { position:fixed; top:1.25rem; right:1.25rem; }
+    .aseo-tv-more-wrap { position:fixed; top:1.25rem; right:1.25rem; z-index:30; }
     .aseo-tv-more-btn { width:48px; height:48px; border-radius:50%; background:var(--surface2); border:1px solid var(--border-active); box-shadow:var(--shadow-lg); cursor:pointer; display:flex; align-items:center; justify-content:center; color:var(--text); }
     .aseo-tv-more-btn svg { width:42%; height:42%; stroke:currentColor; fill:none; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
-    .aseo-tv-more-menu { position:absolute; top:calc(100% + 10px); right:0; background:var(--surface); border:1px solid var(--border-active); border-radius:16px; padding:0.6rem; min-width:230px; box-shadow:var(--shadow-lg); display:none; }
+    .aseo-tv-more-menu { position:absolute; top:calc(100% + 10px); right:0; background:var(--surface); border:1px solid var(--border-active); border-radius:16px; padding:0.6rem; min-width:240px; box-shadow:var(--shadow-lg); display:none; z-index:40; }
     .aseo-tv-more-menu.open { display:block; }
     .aseo-tv-more-section-label { font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--text3); padding:0.4rem 0.6rem 0.3rem; }
     .aseo-tv-more-scale-row { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:0.35rem 0.6rem 0.55rem; }
@@ -21697,6 +21958,10 @@ function getAseoPopupCSS() {
     .aseo-tv-more-divider { height:1px; background:var(--border); margin:4px 0; }
     .aseo-tv-more-item { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:0.6rem 0.6rem; border-radius:10px; font-size:0.875rem; font-weight:500; color:var(--text2); cursor:pointer; width:100%; }
     .aseo-tv-more-item:hover { background:var(--surface2); }
+    .aseo-tv-more-item span { display:flex; align-items:center; gap:10px; }
+    .aseo-tv-more-item svg { width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; flex-shrink:0; }
+    .aseo-tv-more-item:hover { background:rgba(128,128,128,0.16); }
+    .aseo-tv-more-scale-btn:hover { background:rgba(128,128,128,0.16); }
     .aseo-tv-overlay[data-local-theme="light"] { background:#f4f5f7; color:#0b0c0f; }
     .aseo-tv-overlay[data-local-theme="light"] .aseo-tv-block { background:#ffffff; border-color:#e3e5ea; }
     .aseo-tv-overlay[data-local-theme="light"] .aseo-tv-block-icon { background:#eceef2; color:#6b7280; }
@@ -22459,6 +22724,8 @@ async function openUserProfilePage(uid) {
   avatarEl.style.background = col;
   avatarEl.innerHTML = inits;
   document.getElementById('uprofile-name').textContent = u.name;
+  { const _uidEl = document.getElementById('uprofile-userid'); // v1.54.0: el UserID solo lo ve su dueño o el DEV
+    if (_uidEl) { const _show = u.user_id && (isDev || isCurrentUser); _uidEl.style.display = _show ? '' : 'none'; _uidEl.textContent = _show ? u.user_id : ''; } }
   document.getElementById('uprofile-role-badge').textContent = roleLabel;
   document.getElementById('uprofile-status-dot').style.background = isOnline ? '#4ade80' : 'rgba(255,255,255,0.4)';
   document.getElementById('uprofile-status-text').textContent = isOnline ? 'En línea' : `Últ. actividad: ${since}`;
@@ -22632,6 +22899,22 @@ async function openUserProfilePage(uid) {
       <button class="btn-primary" style="width:100%;padding:0.85rem;border-radius:12px;font-weight:700" onclick="openInviteModal()">Invitar</button>
     </div>` : '';
 
+  const userIdDevSection = (isDev && u.role !== 'dev') ? `
+    <div class="uprofile-section">
+      <div class="uprofile-section-title">UserID</div>
+      <div style="padding:0.5rem 1rem 0.2rem;font-size:0.75rem;color:var(--text3);line-height:1.4">El UserID es privado y no puede cambiarlo ni compartirlo el usuario. Solo el DEV puede editarlo.</div>
+      <div style="padding:0.4rem 1rem 0.6rem;display:flex;gap:8px">
+        <input type="text" class="form-input" id="uprof-userid-input" value="${u.user_id || ''}" placeholder="sin UserID" autocapitalize="none" autocorrect="off" spellcheck="false" style="flex:1">
+        <button class="btn-primary" style="padding:0 16px;border-radius:12px;font-weight:700" onclick="devSaveUserId('${u.id}')">Guardar</button>
+      </div>
+      <div style="padding:0 1rem 1rem">
+        ${u.userid_recovery
+          ? `<div style="font-size:0.78rem;color:var(--accent);font-weight:600;margin-bottom:6px">Acceso de recuperación activo: puede entrar una vez con nombre y contraseña.</div>
+             <button class="btn-primary" style="width:100%;padding:0.7rem;border-radius:12px;font-weight:700;background:var(--surface3);color:var(--text)" onclick="devSetUserIdRecovery('${u.id}', false)">Quitar acceso</button>`
+          : `<button class="btn-primary" style="width:100%;padding:0.7rem;border-radius:12px;font-weight:700" onclick="devSetUserIdRecovery('${u.id}', true)">Dar acceso (no recuerda su UserID)</button>`}
+      </div>
+    </div>` : '';
+
   document.getElementById('uprofile-body').innerHTML = `
     <div class="uprofile-section">
       <div class="uprofile-section-title">Información</div>
@@ -22643,6 +22926,7 @@ async function openUserProfilePage(uid) {
       ${u.task ? `<div class="uprofile-row"><span class="uprofile-row-label">Responsabilidad</span><span class="uprofile-row-val">${u.task}</span></div>` : ''}
     </div>
     ${(labelChipsFull || adminTagChipHTML) ? `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.1rem">${labelChipsFull}${adminTagChipHTML}</div>` : ''}
+    ${userIdDevSection}
     ${editSection}
     ${dangerSection}
     ${inviteSection}
@@ -23370,7 +23654,7 @@ async function syncRoleFromServer() {
       }
       // Show/hide admin buttons
       const adminBtn = document.getElementById('admin-dropdown-btn');
-      if (adminBtn) adminBtn.style.display = ['dev','admin'].includes(currentRole) ? '' : 'none';
+      if (adminBtn) adminBtn.style.display = currentRole === 'dev' ? '' : 'none'; // v1.55.90-beta: solo el DEV ve "Administración"
       _applyAdminSectionTabsVisibility();
       const notifAdminTab = document.getElementById('admin-tab-notificaciones');
       if (notifAdminTab) notifAdminTab.style.display = (currentRole === 'dev' || (currentRole === 'admin' && canAccessModule(_currentUserPermsCache, 'notificaciones'))) ? '' : 'none';
@@ -23624,7 +23908,27 @@ async function submitMapCorreccion() {
   toggleMapCorreccionForm();
 }
 
-function toggleOptionsMenu() { document.getElementById('options-dropdown').classList.toggle('open'); }
+// v1.55.90-beta: Visitantes con Inicio → el menú vive en <body> y se abre desde abajo; el botón de perfil abre el perfil.
+var _optDropHome = null;
+function _optionsMenuRestoreHome() {
+  const dd = document.getElementById('options-dropdown');
+  if (!dd) return;
+  dd.classList.remove('from-bottom');
+  if (_optDropHome && dd.parentNode !== _optDropHome) _optDropHome.appendChild(dd);
+}
+function navAvatarClick() {
+  if (document.documentElement.classList.contains('inicio-viewer')) { closeOptionsMenu(); openProfilePage(); return; }
+  toggleOptionsMenu();
+}
+function toggleOptionsMenu() {
+  const dd = document.getElementById('options-dropdown');
+  if (document.documentElement.classList.contains('inicio-viewer')) {
+    if (!_optDropHome) _optDropHome = dd.parentNode;
+    if (dd.parentNode !== document.body) document.body.appendChild(dd);
+    dd.classList.add('from-bottom');
+  } else { _optionsMenuRestoreHome(); }
+  dd.classList.toggle('open');
+}
 function closeOptionsMenu() {
   document.getElementById('options-dropdown').classList.remove('open');
   document.getElementById('appearance-submenu-main')?.classList.remove('open');
@@ -25495,7 +25799,7 @@ function syncAdminDropdown() {
 const _origApplyTheme = applyTheme;
 
 document.addEventListener('click', e => {
-  if (!e.target.closest('.options-wrap')) { closeOptionsMenu(); closeAdminOptionsMenu(); closeTipOptionsMenu(); document.getElementById('notifications-dropdown')?.classList.remove('open'); }
+  if (!e.target.closest('.options-wrap, #options-dropdown, #home-more-btn')) { closeOptionsMenu(); closeAdminOptionsMenu(); closeTipOptionsMenu(); document.getElementById('notifications-dropdown')?.classList.remove('open'); }
 });
 document.querySelectorAll('.modal-overlay').forEach(o => {
   o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
@@ -26474,6 +26778,14 @@ const NOTIF_TEMPLATES_DEFAULT = [
     title: 'Nueva asignación en reunión',
     body: 'Se te ha asignado {roles} para la semana del {rango}. Revisa los detalles.',
     vars: ['roles', 'rango'],
+  },
+  {
+    id: 'conferencia_saliente_asignada',
+    label: 'Conferencia Saliente Asignada',
+    desc: 'Se envía al conferenciante cuando se le asigna (o se modifica) una conferencia saliente.',
+    title: 'Conferencia saliente asignada',
+    body: 'Se te asignó la conferencia "{tema}" en {congregacion} el {fecha}.',
+    vars: ['tema', 'congregacion', 'fecha'],
   },
   {
     id: 'casa_asignada',
@@ -28895,6 +29207,9 @@ function vmcRenderWeekProgram(week, isGuest = false) {
 
 let fsWeeks = [];          // cache of all weeks from Supabase
 let fsEditingId = null;    // null = new week, else id of week being edited
+let fsOutTalks = [];       // v1.52.0: conferencias salientes (tabla fs_outgoing_talks)
+let fsOutEditingId = null; // null = nueva, else id de la conferencia saliente en edición
+let fsMode = 'local';      // 'local' | 'out' (toggle del modal)
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -28928,9 +29243,72 @@ async function loadFsWeeks() {
   const { data, error } = await sb.from('fs_weeks').select('*').order('date_start', { ascending: false });
   if (error) { showToast('Error cargando semanas de Pública', 'error'); return; }
   fsWeeks = data || [];
+  await loadFsOutTalks();
+}
+
+// v1.52.0: conferencias salientes. Si la tabla aún no existe, la app sigue funcionando sin ellas.
+async function loadFsOutTalks() {
+  try {
+    const { data, error } = await sb.from('fs_outgoing_talks').select('*').order('talk_date', { ascending: true });
+    if (error) { console.warn('fs_outgoing_talks:', error.message); fsOutTalks = []; return; }
+    fsOutTalks = data || [];
+  } catch (e) { fsOutTalks = []; }
+}
+
+function fsFormatOutDate(d) {
+  if (!d) return '';
+  return new Date(d + 'T00:00:00').toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+}
+function fsEsc(v) { return String(v == null ? '' : v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function renderAdminFsOut() {
+  const c = document.getElementById('admin-fs-out-list');
+  if (!c) return;
+  if (!fsOutTalks.length) {
+    c.innerHTML = `<div class="vmc-empty"><p>No hay conferencias salientes.<br>Usa "+ Nueva semana" y activa "Conferencia Saliente".</p></div>`;
+    return;
+  }
+  const today = new Date().toISOString().slice(0, 10);
+  const list = [...fsOutTalks].sort((a, b) => b.talk_date.localeCompare(a.talk_date));
+  c.innerHTML = list.map(t => {
+    const past = t.talk_date < today;
+    return `<div class="vmc-week-card">
+      <div class="vmc-week-card-header">
+        <div class="vmc-week-range">${fsEsc(fsFormatOutDate(t.talk_date))}</div>
+        <span class="vmc-week-badge ${past ? 'vmc-week-badge-past' : 'vmc-week-badge-upcoming'}">${past ? 'Pasada' : 'Próxima'}</span>
+      </div>
+      <div style="font-size:0.78rem;color:var(--accent);font-weight:600;margin-top:4px">${fsEsc(t.speaker_name)}${t.talk_title ? ' — ' + fsEsc(t.talk_title) : ''}</div>
+      <div style="font-size:0.78rem;color:var(--text3);margin-top:2px">Destino: ${fsEsc(t.destination_cong)}</div>
+      <div class="vmc-week-actions">
+        <button class="btn-secondary" style="font-size:0.8rem;padding:0.45rem 0.9rem" onclick="openFsWeekModal(null,'${t.id}')">Editar</button>
+        <div style="flex:1"></div>
+        <button class="vmc-part-del-btn" onclick="deleteFsOutTalk('${t.id}')" title="Eliminar conferencia">
+          <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function fsSetMode(mode) {
+  fsMode = mode === 'out' ? 'out' : 'local';
+  const isOut = fsMode === 'out';
+  document.getElementById('fs-local-form').style.display = isOut ? 'none' : '';
+  document.getElementById('fs-out-form').style.display   = isOut ? '' : 'none';
+  const on  = 'background:var(--accent);color:#fff;';
+  const off = 'background:transparent;color:var(--text2, inherit);';
+  const base = 'flex:1;border:none;border-radius:9px;padding:0.5rem 0.4rem;font-size:0.82rem;font-weight:700;cursor:pointer;font-family:inherit;';
+  document.getElementById('fs-mode-local').style.cssText = base + (isOut ? off : on);
+  document.getElementById('fs-mode-out').style.cssText   = base + (isOut ? on : off);
+  const editing = fsEditingId || fsOutEditingId;
+  const ttl = document.getElementById('fs-modal-title');
+  if (ttl) ttl.textContent = isOut
+    ? (fsOutEditingId ? 'Editar conferencia saliente' : 'Nueva conferencia saliente')
+    : (fsEditingId ? 'Editar semana — Reunión Pública' : 'Nueva semana — Reunión Pública');
 }
 
 function renderAdminFs() {
+  renderAdminFsOut();
   const container = document.getElementById('admin-fs-list');
   if (!container) return;
 
@@ -28975,8 +29353,9 @@ function renderAdminFs() {
 
 // ── Modal open / close ────────────────────────────────────────────────────────
 
-async function openFsWeekModal(id) {
+async function openFsWeekModal(id, outId) {
   fsEditingId = id || null;
+  fsOutEditingId = outId || null;
   const overlay = document.getElementById('fs-modal-overlay');
   overlay.classList.add('open');
 
@@ -28996,16 +29375,88 @@ async function openFsWeekModal(id) {
 
   vmcRestorePersonBtn('fs-presidente',         week?.presidente         || '', 'Seleccionar…');
   vmcRestorePersonBtn('fs-watchtower-reader',  week?.watchtower_reader || '', 'Seleccionar…');
+
+  // v1.52.0: campos de conferencia saliente + toggle
+  const out = outId ? fsOutTalks.find(t => t.id === outId) : null;
+  document.getElementById('fs-out-date').value  = out?.talk_date        || '';
+  document.getElementById('fs-out-title').value = out?.talk_title       || '';
+  document.getElementById('fs-out-cong').value  = out?.destination_cong || '';
+  vmcRestorePersonBtn('fs-out-speaker', out?.speaker_name || '', 'Seleccionar…');
+  // El toggle solo se puede cambiar al crear; al editar queda fijo en el tipo que se edita.
+  document.getElementById('fs-mode-toggle').style.display = (id || outId) ? 'none' : 'flex';
+  fsSetMode(outId ? 'out' : 'local');
 }
 
 function closeFsWeekModal() {
   document.getElementById('fs-modal-overlay').classList.remove('open');
   fsEditingId = null;
+  fsOutEditingId = null;
 }
 
 // ── Save week ─────────────────────────────────────────────────────────────────
 
+async function saveFsOutTalk() {
+  const btn = document.getElementById('fs-save-btn');
+  const talk_date        = document.getElementById('fs-out-date').value;
+  const speaker_name     = document.getElementById('fs-out-speaker').value.trim();
+  const talk_title       = document.getElementById('fs-out-title').value.trim();
+  const destination_cong = document.getElementById('fs-out-cong').value.trim();
+  if (!talk_date)        { showToast('Ingresa la fecha de la conferencia', 'error'); return; }
+  if (!speaker_name)     { showToast('Selecciona al conferenciante', 'error'); return; }
+  if (!talk_title)       { showToast('Ingresa el nombre de la conferencia', 'error'); return; }
+  if (!destination_cong) { showToast('Ingresa la congregación de destino', 'error'); return; }
+
+  const payload = { talk_date, speaker_name, talk_title, destination_cong };
+  const prev = fsOutEditingId ? fsOutTalks.find(t => t.id === fsOutEditingId) : null;
+
+  btn.disabled = true; btn.textContent = 'Guardando…';
+  let error;
+  if (fsOutEditingId) ({ error } = await sb.from('fs_outgoing_talks').update(payload).eq('id', fsOutEditingId));
+  else                ({ error } = await sb.from('fs_outgoing_talks').insert(payload));
+  btn.disabled = false; btn.textContent = 'Guardar';
+  if (error) { showToast('Error: ' + error.message, 'error'); return; }
+
+  showToast(fsOutEditingId ? 'Conferencia actualizada ✓' : 'Conferencia saliente creada ✓', 'success');
+  closeFsWeekModal();
+  await loadFsOutTalks();
+  renderAdminFsOut();
+  renderFsUserView();
+
+  // Notifica al conferenciante si es nueva o si cambió el conferenciante, la fecha, el tema o el destino.
+  try {
+    const changed = !prev || prev.speaker_name !== speaker_name || prev.talk_date !== talk_date
+      || prev.talk_title !== talk_title || prev.destination_cong !== destination_cong;
+    if (changed) await fsNotifyOutgoingSpeaker(payload);
+  } catch (err) {
+    console.warn('No se pudo notificar la conferencia saliente:', err.message);
+  }
+}
+
+async function fsNotifyOutgoingSpeaker(t) {
+  const tpl = renderTemplate('conferencia_saliente_asignada', {
+    tema: t.talk_title, congregacion: t.destination_cong, fecha: fsFormatOutDate(t.talk_date),
+  });
+  const target = [t.speaker_name.trim().toLowerCase()];
+  try {
+    await sb.from('notifications').insert({ title: tpl.title, body: tpl.body, target_names: target, notif_category: 'fin-semana' });
+  } catch (err) { console.warn('Error guardando notificación de conferencia saliente:', err.message); }
+  try {
+    await notifyUsersPush('fin-semana', { title: tpl.title, body: tpl.body, target_names: target });
+  } catch (err) { console.warn('Push no disponible para conferencia saliente:', err.message); }
+}
+
+async function deleteFsOutTalk(id) {
+  if (!confirm('¿Eliminar esta conferencia saliente?')) return;
+  const { error } = await sb.from('fs_outgoing_talks').delete().eq('id', id);
+  if (error) { showToast('Error al eliminar', 'error'); return; }
+  showToast('Conferencia eliminada', 'success');
+  fsOutTalks = fsOutTalks.filter(t => t.id !== id);
+  renderAdminFsOut();
+  renderFsUserView();
+}
+
 async function saveFsWeek() {
+  if (fsMode === 'out') return saveFsOutTalk();
   const btn = document.getElementById('fs-save-btn');
   const dateStart = document.getElementById('fs-date-start').value;
   const dateEnd   = document.getElementById('fs-date-end').value;
@@ -29136,7 +29587,7 @@ function renderFsUserView() {
     container.innerHTML = `<div class="vmc-empty">
       <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
       <p>Aún no hay programa cargado.</p>
-    </div>`;
+    </div>` + fsRenderOutgoingSection();
     return;
   }
 
@@ -29168,7 +29619,33 @@ function renderFsUserView() {
       </div>
       <div class="vmc-cal-popover" id="fs-cal-popover"></div>
     </div>
-    <div class="vmc-program-container" id="fs-program-container">${programHtml}</div>`;
+    <div class="vmc-program-container" id="fs-program-container">${programHtml}</div>
+    ${fsRenderOutgoingSection()}`;
+}
+
+// v1.52.0: Conferencias salientes próximas (hoy en adelante), debajo del programa.
+function fsRenderOutgoingSection() {
+  const today = new Date().toISOString().slice(0, 10);
+  const myName = currentUser ? getIdentityName() : '';
+  const upcoming = fsOutTalks.filter(t => t.talk_date >= today).sort((a, b) => a.talk_date.localeCompare(b.talk_date));
+  if (!upcoming.length) return '';
+  const icon = '<svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>';
+  const cards = upcoming.map(t => {
+    const mine = !!myName && (t.speaker_name || '').trim().toLowerCase() === myName.trim().toLowerCase();
+    return `<div class="vmc-user-part-card${mine ? ' is-mine' : ''}">
+      <div class="vmc-part-time-badge">${icon}</div>
+      <div class="vmc-part-body">
+        <div class="vmc-part-name-display">${fsEsc(t.talk_title)}</div>
+        <div class="vmc-part-assigned-display${mine ? ' mine-label' : ''}">${fsEsc(t.speaker_name)}</div>
+        <div class="vmc-part-note-display">${fsEsc(fsFormatOutDate(t.talk_date))}</div>
+        <div class="vmc-part-note-display">Congregación de destino: ${fsEsc(t.destination_cong)}</div>
+      </div>
+    </div>`;
+  }).join('');
+  return `<div class="vmc-user-section" style="margin-top:1rem">
+    <div class="vmc-user-section-header" style="background:rgba(52,199,89,0.12);color:#34c759">Conferencias salientes</div>
+    ${cards}
+  </div>`;
 }
 
 function fsStepWeek(dir) {
@@ -29433,6 +29910,7 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
       </div>
 
       <div class="profile-name" id="profile-name-display">—</div>
+      <div id="profile-userid-display" style="display:none;font-size:0.8rem;font-weight:600;color:var(--text3);letter-spacing:0.02em;margin:2px 0 6px"></div>
       <div class="profile-role-badge" id="profile-role-badge"></div>
       <div class="profile-tags" id="profile-tags-display"></div>
     </div>
@@ -29997,6 +30475,43 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
     </div>
     <div class="vmc-modal-body" id="fs-modal-body">
 
+      <!-- v1.52.0: Toggle Reunión Local / Conferencia Saliente (solo al crear; al editar queda fijo) -->
+      <div id="fs-mode-toggle" style="display:flex;gap:4px;padding:4px;border-radius:12px;background:var(--bg3, rgba(120,120,128,0.14));margin-bottom:1rem">
+        <button type="button" id="fs-mode-local" onclick="fsSetMode('local')" style="flex:1;border:none;border-radius:9px;padding:0.5rem 0.4rem;font-size:0.82rem;font-weight:700;cursor:pointer;font-family:inherit">Reunión Local</button>
+        <button type="button" id="fs-mode-out" onclick="fsSetMode('out')" style="flex:1;border:none;border-radius:9px;padding:0.5rem 0.4rem;font-size:0.82rem;font-weight:700;cursor:pointer;font-family:inherit">Conferencia Saliente</button>
+      </div>
+
+      <!-- Conferencia saliente -->
+      <div id="fs-out-form" style="display:none">
+        <div class="vmc-section-block">
+          <div class="vmc-section-header" style="background:rgba(52,199,89,0.1);color:#34c759;border-bottom:1px solid rgba(52,199,89,0.25)">
+            <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+            Conferencia saliente
+          </div>
+          <div class="vmc-meta-row">
+            <span class="vmc-meta-label">Fecha</span>
+            <input type="date" class="vmc-meta-val-input" id="fs-out-date" style="font-size:0.85rem">
+          </div>
+          <div class="vmc-meta-row">
+            <span class="vmc-meta-label">Conferenciante</span>
+            <div class="vmc-assign-wrap" style="flex:1">
+              <input type="hidden" id="fs-out-speaker">
+              <button type="button" class="vmc-person-btn" data-placeholder="Seleccionar…"
+                onclick="vmcPpOpen(document.getElementById('fs-out-speaker'),this,'Conferenciante')">Seleccionar…</button>
+            </div>
+          </div>
+          <div class="vmc-meta-row">
+            <span class="vmc-meta-label">Nombre de la conferencia</span>
+            <input type="text" class="vmc-meta-val-input" id="fs-out-title" placeholder="Ej: ¿Cómo puede ayudarnos la Biblia?" autocomplete="off">
+          </div>
+          <div class="vmc-meta-row" style="border-bottom:none">
+            <span class="vmc-meta-label">Congregación de destino</span>
+            <input type="text" class="vmc-meta-val-input" id="fs-out-cong" placeholder="Ej: Congregación Las Rosas" autocomplete="off">
+          </div>
+        </div>
+      </div>
+
+      <div id="fs-local-form">
       <!-- Rango de fechas -->
       <div style="display:flex;gap:8px;margin-bottom:1rem;align-items:center;flex-wrap:wrap">
         <div style="flex:1;min-width:140px">
@@ -30051,6 +30566,7 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
           </div>
         </div>
       </div>
+      </div><!-- /#fs-local-form -->
     </div><!-- /.vmc-modal-body -->
 
     <div class="vmc-modal-footer">
